@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="news-detail-page-bg">
+    <div class="container">
+        <nav class="news-detail-breadcrumbs">
+            <a href="/">Главная</a> | <a href="{% url 'news' %}">Новости</a> | <span>Новость</span>
+        </nav>
+
+        <div class="news-detail-card">
+            <h1 class="news-detail-title">{{ item.title }}</h1>
+            
+            <div class="news-detail-content">
+                <p>{{ item.content }}</p>
+                
+                {% if item.image %}
+                <div class="news-detail-main-image">
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

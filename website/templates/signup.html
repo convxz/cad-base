@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{% static 'signup_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="registration-page">
+        <div class="sidebar">
+            <div class="sidebar-text">
+                <h1>ДОБРО<br>ПОЖАЛОВАТЬ!</h1>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-box">
+                <div class="form-header">
+                    <h2>Создать аккаунт</h2>
+                        <!-- {% if messages %}
+                            {% for message in messages %}
+                                <p style="color: red; background: #ffe6e6; padding: 10px; border-radius: 5px;">{{ message }}</p>
+                            {% endfor %}
+                        {% endif %} -->
+                    <p>У вас уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+                </div>
+
+                <form method="post" class="reg-form" id="signupForm">
+                    {% csrf_token %}
+                    
+                    <div class="input-group">
+                        <label>Имя и Фамилия</label>
+                        <input type="text" name="full_name" id="nameInput" placeholder="Введите имя и фамилию" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" name="email" id="emailInput" placeholder="example@mail.com" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Пароль</label>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="passwordInput" required>
+                            <!-- Убрали текст "Скрыть", оставили иконку -->
+                            <span class="pass-toggle" id="togglePassword">👁️</span>
+                        </div>
+                        <small>Используйте 8 или более символов, сочетая буквы, цифры и символы</small>
+                    </div>
+
+                    <p class="policy-text">
+                        Создав аккаунт, вы соглашаетесь с нашими 
+                        <a href="#">Условиями использования</a> и <a href="#">Политикой конфиденциальности</a>
+                    </p>
+
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Создать аккаунт</button>
+
+                    <p class="login-redirect">У вас уже есть аккаунт? <a href="{% url 'login' %}" class="bold-link">Войти</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('nameInput');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // Проверка заполнения всех ТРЕХ полей
+        function checkInputs() {
+            const isNameFilled = nameInput.value.trim() !== '';
+            const isEmailFilled = emailInput.value.trim() !== '';
+            const isPassFilled = passwordInput.value.trim() !== '';
+
+            if (isNameFilled && isEmailFilled && isPassFilled) {
+                submitBtn.classList.add('active');
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.classList.remove('active');
+                submitBtn.disabled = true;
+            }
+        }
+
+        nameInput.addEventListener('input', checkInputs);
+        emailInput.addEventListener('input', checkInputs);
+        passwordInput.addEventListener('input', checkInputs);
+
+        // Переключение видимости пароля
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '🔒';
+        });
+    </script>
+</body>
+</html>

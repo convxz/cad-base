@@ -1,0 +1,584 @@
+<!-- templates/model_detail.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ submission.title }} — Каталог</title>
+<style>
+  :root {
+    --bg: #0d0f1a; --surface: #131627; --surface2: #1a1f35;
+    --accent: #4fc3f7; --accent2: #a78bfa;
+    --err: #f87171; --muted: rgba(255,255,255,0.4); --text: #e2e8f0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  header {
+    background:rgba(0,0,0,0.5); backdrop-filter:blur(14px);
+    padding:14px 40px; display:flex; align-items:center; gap:16px;
+    border-bottom:1px solid rgba(79,195,247,0.15);
+    position:sticky; top:0; z-index:100;
+  }
+  .back-btn {
+    color:var(--accent); text-decoration:none; font-size:13px;
+    padding:6px 14px; border:1px solid rgba(79,195,247,0.3);
+    border-radius:20px; transition:all .2s; white-space:nowrap;
+  }
+  .back-btn:hover { background:rgba(79,195,247,0.1); }
+  header h1 { font-size:17px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .page {
+    max-width:1200px; margin:0 auto;
+    padding:32px 40px 60px;
+    display:grid; grid-template-columns:1fr 320px; gap:28px;
+  }
+
+  /* ═══════════ VIEWER ═══════════ */
+  .viewer-wrap {
+    width:100%; aspect-ratio:16/10;
+    border-radius:16px; overflow:hidden; position:relative;
+    background:#070a14; border:1px solid rgba(79,195,247,0.15);
+  }
+  #threeCanvas { display:block; width:100% !important; height:100% !important; }
+
+  .viewer-overlay {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px;
+    z-index:10;
+    background:radial-gradient(ellipse at 35% 40%, #0e1a2e 0%, #070a14 100%);
+    transition:opacity .35s;
+  }
+  .viewer-overlay.fade-out { opacity:0; pointer-events:none; }
+  .viewer-overlay.hidden   { display:none; }
+
+  .ov-icon { font-size:52px; }
+  .ov-icon.spin { animation:pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4;transform:scale(.93)} 50%{opacity:1;transform:scale(1.06)} }
+  .ov-text { font-size:14px; color:var(--muted); text-align:center; line-height:1.6; max-width:300px; }
+  .ov-text strong { color:var(--text); }
+
+  .progress-wrap { width:200px; height:3px; background:rgba(255,255,255,.1); border-radius:4px; overflow:hidden; }
+  .progress-bar  { height:100%; width:0; background:var(--accent); border-radius:4px; transition:width .15s linear; }
+  .progress-bar.err { background:var(--err); width:100% !important; }
+
+  .ov-dl-btn {
+    background:var(--accent); color:#0d0f1a;
+    text-decoration:none; font-weight:700; font-size:13px;
+    padding:9px 20px; border-radius:10px; transition:all .2s; display:none; margin-top:4px;
+  }
+  .ov-dl-btn:hover { background:#81d4fa; }
+
+  .viewer-hint {
+    position:absolute; top:12px; right:12px; font-size:11px; color:var(--muted);
+    background:rgba(7,10,20,.7); backdrop-filter:blur(6px);
+    padding:5px 10px; border-radius:8px;
+    border:1px solid rgba(255,255,255,.07); pointer-events:none; display:none;
+  }
+  .viewer-controls {
+    position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
+    display:none; gap:6px; z-index:20;
+    background:rgba(7,10,20,.82); backdrop-filter:blur(8px);
+    padding:6px 10px; border-radius:30px;
+    border:1px solid rgba(255,255,255,.09);
+    opacity:0; transition:opacity .3s;
+  }
+  .viewer-wrap:hover .viewer-controls { opacity:1; }
+  .vc-btn {
+    background:none; border:none; color:var(--muted);
+    font-size:16px; cursor:pointer; padding:5px 8px;
+    border-radius:8px; transition:all .2s; line-height:1;
+  }
+  .vc-btn:hover  { background:rgba(255,255,255,.1); color:var(--text); }
+  .vc-btn.active { color:var(--accent); }
+  .vc-sep { width:1px; background:rgba(255,255,255,.12); margin:4px 2px; }
+
+  /* ── Описание ── */
+  .desc-block    { margin-top:20px; }
+  .section-label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:8px; }
+  .desc-text     { font-size:14px; line-height:1.75; color:rgba(255,255,255,.7); white-space:pre-wrap; }
+  .admin-comment-block {
+    background:rgba(167,139,250,.07); border:1px solid rgba(167,139,250,.2);
+    border-radius:10px; padding:12px 14px;
+  }
+  .admin-comment-block p { font-size:13px; color:rgba(167,139,250,.85); line-height:1.6; }
+
+  /* ── Sidebar ── */
+  .sidebar { display:flex; flex-direction:column; gap:14px; }
+  .info-card {
+    background:var(--surface); border-radius:14px;
+    border:1px solid rgba(255,255,255,.07);
+    padding:18px; display:flex; flex-direction:column; gap:12px;
+  }
+  .info-card-title { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; }
+  .info-row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .info-row .lbl { font-size:12px; color:var(--muted); }
+  .info-row .val { font-size:13px; font-weight:600; text-align:right; }
+  .ext-badge    { background:rgba(79,195,247,.12); color:var(--accent); padding:3px 10px; border-radius:8px; font-size:12px; font-weight:700; }
+  .author-badge { background:rgba(167,139,250,.1); color:var(--accent2); padding:3px 10px; border-radius:8px; font-size:12px; font-weight:600; }
+  .download-btn {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--accent); color:#0d0f1a;
+    text-decoration:none; font-weight:700; font-size:14px;
+    padding:13px 20px; border-radius:12px; transition:all .2s;
+  }
+  .download-btn:hover { background:#81d4fa; transform:translateY(-1px); }
+  .chat-link {
+    display:flex; align-items:center; gap:8px; color:var(--accent);
+    font-size:13px; text-decoration:none; padding:9px 12px;
+    background:rgba(79,195,247,.08); border-radius:10px;
+    border:1px solid rgba(79,195,247,.2); transition:all .2s;
+  }
+  .chat-link:hover { background:rgba(79,195,247,.15); }
+
+  /* ── Related ── */
+  .related-section { max-width:1200px; margin:0 auto; padding:0 40px 60px; }
+  .related-title { font-size:17px; font-weight:700; margin-bottom:14px; }
+  .related-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+  .rel-card {
+    background:var(--surface); border-radius:12px; overflow:hidden;
+    border:1.5px solid rgba(255,255,255,.05); text-decoration:none; color:inherit;
+    display:flex; flex-direction:column; transition:all .2s;
+  }
+  .rel-card:hover { border-color:rgba(79,195,247,.35); transform:translateY(-3px); }
+  .rel-thumb { width:100%; aspect-ratio:4/3; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:32px; overflow:hidden; }
+  .rel-thumb img { width:100%; height:100%; object-fit:cover; }
+  .rel-body { padding:9px 11px 11px; }
+  .rel-title { font-size:13px; font-weight:700; }
+  .rel-meta  { font-size:11px; color:var(--muted); margin-top:3px; }
+
+  @media(max-width:900px) {
+    .page { grid-template-columns:1fr; }
+    .viewer-wrap { aspect-ratio:4/3; }
+  }
+  @media(max-width:600px) {
+    header { padding:12px 16px; }
+    .page, .related-section { padding-left:16px; padding-right:16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="{% url 'catalog' %}" class="back-btn">← Каталог</a>
+  <h1>{{ submission.title }}</h1>
+</header>
+
+<div class="page">
+
+  <!-- ЛЕВАЯ КОЛОНКА -->
+  <div>
+    <div class="viewer-wrap" id="viewerWrap">
+      <canvas id="threeCanvas"></canvas>
+
+      <div class="viewer-overlay" id="viewerOverlay">
+        <div class="ov-icon spin" id="ovIcon">📦</div>
+        <div class="ov-text"      id="ovText">Загрузка модели…</div>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <a href="{{ submission.model_file.url }}" class="ov-dl-btn" id="ovDlBtn" download>
+          ⬇️ Скачать модель
+        </a>
+      </div>
+
+      <div class="viewer-hint"     id="viewerHint">ЛКМ — вращение · Колесо — масштаб · ПКМ — перемещение</div>
+      <div class="viewer-controls" id="viewerControls">
+        <button class="vc-btn"       id="btnReset"  onclick="vReset()"  title="Сбросить вид">🎯</button>
+        <button class="vc-btn active" id="btnRotate" onclick="vRotate()" title="Автовращение">🔄</button>
+        <div class="vc-sep"></div>
+        <button class="vc-btn"       id="btnWire"   onclick="vWire()"   title="Каркас">🔳</button>
+        <button class="vc-btn active" id="btnLight"  onclick="vLight()"  title="Свет">💡</button>
+        <div class="vc-sep"></div>
+        <button class="vc-btn"                       onclick="vFull()"   title="Полный экран">⛶</button>
+      </div>
+    </div>
+
+    {% if submission.description %}
+    <div class="desc-block">
+      <div class="section-label">Описание</div>
+      <p class="desc-text">{{ submission.description }}</p>
+    </div>
+    {% endif %}
+
+    {% if submission.admin_comment %}
+    <div class="desc-block" style="margin-top:16px;">
+      <div class="section-label">Комментарий администратора</div>
+      <div class="admin-comment-block"><p>{{ submission.admin_comment }}</p></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ПРАВАЯ КОЛОНКА -->
+  <aside class="sidebar">
+    <a href="{{ submission.model_file.url }}" class="download-btn" download>
+      ⬇️ Скачать {{ submission.model_extension }}
+    </a>
+    <div class="info-card">
+      <div class="info-card-title">О модели</div>
+      <div class="info-row">
+        <span class="lbl">Формат</span>
+        <span class="ext-badge">{{ submission.model_extension }}</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Автор</span>
+        <span class="author-badge">{{ submission.user.username }}</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Добавлена</span>
+        <span class="val">{{ submission.reviewed_at|date:"d.m.Y" }}</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Отправлена</span>
+        <span class="val">{{ submission.created_at|date:"d.m.Y" }}</span>
+      </div>
+    </div>
+    {% if user.is_authenticated and user == submission.user %}
+    <div class="info-card">
+      <div class="info-card-title">Управление</div>
+      <a href="{% url 'chat:room' submission.chat_room.pk %}" class="chat-link">
+        💬 Открыть чат заявки
+      </a>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+
+{% if related %}
+<div class="related-section">
+  <div class="related-title">Другие модели</div>
+  <div class="related-grid">
+    {% for item in related %}
+    <a href="{% url 'model_detail' item.pk %}" class="rel-card">
+      <div class="rel-thumb">
+        {% if item.thumbnail %}<img src="{{ item.thumbnail.url }}" alt="{{ item.title }}">
+        {% else %}📦{% endif %}
+      </div>
+      <div class="rel-body">
+        <div class="rel-title">{{ item.title }}</div>
+        <div class="rel-meta">{{ item.model_extension }} · {{ item.user.username }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ═══════════════════════════════════════════════════════
+  Three.js r158 через ES-модули с прямыми URL (esm.sh).
+  Не нужен importmap — просто type="module" + полные URL.
+════════════════════════════════════════════════════════ -->
+<script type="module">
+// ── Импорты (прямые URL, без importmap) ───────────────────
+import * as THREE        from 'https://esm.sh/three@0.158.0';
+import { OrbitControls } from 'https://esm.sh/three@0.158.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader }    from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader }   from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/DRACOLoader.js';
+import { FBXLoader }     from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/FBXLoader.js';
+import { STLLoader }     from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/STLLoader.js';
+import { OBJLoader }     from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/OBJLoader.js';
+import { PLYLoader }     from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/PLYLoader.js';
+import { ColladaLoader } from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/ColladaLoader.js';
+
+// ── Данные из Django ───────────────────────────────────────
+const MODEL_URL = '{{ submission.model_file.url }}';
+const MODEL_EXT = '{{ submission.model_extension }}'.toLowerCase().replace(/^\./, '');
+const SUPPORTED = ['glb','gltf','fbx','stl','obj','ply','dae'];
+
+// ── DOM ────────────────────────────────────────────────────
+const wrap        = document.getElementById('viewerWrap');
+const canvas      = document.getElementById('threeCanvas');
+const overlay     = document.getElementById('viewerOverlay');
+const ovIcon      = document.getElementById('ovIcon');
+const ovText      = document.getElementById('ovText');
+const progressBar = document.getElementById('progressBar');
+const ovDlBtn     = document.getElementById('ovDlBtn');
+const hint        = document.getElementById('viewerHint');
+const ctrlPanel   = document.getElementById('viewerControls');
+
+// ── Неподдерживаемый формат ────────────────────────────────
+if (!SUPPORTED.includes(MODEL_EXT)) {
+  ovIcon.classList.remove('spin');
+  ovIcon.textContent = '🔧';
+  ovText.innerHTML   = `Формат <strong>{{ submission.model_extension }}</strong> не поддерживается для просмотра в браузере.`;
+  ovDlBtn.style.display = 'inline-flex';
+  // Прогресс-бар не нужен
+  document.querySelector('.progress-wrap').style.display = 'none';
+  throw new Error('unsupported');  // выходим из модуля
+}
+
+// ── Renderer ───────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace    = THREE.SRGBColorSpace;
+renderer.toneMapping         = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.shadowMap.enabled   = true;
+renderer.shadowMap.type      = THREE.PCFSoftShadowMap;
+
+// ── Scene / Camera / Controls ──────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x070a14);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 5000);
+camera.position.set(0, 1, 5);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping   = true;
+controls.dampingFactor   = 0.07;
+controls.autoRotate      = true;
+controls.autoRotateSpeed = 0.7;
+
+// ── Свет ───────────────────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xfff4e0, 2.5);
+sunLight.position.set(5, 10, 7);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(2048, 2048);
+scene.add(sunLight);
+
+const fillLight = new THREE.DirectionalLight(0x4fc3f7, 0.6);
+fillLight.position.set(-6, 2, -6);
+scene.add(fillLight);
+
+const rimLight = new THREE.PointLight(0xa78bfa, 1.0, 100);
+scene.add(rimLight);
+
+const allLights = [ambientLight, sunLight, fillLight, rimLight];
+
+// ── Grid / тень-пол ────────────────────────────────────────
+const grid = new THREE.GridHelper(30, 40, 0x0f2030, 0x0a1520);
+grid.material.transparent = true;
+grid.material.opacity = 0.5;
+scene.add(grid);
+
+const shadowFloor = new THREE.Mesh(
+  new THREE.PlaneGeometry(60, 60),
+  new THREE.ShadowMaterial({ opacity: 0.25 })
+);
+shadowFloor.rotation.x   = -Math.PI / 2;
+shadowFloor.receiveShadow = true;
+scene.add(shadowFloor);
+
+// ── Состояние ──────────────────────────────────────────────
+let savedCamPos = null, savedTarget = null;
+let currentObject = null, mixer = null;
+let wireframeOn = false, lightsOn = true;
+
+// ── Helpers ────────────────────────────────────────────────
+function fitToView(object) {
+  const box    = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size   = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z) || 1;
+
+  object.position.sub(center);
+
+  const floorY = box.min.y - center.y;
+  grid.position.y          = floorY - 0.01;
+  shadowFloor.position.y   = floorY - 0.005;
+
+  const fovRad = camera.fov * (Math.PI / 180);
+  const dist   = Math.max((maxDim / 2) / Math.tan(fovRad / 2) * 1.6, 0.1);
+
+  camera.position.set(dist * 0.7, dist * 0.35, dist);
+  camera.near = dist * 0.001;
+  camera.far  = dist * 200;
+  camera.updateProjectionMatrix();
+
+  controls.target.set(0, 0, 0);
+  controls.minDistance = dist * 0.05;
+  controls.maxDistance = dist * 30;
+  controls.update();
+
+  sunLight.position.set(maxDim, maxDim * 2, maxDim * 1.5);
+  sunLight.shadow.camera.left   = -maxDim * 2;
+  sunLight.shadow.camera.right  =  maxDim * 2;
+  sunLight.shadow.camera.top    =  maxDim * 2;
+  sunLight.shadow.camera.bottom = -maxDim * 2;
+  sunLight.shadow.camera.far    =  maxDim * 20;
+  sunLight.shadow.camera.updateProjectionMatrix();
+  rimLight.position.set(0, floorY - maxDim * 0.5, 0);
+  rimLight.distance = maxDim * 15;
+
+  savedCamPos = camera.position.clone();
+  savedTarget = controls.target.clone();
+}
+
+function applyShadows(object) {
+  object.traverse(node => {
+    if (!node.isMesh) return;
+    node.castShadow = node.receiveShadow = true;
+    if (node.geometry && !node.geometry.attributes.normal)
+      node.geometry.computeVertexNormals();
+  });
+}
+
+function onProgress(xhr) {
+  if (!xhr.total) return;
+  const pct = Math.round(xhr.loaded / xhr.total * 100);
+  progressBar.style.width = pct + '%';
+  ovText.textContent = `Загрузка… ${pct}%`;
+}
+
+function onSuccess(object) {
+  if (currentObject) scene.remove(currentObject);
+  currentObject = object;
+  scene.add(object);
+  applyShadows(object);
+  fitToView(object);
+
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.classList.add('hidden'), 380);
+  hint.style.display      = '';
+  ctrlPanel.style.display = 'flex';
+}
+
+function showError(msg) {
+  ovIcon.classList.remove('spin');
+  ovIcon.textContent    = '⚠️';
+  ovText.innerHTML      = msg;
+  progressBar.classList.add('err');
+  ovDlBtn.style.display = 'inline-flex';
+}
+
+function onError(err) {
+  console.error('[3D Viewer] Load error:', err);
+  showError('Ошибка загрузки файла.<br><small style="opacity:.6">' + (err?.message ?? String(err)) + '</small>');
+}
+
+// ── Загрузка по формату ────────────────────────────────────
+console.log('[3D Viewer] Starting load:', MODEL_URL, '| ext:', MODEL_EXT);
+
+if (MODEL_EXT === 'glb' || MODEL_EXT === 'gltf') {
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(draco);
+  loader.load(MODEL_URL, gltf => {
+    if (gltf.animations?.length) {
+      mixer = new THREE.AnimationMixer(gltf.scene);
+      gltf.animations.forEach(c => mixer.clipAction(c).play());
+    }
+    onSuccess(gltf.scene);
+  }, onProgress, onError);
+
+} else if (MODEL_EXT === 'fbx') {
+  const loader = new FBXLoader();
+  loader.load(MODEL_URL, obj => {
+    if (obj.animations?.length) {
+      mixer = new THREE.AnimationMixer(obj);
+      obj.animations.forEach(c => mixer.clipAction(c).play());
+    }
+    onSuccess(obj);
+  }, onProgress, onError);
+
+} else if (MODEL_EXT === 'stl') {
+  new STLLoader().load(MODEL_URL, geometry => {
+    geometry.computeVertexNormals();
+    const mesh = new THREE.Mesh(geometry,
+      new THREE.MeshStandardMaterial({ color: 0x7ab0cc, metalness: 0.25, roughness: 0.55 }));
+    onSuccess(mesh);
+  }, onProgress, onError);
+
+} else if (MODEL_EXT === 'obj') {
+  new OBJLoader().load(MODEL_URL, obj => {
+    obj.traverse(node => {
+      if (node.isMesh && !node.material?.map)
+        node.material = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, roughness: 0.6 });
+    });
+    onSuccess(obj);
+  }, onProgress, onError);
+
+} else if (MODEL_EXT === 'ply') {
+  new PLYLoader().load(MODEL_URL, geometry => {
+    geometry.computeVertexNormals();
+    const hasColor = !!geometry.attributes.color;
+    const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({
+      vertexColors: hasColor,
+      color: hasColor ? undefined : 0x9ab8cc,
+      roughness: 0.5, metalness: 0.15,
+    }));
+    onSuccess(mesh);
+  }, onProgress, onError);
+
+} else if (MODEL_EXT === 'dae') {
+  new ColladaLoader().load(MODEL_URL, collada => {
+    onSuccess(collada.scene);
+  }, onProgress, onError);
+}
+
+// ── Resize ─────────────────────────────────────────────────
+function resize() {
+  const w = wrap.clientWidth, h = wrap.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+new ResizeObserver(resize).observe(wrap);
+document.addEventListener('fullscreenchange', () => setTimeout(resize, 80));
+
+// ── Render loop ────────────────────────────────────────────
+const clock = new THREE.Clock();
+(function loop() {
+  requestAnimationFrame(loop);
+  mixer?.update(clock.getDelta());
+  controls.update();
+  renderer.render(scene, camera);
+})();
+
+// ── Кнопки (экспорт через window) ─────────────────────────
+window.vReset = () => {
+  if (!savedCamPos) return;
+  camera.position.copy(savedCamPos);
+  controls.target.copy(savedTarget);
+  controls.update();
+};
+
+window.vRotate = () => {
+  controls.autoRotate = !controls.autoRotate;
+  document.getElementById('btnRotate').classList.toggle('active', controls.autoRotate);
+};
+
+window.vWire = () => {
+  wireframeOn = !wireframeOn;
+  scene.traverse(node => {
+    if (!node.isMesh) return;
+    [node.material].flat().forEach(m => m.wireframe = wireframeOn);
+  });
+  document.getElementById('btnWire').classList.toggle('active', wireframeOn);
+};
+
+window.vLight = () => {
+  lightsOn = !lightsOn;
+  allLights.forEach(l => l.visible = lightsOn);
+  scene.traverse(node => {
+    if (!node.isMesh) return;
+    if (!lightsOn) {
+      node.userData._mat = node.material;
+      const src = [node.userData._mat].flat();
+      const basic = src.map(m => new THREE.MeshBasicMaterial({
+        map: m.map, color: m.color, wireframe: wireframeOn, vertexColors: m.vertexColors,
+      }));
+      node.material = basic.length === 1 ? basic[0] : basic;
+    } else if (node.userData._mat) {
+      node.material = node.userData._mat;
+    }
+  });
+  document.getElementById('btnLight').classList.toggle('active', lightsOn);
+};
+
+window.vFull = () => {
+  if (!document.fullscreenElement) wrap.requestFullscreen().catch(() => {});
+  else document.exitFullscreen();
+};
+</script>
+
+</body>
+</html>

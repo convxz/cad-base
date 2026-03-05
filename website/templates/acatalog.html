@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="st-main-wrapper">
+<aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="#" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
+            
+            {% if user.is_superuser %}
+                <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+                <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+                <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
+            {% endif %}
+
+            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
+
+    <main class="st-content-area">
+        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">Каталог изделий</h1>
+
+        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3; background: #fff; border-radius: 8px;">
+            <div style="padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">📦</span> 
+                    <span style="font-size: 18px; color: #333;"><strong style="font-size: 20px;">{{ total_count }}</strong> Всего изделий</span>
+                </div>
+                <a href="{% url 'add_model' %}" class="st-btn-blue" style="text-decoration: none; display: flex; align-items: center; gap: 8px; background: #3e5281; color: #fff; padding: 10px 20px; border-radius: 5px;">
+                    + Добавить изделие
+                </a>
+            </div>
+
+            <div style="padding: 15px 30px;">
+                <form method="get">
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Поиск по названию или описанию" 
+                           style="width: 100%; padding: 12px 15px; border: 1px solid #eee; border-radius: 8px; outline: none;">
+                </form>
+            </div>
+
+
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; font-size: 13px; color: #999; border-bottom: 1px solid #eee;">
+                        <th style="padding: 15px 30px; font-weight: 500;">Название модели</th>
+                        <th style="padding: 15px; font-weight: 500;">Формат</th>
+                        <th style="padding: 15px; font-weight: 500; text-align: center;">Дата</th>
+                        <th style="padding: 15px 30px; font-weight: 500; text-align: right;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in submissions %}
+                    <tr style="border-bottom: 1px solid #f9f9f9;">
+                        <td style="padding: 12px 30px;">
+                            <a href="{% url 'model_detail' item.pk %}" style="text-decoration: none; color: #3e5281; font-weight: 600;">
+                                {{ item.title }}
+                            </a>
+                            <div style="color: #999; font-size: 11px;">от {{ item.user.username }}</div>
+                        </td>
+                        <td style="padding: 12px;">
+                            <span class="badge-ext" style="position: static; background: #eee; color: #666;">
+                                {{ item.model_extension }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; text-align: center;">{{ item.created_at|date:"d.m.Y" }}</td>
+                        <td style="padding: 12px 30px; text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <a href="{% url 'edit_model' item.pk %}" class="st-btn-blue" style="padding: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 14px;">✎</span>
+                                </a>
+                                <form action="{% url 'delete_model' item.pk %}" method="post" onsubmit="return confirm('Удалить модель?')">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background: #e74c3c; color: white; border-radius: 4px; width: 32px; height: 32px; border: none; cursor: pointer;">
+                                        <span style="font-size: 14px;">🗑</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}

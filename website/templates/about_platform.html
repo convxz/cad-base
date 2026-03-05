@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- СЕКЦИЯ 2: О ПЛАТФОРМЕ -->
+<section class="about">
+    <div class="container about-inner">
+        <div class="about-text">
+            <p class="about-text-h"><span style="font-weight: bold;">CADBase</span> — НАДЁЖНОСТЬ ПРОВЕРЕННАЯ ВРЕМЕНЕМ!</p>
+            <p class="about-text-p">CADBase — это веб-каталог стандартных изделий и компонентов САПР, предназначенный для поиска, просмотра и скачивания 3D-моделей и технической документации. Платформа обеспечивает удобный доступ к стандартизированным элементам и повышает эффективность инженерного проектирования.</p>
+        </div>
+        <div class="about-image">
+            <img src="{% static 'img/cube-illustration.png' %}" alt="3D Cube">
+        </div>
+    </div>
+</section>
+
+<!-- СЕКЦИЯ 3: ПРЕИМУЩЕСТВА -->
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">Преимущество платформы</h2>
+        <div class="features-grid">
+            
+            <div class="feature-item">
+                <img src="{% static 'img/material-symbols_database-outline.png' %}" alt="icon" class="feature-icon">
+                <p>Централизованный доступ к стандартным 3D-моделям и технической документации.</p>
+            </div>
+
+            <div class="feature-item">
+                <img src="{% static 'img/mdi_cube-outline.png' %}" alt="icon" class="feature-icon">
+                <p>Поддержка распространенных форматов САПР (STEP, STL, IGES).</p>
+            </div>
+
+            <div class="feature-item">
+                <img src="{% static 'img/material-symbols_search-rounded.png' %}" alt="icon" class="feature-icon">
+                <p>Удобный поиск и фильтрация изделий по стандартам и характеристикам.</p>
+            </div>
+
+            <div class="feature-item">
+                <img width="65px"  src="{% static 'img/tabler_rotate-3d.png' %}" alt="icon" class="feature-icon">
+                <p>Интерактивный 3D-просмотр моделей прямо в браузере.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}

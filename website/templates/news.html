@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="news-page-main-title">Новости</h1> <div class="news-cards-grid">
+        {% for item in news_list %}
+        <a href="{% url 'news_detail' item.id %}" class="news-card-link">
+            <div class="news-card-item">
+                <div class="news-image-box">
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                </div>
+                <div class="news-title-box">
+                    <span class="news-title-text">{{ item.title }}</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <p>Новостей пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

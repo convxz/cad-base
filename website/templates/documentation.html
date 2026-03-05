@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="news-detail-page-bg">
+    <div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 0 40px;">
+        <nav class="news-detail-breadcrumbs" style="margin-left: 10px;">
+            <a href="/">Главная</a> | <span>Документация</span>
+        </nav>
+
+        <div class="wide-doc-card">
+            <div class="doc-header">
+                <div>
+                    <h1 class="doc-main-title">Документация</h1>
+                    <p class="doc-sub-title">Нормативно-технические документы, ГОСТы и ТУ для проектирования</p>
+                </div>
+                <div class="doc-stats">
+                    <span>Всего документов: <strong>{{ documents.count }}</strong></span>
+                </div>
+            </div>
+            
+            <div class="documentation-table-wrapper">
+                <table class="full-width-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 250px;">Номер / Стандарт</th>
+                            <th>Название документа</th>
+                            <th style="text-align: center; width: 120px;">Формат</th>
+                            <th style="text-align: right; width: 180px;">Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td class="col-standard">
+                                {% if doc.file %}
+                                    <a href="{{ doc.file.url }}" download class="doc-bold-link">{{ doc.standard_number }}</a>
+                                {% else %}
+                                    <span class="doc-bold-link">{{ doc.standard_number }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="col-name">
+                                {% if doc.file %}
+                                    <a href="{{ doc.file.url }}" download class="doc-name-link">{{ doc.name }}</a>
+                                {% else %}
+                                    {{ doc.name }}
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">
+                                {% if doc.file %}
+                                    <span class="file-type-badge">
+                                        {{ doc.get_extension }}
+                                    </span>
+                                {% else %}
+                                    <span class="file-type-badge" style="background: #eee; color: #999;">НЕТ</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                {% if doc.file %}
+                                    <a href="{{ doc.file.url }}" download class="download-btn-ui">Скачать</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-row">Документы не найдены</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Расширенная карточка */
+    .wide-doc-card {
+        background: #ffffff;
+        border: 1px solid #eef0f3;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+        padding: 40px 50px;
+        margin-bottom: 50px;
+    }
+
+    .doc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        border-bottom: 2px solid #f8f9fb;
+        padding-bottom: 25px;
+        margin-bottom: 20px;
+    }
+
+    .doc-main-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+    }
+
+    .doc-sub-title {
+        color: #888;
+        font-size: 16px;
+    }
+
+    .doc-stats {
+        color: #3e5281;
+        background: #f1f4f8;
+        padding: 8px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    /* Таблица на всю ширину */
+    .full-width-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .full-width-table th {
+        text-align: left;
+        padding: 15px 10px;
+        font-size: 12px;
+        color: #bbb;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .full-width-table td {
+        padding: 22px 10px;
+        border-bottom: 1px solid #f1f4f8;
+        vertical-align: middle;
+    }
+
+    /* Ссылки и стили колонок */
+    .doc-bold-link {
+        font-weight: 700;
+        color: #222;
+        text-decoration: none;
+        font-size: 16px;
+    }
+
+    .doc-name-link {
+        color: #3e5281;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 16px;
+    }
+
+    .doc-name-link:hover {
+        text-decoration: underline;
+    }
+
+    .file-type-badge {
+        background: #fcedec;
+        color: #e74c3c;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .download-btn-ui {
+        background: #3e5281;
+        color: white;
+        padding: 8px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .download-btn-ui:hover {
+        background: #2a3a5c;
+        box-shadow: 0 4px 12px rgba(62, 82, 129, 0.2);
+    }
+
+    .empty-row {
+        text-align: center;
+        padding: 100px !important;
+        color: #ccc;
+        font-style: italic;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1024px) {
+        .wide-doc-card {
+            padding: 20px;
+        }
+        .doc-main-title {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}

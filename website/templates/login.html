@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <link rel="stylesheet" href="{% static 'login_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-page">
+        <div class="form-container">
+            <div class="form-box">
+                <div class="form-header">
+                    <h2>Войти в систему</h2>
+                </div>
+                <!-- Сообщение об ошибке -->
+                {% if error %}
+                <div style="color: #ff4d4d; text-align: center; margin-bottom: 15px; font-weight: 600;">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <!-- Важно: action пустой, значит шлет на текущий URL -->
+                <form method="post" action="" class="login-form" id="loginForm">
+                    {% csrf_token %}
+                    
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" name="username" id="emailInput" placeholder="example@mail.com" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Пароль</label>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="passwordInput" required>
+                            <span class="pass-toggle" id="togglePassword">👁️</span>
+                        </div>
+                    </div>
+
+                    <div class="options-row">
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="remember">
+                            Запомни меня
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Войти</button>
+
+                    <div class="footer-links">
+                        <a href="{% url 'password_reset' %}" class="forgot-pass">Забыли пароль?</a>
+                        <p>У вас еще нет аккаунта? <a href="{% url 'signup' %}" class="bold-link">Зарегистрироваться</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-text">
+                <h1>С ВОЗВРАЩЕНИЕМ!</h1>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // 1. Функция "загорания" кнопки
+        function checkInputs() {
+            if (emailInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+                submitBtn.classList.add('active');
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.classList.remove('active');
+                submitBtn.disabled = true;
+            }
+        }
+
+        emailInput.addEventListener('input', checkInputs);
+        passwordInput.addEventListener('input', checkInputs);
+
+        // 2. Переключение видимости пароля
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '🔒';
+        });
+    </script>
+</body>
+</html>

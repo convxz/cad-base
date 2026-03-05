@@ -1,0 +1,91 @@
+/* 1. Глобальные сбросы */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-header, .header-container {
+    width: 100%;
+    min-height: 140px;
+    background: linear-gradient(rgba(20, 30, 48, 0.85), rgba(36, 59, 85, 0.85)), 
+                url('img/background.png'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 25px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 140px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-text {
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    font-family: "Playfair Display", serif;
+}
+
+.logo-text span {
+    font-family: "Playfair Display", serif;
+    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.user-name {
+    color: inherit;            /* Берет цвет у родительского текста */
+    text-decoration: none;     /* Убирает подчеркивание */
+    font: inherit;             /* Наследует шрифт, размер и жирность */
+    cursor: pointer;           /* Оставляет "палец" при наведении */
+    outline: none;
+}
+
+.user-role {
+    color: inherit;            /* Берет цвет у родительского текста */
+    text-decoration: none;     /* Убирает подчеркивание */
+    font: inherit;             /* Наследует шрифт, размер и жирность */
+    cursor: pointer;           /* Оставляет "палец" при наведении */
+    outline: none;
+}
+
+.logout-btn {
+    background:none; 
+    border:none; 
+    color:inherit; 
+    cursor:pointer;
+    background: transparent;
+    color: white;
+    padding: 7px 18px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.3s ease;
+}

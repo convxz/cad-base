@@ -1,0 +1,25 @@
+{% load static %}
+<div class="header-top">
+    <div class="logo">
+        <div class="logo-icon"><img src="{% static 'img/cubelogo.png' %}" alt="Logo" width="70px"></div>
+        <div class="logo-text">CAD<span>Base</span></div>
+    </div>
+    <div class="header-actions">
+        <a href="tel:+79678997755" class="phone"><i class='bx bx-phone'></i> +7(967)899 77 55</a>
+        <a href="{% url 'login' %}" class="login-btn"><i class='bx bx-log-in-circle'></i> Вход/Регистрация</a>
+    </div>
+</div>
+{% if request.resolver_match.url_name != 'home' %}
+    <hr class="header-divider">
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a></li>
+            <li><a href="{% url 'catalog' %}" class="{% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">Каталог</a></li>
+            <li><a href="{% url 'documentation' %}" class="{% if request.resolver_match.url_name == 'documentation' %}active{% endif %}">Документация</a></li>
+            <li><a href="{% url 'about_platform' %}" class="{% if request.resolver_match.url_name == 'about_platform' %}active{% endif %}">О платформе</a></li>
+            <li><a href="{% url 'news' %}" class="{% if request.resolver_match.url_name == 'news' %}active{% endif %}">Новости</a></li>
+            <li><a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Контакты</a></li>
+            <li><a href="{% url 'questions' %}" class="{% if request.resolver_match.url_name == 'questions' %}active{% endif %}">Поддержка</a></li>
+        </ul>
+    </nav>
+{% endif %}

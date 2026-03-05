@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="st-main-wrapper">
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="#" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="st-active">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
+            <a href="#" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
+
+    <main class="st-content-area">
+        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333;">Добавить новость</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="st-white-card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+                    <div style="background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">news</div>
+                    <span style="font-weight: bold; font-size: 18px;">Новость</span>
+                </div>
+
+                <div style="padding: 30px;">
+                    <div class="st-group" style="margin-bottom: 25px;">
+                        <label style="color: #333; font-weight: 600; margin-bottom: 10px;">Заголовок</label>
+                        <input type="text" name="title" placeholder="Введите название новости..." required 
+                               style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f9f9f9;">
+                    </div>
+
+                    <div class="st-group" style="margin-bottom: 25px;">
+                        <label style="color: #333; font-weight: 600; margin-bottom: 10px;">Краткое описание</label>
+                        <textarea name="content" rows="6" placeholder="Введите текст новости..." 
+                                  style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f9f9f9; resize: none;"></textarea>
+                    </div>
+
+                    <label style="display: block; cursor: pointer;">
+                        <input type="file" name="image" accept="image/*" required style="display: none;" onchange="updateFileName(this)">
+                        <div id="drop-zone" style="border: 2px dashed #eee; border-radius: 12px; padding: 40px; text-align: center; background: #fcfcfc;">
+                            <div style="font-size: 40px; color: #ccc; margin-bottom: 10px;">🖼</div>
+                            <p id="file-name" style="color: #999; font-size: 14px;">Добавьте изображение<br>(по желанию) или перетащите его сюда</p>
+                        </div>
+                    </label>
+
+                    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 40px;">
+                        <a href="{% url 'anews' %}" class="st-btn-white" style="width: 180px; text-align: center;">Отменить</a>
+                        <button type="submit" class="st-btn-blue" style="width: 180px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 18px;">✎</span> Сохранить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+
+<script>
+// Чтобы юзер видел, что файл выбрался
+function updateFileName(input) {
+    const fileName = input.files[0].name;
+    document.getElementById('file-name').innerHTML = "Выбран файл:<br><b>" + fileName + "</b>";
+    document.getElementById('drop-zone').style.borderColor = "#3e5281";
+}
+</script>
+{% endblock %}

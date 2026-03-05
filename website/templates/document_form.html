@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="st-main-wrapper">
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'adocumentation' %}" class="st-active">ДОКУМЕНТАЦИЯ</a>
+            </nav>
+    </aside>
+
+    <main class="st-content-area">
+        <h1 style="font-size: 28px; margin-bottom: 5px; color: #333; font-weight: bold;">
+            {% if edit_mode %}Редактировать документ{% else %}Добавить документ{% endif %}
+        </h1>
+        <p style="color: #666; margin-bottom: 25px;">Добро пожаловать!</p>
+
+        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3;">
+    <div style="padding: 15px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">📄</span>
+        <strong style="font-size: 18px; color: #333;">Документ</strong>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" style="padding: 30px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Номер стандарта</label>
+            {{ form.standard_number }}
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Название</label>
+            {{ form.name }}
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Файл документа (PDF)</label>
+            
+            <div class="st-file-upload-container" id="drop-zone">
+                <label class="st-file-upload-label">
+                    {{ form.file }}
+                    <div class="st-file-upload-content" id="upload-content">
+                        <div class="st-upload-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="12"></line>
+                                <line x1="9" y1="15" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                        <span class="st-upload-text" id="file-name-text">
+                            Загрузить файл документа PDF или перетащите его сюда
+                        </span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #eee; padding-top: 25px;">
+            <a href="{% url 'adocumentation' %}" class="st-btn-white">Отменить</a>
+            <button type="submit" class="st-btn-blue">
+                {% if edit_mode %}Сохранить изменения{% else %}Создать документ{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .file-upload-wrapper input[type="file"] {
+        background: #f1f4f8;
+        padding: 20px;
+        border: 2px dashed #3e5281;
+        width: 100%;
+        cursor: pointer;
+        
+    }
+    /* Контейнер области загрузки */
+.st-file-upload-container {
+    width: 100%;
+    background: #f1f4f8; /* Цвет фона как в инпутах */
+    border-radius: 8px;
+    border: 1px solid #eef0f3;
+    transition: 0.3s;
+}
+
+.st-file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Скрываем стандартный инпут Django */
+.st-file-upload-label input[type="file"] {
+    display: none;
+}
+
+.st-file-upload-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.st-upload-icon {
+    opacity: 0.6;
+}
+
+.st-upload-text {
+    font-size: 14px;
+    color: #999;
+    max-width: 250px;
+    line-height: 1.4;
+}
+
+/* Эффект при наведении */
+.st-file-upload-container:hover {
+    background: #eaeff5;
+    border-color: #3e5281;
+}
+.st-file-upload-container {
+    width: 100%;
+    background: #f1f4f8; /* Цвет фона из макета */
+    border: 2px dashed #d1d9e2; /* Пунктирная рамка для зоны загрузки */
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.st-file-upload-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    cursor: pointer;
+    min-height: 160px;
+}
+
+.st-file-upload-label input[type="file"] {
+    display: none; /* Скрываем некрасивую кнопку "Выберите файл" */
+}
+
+.st-upload-text {
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+    margin-top: 10px;
+    display: block;
+}
+</style>
+</main>
+</div>
+
+<script>
+    const fileInput = document.querySelector('input[type="file"]');
+    const fileNameText = document.getElementById('file-name-text');
+    const uploadContent = document.getElementById('upload-content');
+
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            const fileName = this.files[0].name;
+            // Меняем текст на имя файла и подсвечиваем его
+            fileNameText.innerHTML = `<strong>Выбран файл:</strong><br>${fileName}`;
+            uploadContent.style.opacity = '1';
+            document.getElementById('drop-zone').style.borderColor = '#3e5281';
+            document.getElementById('drop-zone').style.background = '#eef2f7';
+        }
+    });
+
+    // Опционально: эффект перетаскивания (Drag & Drop)
+    const dropZone = document.getElementById('drop-zone');
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#e0e6ed';
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropZone.style.background = '#f1f4f8';
+        }, false);
+    });
+</script>
+<style>
+    .st-input {
+        width: 100%;
+        background: #f1f4f8 !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 12px 15px !important;
+        font-size: 14px;
+        color: #333;
+    }
+</style>
+{% endblock %}

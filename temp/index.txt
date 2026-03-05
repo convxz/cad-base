@@ -1,0 +1,1137 @@
+# chat/views.py
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.db import transaction
+from django.db.models import Q, Count, OuterRef, Subquery, Max
+
+from website.models import ModelSubmission, ChatRoom, ChatMessage
+
+# ──────────────────────────────────────────────
+# Вспомогательное
+# ──────────────────────────────────────────────
+
+def is_admin(user):
+    return user.is_staff or user.is_superuser
+
+def _room_or_404(room_id, user):
+    """Достаём комнату и проверяем, что пользователь имеет к ней доступ."""
+    room = get_object_or_404(ChatRoom, pk=room_id)
+    if not (is_admin(user) or room.submission.user == user):
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied
+    return room
+
+def _system_message(room, text):
+    """Системное сообщение (смена статуса, приветствие и т.д.)."""
+    ChatMessage.objects.create(
+        room=room,
+        sender=room.submission.user,  # технически от имени автора, но is_system=True
+        body=text,
+        is_system=True,
+    )
+
+
+# ──────────────────────────────────────────────
+# Пользовательские views
+# ──────────────────────────────────────────────
+
+@login_required
+def my_submissions(request):
+    """Список заявок текущего пользователя."""
+    submissions = (
+        ModelSubmission.objects
+        .filter(user=request.user)
+        .select_related('chat_room')
+        .order_by('-created_at')
+    )
+    # Считаем непрочитанные для каждой комнаты
+    for sub in submissions:
+        if hasattr(sub, 'chat_room'):
+            sub.unread = sub.chat_room.messages.filter(
+                is_read=False
+            ).exclude(sender=request.user).count()
+        else:
+            sub.unread = 0
+
+    return render(request, 'chat/my_submissions.html', {'submissions': submissions})
+
+
+@login_required
+def submit_model(request):
+    """Форма подачи заявки."""
+    # Допустимые расширения (те же, что в вашем SUPPORTED_FORMATS)
+    ALLOWED_EXTS = (
+        '.glb', '.gltf', '.fbx', '.stl', '.obj', '.ply', '.dae',
+        '.3ds', '.3mf', '.wrl', '.x3d', '.amf', '.off',
+        '.step', '.stp', '.iges', '.igs', '.blend',
+        '.abc', '.usd', '.usda', '.usdc', '.usdz',
+        '.xyz', '.pcd', '.pts',
+    )
+    MANUAL_EXTS = ('.dwg', '.dxf', '.skp', '.max', '.ma', '.mb', '.c4d')
+
+    if request.method == 'POST':
+        title       = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        model_file  = request.FILES.get('model_file')
+        thumbnail   = request.FILES.get('thumbnail')
+
+        errors = {}
+
+        if not title:
+            errors['title'] = 'Введите название модели'
+        if not model_file:
+            errors['model_file'] = 'Прикрепите 3D-файл'
+        else:
+            import os
+            ext = os.path.splitext(model_file.name)[1].lower()
+            if ext in MANUAL_EXTS:
+                errors['model_file'] = (
+                    f'Формат {ext.upper()} требует ручной конвертации. '
+                    'Конвертируйте в GLB через Blender и загрузите .glb-файл.'
+                )
+            elif ext not in ALLOWED_EXTS:
+                errors['model_file'] = f'Формат {ext.upper()} не поддерживается.'
+
+        if errors:
+            return render(request, 'chat/submit_model.html', {
+                'errors': errors,
+                'title': title,
+                'description': description,
+            })
+
+        with transaction.atomic():
+            submission = ModelSubmission.objects.create(
+                user=request.user,
+                title=title,
+                description=description,
+                model_file=model_file,
+                thumbnail=thumbnail,
+            )
+            # Сразу создаём чат-комнату
+            room = ChatRoom.objects.create(submission=submission)
+            # Системное приветствие
+            _system_message(room, f'📦 Заявка «{title}» отправлена на рассмотрение.')
+
+        return redirect('chat:room', room_id=room.pk)
+
+    return render(request, 'chat/submit_model.html', {'allowed_exts': ALLOWED_EXTS})
+
+
+@login_required
+def chat_room(request, room_id):
+    """Страница чата конкретной заявки."""
+    room = _room_or_404(room_id, request.user)
+    submission = room.submission
+
+    # Помечаем сообщения как прочитанные
+    room.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True)
+
+    messages = room.messages.select_related('sender').all()
+
+    return render(request, 'chat/room.html', {
+        'room': room,
+        'submission': submission,
+        'messages': messages,
+        'is_admin': is_admin(request.user),
+    })
+
+
+# ──────────────────────────────────────────────
+# AJAX-эндпоинты (polling)
+# ──────────────────────────────────────────────
+
+@login_required
+@require_POST
+def send_message(request, room_id):
+    """POST /chat/<room_id>/send/ — отправить сообщение."""
+    room = _room_or_404(room_id, request.user)
+    body = request.POST.get('body', '').strip()
+
+    if not body:
+        return JsonResponse({'error': 'Пустое сообщение'}, status=400)
+
+    msg = ChatMessage.objects.create(
+        room=room,
+        sender=request.user,
+        body=body,
+    )
+
+    return JsonResponse({
+        'id':          msg.pk,
+        'body':        msg.body,
+        'sender':      msg.sender.username,
+        'is_admin':    msg.sender_is_admin,
+        'is_system':   msg.is_system,
+        'created_at':  msg.created_at.strftime('%d.%m.%Y %H:%M'),
+    })
+
+
+@login_required
+def poll_messages(request, room_id):
+    """GET /chat/<room_id>/poll/?after=<msg_id> — получить новые сообщения."""
+    room = _room_or_404(room_id, request.user)
+    after_id = int(request.GET.get('after', 0))
+
+    new_msgs = room.messages.filter(pk__gt=after_id).select_related('sender')
+    # Помечаем как прочитанные
+    new_msgs.exclude(sender=request.user).update(is_read=True)
+
+    data = [
+        {
+            'id':         m.pk,
+            'body':       m.body,
+            'sender':     m.sender.username,
+            'is_admin':   m.sender_is_admin,
+            'is_system':  m.is_system,
+            'created_at': m.created_at.strftime('%d.%m.%Y %H:%M'),
+        }
+        for m in new_msgs
+    ]
+
+    return JsonResponse({'messages': data})
+
+
+# ──────────────────────────────────────────────
+# Действия с заявкой (только для admin)
+# ──────────────────────────────────────────────
+
+@login_required
+@require_POST
+def review_submission(request, submission_id):
+    """
+    POST /chat/review/<submission_id>/
+    action = 'approve' | 'reject'
+    comment = строка (необязательно)
+    """
+    if not is_admin(request.user):
+        return JsonResponse({'error': 'Нет доступа'}, status=403)
+
+    submission = get_object_or_404(ModelSubmission, pk=submission_id)
+    action  = request.POST.get('action')
+    comment = request.POST.get('comment', '').strip()
+
+    if action not in ('approve', 'reject'):
+        return JsonResponse({'error': 'Неверное действие'}, status=400)
+
+    with transaction.atomic():
+        submission.status      = ModelSubmission.STATUS_APPROVED if action == 'approve' else ModelSubmission.STATUS_REJECTED
+        submission.reviewed_at = timezone.now()
+        submission.reviewed_by = request.user
+        submission.admin_comment = comment
+        submission.save(update_fields=['status', 'reviewed_at', 'reviewed_by', 'admin_comment'])
+
+        room = submission.chat_room
+        if action == 'approve':
+            msg_text = f'✅ Заявка принята администратором {request.user.username}.'
+            if comment:
+                msg_text += f' Комментарий: {comment}'
+        else:
+            msg_text = f'❌ Заявка отклонена администратором {request.user.username}.'
+            if comment:
+                msg_text += f' Причина: {comment}'
+
+        _system_message(room, msg_text)
+
+    return JsonResponse({
+        'success':      True,
+        'new_status':   submission.get_status_display(),
+        'status_code':  submission.status,
+    })
+
+
+# ──────────────────────────────────────────────
+# Панель администратора
+# ──────────────────────────────────────────────
+
+@login_required
+@user_passes_test(is_admin)
+def admin_inbox(request):
+    """Список всех заявок для администратора."""
+    filter_status = request.GET.get('status', 'pending')
+    qs = ModelSubmission.objects.select_related('user', 'chat_room')
+
+    if filter_status in ('pending', 'approved', 'rejected'):
+        qs = qs.filter(status=filter_status)
+
+    # Непрочитанные сообщения от пользователей
+    for sub in qs:
+        if hasattr(sub, 'chat_room'):
+            sub.unread = sub.chat_room.messages.filter(
+                is_read=False,
+                is_system=False,
+            ).filter(sender=sub.user).count()
+        else:
+            sub.unread = 0
+
+    return render(request, 'chat/admin_inbox.html', {
+        'submissions':    qs,
+        'filter_status':  filter_status,
+    })
+
+
+
+
+# website/views.py
+
+import os
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from django.db import transaction
+
+from website.models import ModelSubmission, ChatRoom, ChatMessage
+from .forms import UserUpdateForm, ProfileUpdateForm
+from .forms import SignUpForm
+
+
+# ══════════════════════════════════════════════════════════════
+# Обычные страницы сайта
+# ══════════════════════════════════════════════════════════════
+
+def home(request):
+    return render(request, 'index.html')
+
+def contacts(request):
+    return render(request, 'contacts.html')
+
+def news(request):
+    return render(request, 'news.html')
+
+def catalog(request):
+    return render(request, 'catalog.html')
+
+def documentation(request):
+    return render(request, 'documentation.html')
+
+def about_platform(request):
+    return render(request, 'about_platform.html')
+
+def questions(request):
+    return render(request, 'questions.html')
+
+
+# ══════════════════════════════════════════════════════════════
+# Авторизация / регистрация
+# ══════════════════════════════════════════════════════════════
+
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Регистрация прошла успешно! Теперь войдите.")
+            return redirect('login')
+        else:
+            for error in form.errors.values():
+                messages.error(request, error)
+    else:
+        form = SignUpForm()
+    return render(request, 'signup.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        user = authenticate(request, username=u, password=p)
+        if user is not None:
+            login(request, user)
+            return redirect('profile')
+        else:
+            messages.error(request, "Неверный Email или пароль")
+            return render(request, 'login.html')
+    return render(request, 'login.html')
+
+
+def logout_user(request):
+    logout(request)
+    return redirect('/')
+
+
+@login_required
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    edit_mode = request.GET.get('edit') == '1'
+
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, 'Настройки сохранены!')
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=profile)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form,
+        'profile': profile,
+        'edit_mode': edit_mode,
+    }
+    return render(request, 'profile.html', context)
+
+
+
+
+
+# website/urls.py 
+
+from django.urls import path, include 
+from django.contrib.auth import views as auth_views
+from . import views
+
+urlpatterns = [
+    # ── Обычные страницы ──────────────────────────────────────
+    path('',                views.home,           name='home'),
+    path('contacts/',       views.contacts,       name='contacts'),
+    path('news/',           views.news,           name='news'),
+    path('catalog/',        views.catalog,        name='catalog'),
+    path('documentation/',  views.documentation,  name='documentation'),
+    path('about_platform/', views.about_platform, name='about_platform'),
+    path('questions/',      views.questions,      name='questions'),
+
+    # ── Авторизация ───────────────────────────────────────────
+    path('login/',    views.login_view,  name='login'),
+    path('logout/',   views.logout_user, name='logout'),
+    path('signup/',   views.signup_view, name='signup'),
+    path('profile/',  views.profile_view, name='profile'),
+
+    # ── Сброс пароля ─────────────────────────────────────────
+    path('password_reset/', auth_views.PasswordResetView.as_view(
+        template_name='password_reset.html',
+        html_email_template_name='password_reset_email.html',
+    ), name='password_reset'),
+    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='password_reset_done.html',
+    ), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='password_reset_confirm.html',
+    ), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='password_reset_complete.html',
+    ), name='password_reset_complete'),
+
+    # ── Чат (Подключение приложения) ──────────────────────────
+    path('chat/', include('chat.urls')), 
+
+]
+
+
+
+# chat/urls.py
+from django.urls import path
+from . import views
+
+app_name = 'chat'  # Регистрируем неймспейс
+
+urlpatterns = [
+    path('', views.my_submissions, name='my_submissions'),
+    path('submit/', views.submit_model, name='submit'),
+    path('room/<int:room_id>/', views.chat_room, name='room'),
+    path('room/<int:room_id>/send/', views.send_message, name='send_message'),
+    path('room/<int:room_id>/poll/', views.poll_messages, name='poll_messages'),
+    path('review/<int:submission_id>/', views.review_submission, name='review'),
+    path('admin/', views.admin_inbox, name='admin_inbox'),
+]
+
+
+
+
+# website/models.py
+
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+
+class Profile(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'мужской'),
+        ('F', 'женский'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    language = models.CharField(max_length=50, default='русский')
+    birth_date = models.DateField(null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+
+    def __str__(self):
+        return f'Профиль для {self.user.username}'
+
+# --- СИГНАЛЫ ---
+
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    """
+    Создает профиль при создании пользователя.
+    Обновляет профиль при сохранении пользователя.
+    """
+    if created:
+        Profile.objects.create(user=instance)
+    else:
+        # Используем getattr на случай, если профиля почему-то нет (например, для старых юзеров)
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
+
+class ModelSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('pending', '⏳ На рассмотрении'),
+        ('approved', '✅ Принята'),
+        ('rejected', '❌ Отклонена'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions', verbose_name='Пользователь')
+    title = models.CharField(max_length=200, verbose_name='Название модели')
+    description = models.TextField(blank=True, verbose_name='Описание')
+    model_file = models.FileField(upload_to='submissions/models/', verbose_name='3D-файл')
+    thumbnail = models.ImageField(upload_to='submissions/thumbnails/', null=True, blank=True, verbose_name='Превью')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True, verbose_name='Статус')
+    admin_comment = models.TextField(blank=True, verbose_name='Комментарий администратора')
+    created_at = models.DateTimeField(default=timezone.now, verbose_name='Создана')
+    reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name='Рассмотрена')
+    reviewed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviewed_submissions', verbose_name='Проверил')
+
+    class Meta:
+        verbose_name = 'Заявка на модель'
+        verbose_name_plural = 'Заявки на модели'
+        ordering = ['-created_at']
+
+class ChatRoom(models.Model):
+    submission = models.OneToOneField(ModelSubmission, on_delete=models.CASCADE, related_name='chat_room', verbose_name='Заявка')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Чат-комната'
+        verbose_name_plural = 'Чат-комнаты'
+
+class ChatMessage(models.Model):
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_messages', verbose_name='Отправитель')
+    body = models.TextField(blank=True, verbose_name='Текст')
+    is_system = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'
+        ordering = ['created_at']
+
+
+
+
+
+
+        <!-- templates/chat/room.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чат — {{ submission.title }}</title>
+<style>
+  :root {
+    --bg: #0d0f1a; --surface: #131627; --surface2: #1a1f35;
+    --accent: #4fc3f7; --accent2: #a78bfa;
+    --ok: #4ade80; --warn: #fbbf24; --err: #f87171;
+    --text: #e2e8f0; --muted: rgba(255,255,255,0.4);
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); height:100vh; display:flex; flex-direction:column; }
+
+  /* ── Header ── */
+  .chat-header { background:rgba(0,0,0,0.45); backdrop-filter:blur(14px); padding:14px 24px; border-bottom:1px solid rgba(79,195,247,0.15); display:flex; align-items:center; gap:16px; flex-shrink:0; }
+  .back-btn { color:var(--accent); text-decoration:none; font-size:13px; padding:6px 14px; border:1px solid rgba(79,195,247,0.3); border-radius:20px; transition:all .2s; }
+  .back-btn:hover { background:rgba(79,195,247,0.1); }
+  .header-info { flex:1; }
+  .header-info h2 { font-size:16px; color:var(--accent); }
+  .header-info p  { font-size:12px; color:var(--muted); margin-top:2px; }
+  .status-badge { padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700; }
+  .status-pending  { background:rgba(251,191,36,0.15);  color:var(--warn); }
+  .status-approved { background:rgba(74,222,128,0.15);  color:var(--ok); }
+  .status-rejected { background:rgba(248,113,113,0.15); color:var(--err); }
+
+  /* ── Layout ── */
+  .chat-body { flex:1; display:flex; overflow:hidden; }
+
+  /* ── Sidebar: инфо о заявке ── */
+  .sidebar { width:280px; border-right:1px solid rgba(255,255,255,0.06); padding:20px; overflow-y:auto; flex-shrink:0; display:flex; flex-direction:column; gap:16px; }
+  .sidebar h3 { font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .model-thumb { width:100%; aspect-ratio:16/10; border-radius:10px; overflow:hidden; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; }
+  .model-thumb img { width:100%; height:100%; object-fit:cover; }
+  .model-thumb .no-thumb { font-size:40px; }
+  .info-row { display:flex; flex-direction:column; gap:3px; }
+  .info-row label { font-size:11px; color:var(--muted); }
+  .info-row span  { font-size:13px; }
+  .download-link { display:flex; align-items:center; gap:8px; background:rgba(79,195,247,0.08); border:1px solid rgba(79,195,247,0.2); color:var(--accent); text-decoration:none; padding:8px 14px; border-radius:10px; font-size:13px; transition:all .2s; }
+  .download-link:hover { background:rgba(79,195,247,0.15); }
+  .ext-badge { background:rgba(79,195,247,0.15); padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+
+  /* ── Панель действий админа ── */
+  .admin-actions { background:var(--surface2); border-radius:var(--radius); padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .admin-actions h4 { font-size:12px; color:var(--muted); }
+  .comment-input { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:var(--text); padding:8px 12px; border-radius:8px; font-size:12px; width:100%; resize:vertical; min-height:60px; outline:none; font-family:inherit; }
+  .comment-input:focus { border-color:var(--accent); }
+  .action-btns { display:flex; gap:8px; }
+  .btn-approve { flex:1; background:rgba(74,222,128,0.15);  color:var(--ok);  border:1px solid rgba(74,222,128,0.3);  padding:8px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px; transition:all .2s; }
+  .btn-reject  { flex:1; background:rgba(248,113,113,0.15); color:var(--err); border:1px solid rgba(248,113,113,0.3); padding:8px; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px; transition:all .2s; }
+  .btn-approve:hover { background:rgba(74,222,128,0.3); }
+  .btn-reject:hover  { background:rgba(248,113,113,0.3); }
+  .btn-approve:disabled, .btn-reject:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ── Messages ── */
+  .messages-area { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+  #messagesList { flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:10px; }
+  .msg { display:flex; flex-direction:column; max-width:75%; }
+  .msg.mine    { align-self:flex-end; align-items:flex-end; }
+  .msg.theirs  { align-self:flex-start; align-items:flex-start; }
+  .msg.system  { align-self:center; align-items:center; max-width:90%; }
+  .msg-bubble { padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; word-break:break-word; }
+  .msg.mine   .msg-bubble { background:rgba(79,195,247,0.18); border-bottom-right-radius:4px; }
+  .msg.theirs .msg-bubble { background:var(--surface2); border-bottom-left-radius:4px; }
+  .msg.admin.theirs .msg-bubble { background:rgba(167,139,250,0.15); border-left:2px solid var(--accent2); }
+  .msg.system .msg-bubble { background:rgba(255,255,255,0.04); color:var(--muted); font-size:12px; font-style:italic; border-radius:20px; padding:6px 16px; }
+  .msg-meta { font-size:11px; color:var(--muted); margin-top:3px; display:flex; gap:6px; }
+  .admin-tag { color:var(--accent2); font-weight:600; }
+
+  /* ── Input area ── */
+  .input-area { padding:16px 24px; border-top:1px solid rgba(255,255,255,0.06); display:flex; gap:10px; align-items:flex-end; flex-shrink:0; }
+  .msg-textarea { flex:1; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1); color:var(--text); padding:11px 16px; border-radius:14px; font-size:14px; resize:none; outline:none; font-family:inherit; transition:border-color .2s; max-height:120px; }
+  .msg-textarea:focus { border-color:var(--accent); }
+  .send-btn { background:var(--accent); color:#0d0f1a; border:none; padding:11px 22px; border-radius:14px; font-weight:700; font-size:14px; cursor:pointer; transition:all .2s; flex-shrink:0; }
+  .send-btn:hover { background:#81d4fa; }
+  .send-btn:disabled { background:#444; cursor:not-allowed; }
+
+  @media(max-width:700px) {
+    .sidebar { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chat-header">
+  <a href="{% url 'chat:my_submissions' %}" class="back-btn">← Назад</a>
+  <div class="header-info">
+    <h2>{{ submission.title }}</h2>
+    <p>от {{ submission.user.username }} · {{ submission.created_at|date:"d.m.Y" }}</p>
+  </div>
+  <span class="status-badge status-{{ submission.status }}" id="statusBadge">
+    {{ submission.get_status_display }}
+  </span>
+</div>
+
+<div class="chat-body">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="model-thumb">
+      {% if submission.thumbnail %}
+        <img src="{{ submission.thumbnail.url }}" alt="preview">
+      {% else %}
+        <span class="no-thumb">📦</span>
+      {% endif %}
+    </div>
+
+    <div class="info-row">
+      <label>Формат файла</label>
+      <span><span class="ext-badge">{{ submission.model_extension }}</span></span>
+    </div>
+
+    {% if submission.description %}
+    <div class="info-row">
+      <label>Описание</label>
+      <span>{{ submission.description }}</span>
+    </div>
+    {% endif %}
+
+    <a href="{{ submission.model_file.url }}" class="download-link" download>
+      ⬇️ Скачать модель
+      <span class="ext-badge">{{ submission.model_extension }}</span>
+    </a>
+
+    {% if submission.admin_comment %}
+    <div class="info-row">
+      <label>Комментарий администратора</label>
+      <span>{{ submission.admin_comment }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Панель действий — только для админа и только для pending -->
+    {% if is_admin and submission.is_pending %}
+    <div class="admin-actions">
+      <h4>🛡 Действие администратора</h4>
+      <textarea class="comment-input" id="adminComment"
+                placeholder="Комментарий (необязательно)…"></textarea>
+      <div class="action-btns">
+        <button class="btn-approve" id="btnApprove" onclick="doReview('approve')">✅ Принять</button>
+        <button class="btn-reject"  id="btnReject"  onclick="doReview('reject')">❌ Отклонить</button>
+      </div>
+    </div>
+    {% endif %}
+  </aside>
+
+  <!-- Messages -->
+  <div class="messages-area">
+    <div id="messagesList">
+      {% for msg in messages %}
+        {% include "chat/_message.html" with msg=msg current_user=request.user %}
+      {% endfor %}
+    </div>
+
+    <div class="input-area">
+      <textarea class="msg-textarea" id="msgInput" rows="1"
+                placeholder="Написать сообщение… (Enter — отправить, Shift+Enter — перенос)"></textarea>
+      <button class="send-btn" id="sendBtn">Отправить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ROOM_ID    = {{ room.pk }};
+var CSRF_TOKEN = '{{ csrf_token }}';
+var CURRENT_USER = '{{ request.user.username }}';
+var lastMsgId  = {{ messages.last.pk|default:0 }};
+
+// ── Отправка сообщения ────────────────────────────────────
+document.getElementById('sendBtn').addEventListener('click', sendMsg);
+document.getElementById('msgInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMsg();
+    }
+});
+
+function sendMsg() {
+    var input = document.getElementById('msgInput');
+    var body  = input.value.trim();
+    if (!body) return;
+
+    var btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+
+    fetch('/chat/room/' + ROOM_ID + '/send/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'body=' + encodeURIComponent(body),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(msg) {
+        appendMessage(msg);
+        lastMsgId = msg.id;
+        input.value = '';
+        input.style.height = '';
+    })
+    .finally(function() { btn.disabled = false; });
+}
+
+// ── Polling: каждые 2 секунды ─────────────────────────────
+function poll() {
+    fetch('/chat/room/' + ROOM_ID + '/poll/?after=' + lastMsgId)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        data.messages.forEach(function(msg) {
+            if (msg.sender !== CURRENT_USER) { // свои уже добавлены мгновенно
+                appendMessage(msg);
+            }
+            if (msg.id > lastMsgId) lastMsgId = msg.id;
+        });
+    })
+    .catch(function() {}) // тихо игнорируем сетевые ошибки
+    .finally(function() {
+        setTimeout(poll, 2000);
+    });
+}
+setTimeout(poll, 2000);
+
+// ── Добавить сообщение в DOM ──────────────────────────────
+function appendMessage(msg) {
+    var list  = document.getElementById('messagesList');
+    var div   = document.createElement('div');
+
+    var cls = 'msg';
+    if (msg.is_system) {
+        cls += ' system';
+    } else if (msg.sender === CURRENT_USER) {
+        cls += ' mine';
+    } else {
+        cls += ' theirs';
+        if (msg.is_admin) cls += ' admin';
+    }
+    div.className = cls;
+
+    var adminTag = msg.is_admin && !msg.is_system
+        ? '<span class="admin-tag">Администратор</span>' : '';
+
+    div.innerHTML =
+        '<div class="msg-bubble">' + escHtml(msg.body) + '</div>' +
+        '<div class="msg-meta">' + adminTag + '<span>' + msg.created_at + '</span></div>';
+
+    list.appendChild(div);
+    list.scrollTop = list.scrollHeight;
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+             .replace(/\n/g,'<br>');
+}
+
+// Скролл вниз при открытии
+document.getElementById('messagesList').scrollTop = 99999;
+
+// ── Действие администратора ───────────────────────────────
+function doReview(action) {
+    var comment = (document.getElementById('adminComment') || {}).value || '';
+    var label   = action === 'approve' ? 'Принять' : 'Отклонить';
+    if (!confirm(label + ' заявку «{{ submission.title|escapejs }}»?')) return;
+
+    var btnA = document.getElementById('btnApprove');
+    var btnR = document.getElementById('btnReject');
+    if (btnA) btnA.disabled = true;
+    if (btnR) btnR.disabled = true;
+
+    var SUBMISSION_ID = {{ submission.pk }};
+
+    fetch('/chat/review/' + SUBMISSION_ID + '/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=' + action + '&comment=' + encodeURIComponent(comment),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Обновляем бейдж статуса
+            var badge = document.getElementById('statusBadge');
+            badge.textContent = data.new_status;
+            badge.className   = 'status-badge status-' + data.status_code;
+            // Убираем панель действий
+            var panel = document.querySelector('.admin-actions');
+            if (panel) panel.remove();
+        }
+    });
+}
+
+// Авторастяжение textarea
+document.getElementById('msgInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+</script>
+</body>
+</html>
+
+
+
+
+<!-- templates/chat/submit_model.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Отправить модель</title>
+<style>
+  :root { --bg:#0d0f1a; --surface:#131627; --accent:#4fc3f7; --ok:#4ade80; --warn:#fbbf24; --err:#f87171; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:#e2e8f0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+  .card { background:var(--surface); border-radius:16px; padding:36px 40px; width:100%; max-width:540px; border:1px solid rgba(79,195,247,0.2); }
+  .card h1 { font-size:22px; color:var(--accent); margin-bottom:24px; }
+  .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+  label { font-size:13px; color:rgba(255,255,255,0.6); }
+  .req { color:var(--err); }
+  input[type=text], textarea {
+    background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12);
+    color:white; padding:10px 14px; border-radius:10px; font-size:14px;
+    outline:none; transition:border-color .2s; font-family:inherit; width:100%;
+  }
+  input[type=text]:focus, textarea:focus { border-color:var(--accent); }
+  textarea { resize:vertical; min-height:80px; }
+  .drop-zone { border:2px dashed rgba(79,195,247,0.35); border-radius:10px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; color:rgba(255,255,255,0.5); font-size:13px; position:relative; }
+  .drop-zone:hover { border-color:var(--accent); background:rgba(79,195,247,0.06); }
+  .drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+  .drop-zone .dz-icon { font-size:32px; margin-bottom:8px; display:block; }
+  .dz-name { color:var(--accent); font-weight:600; margin-top:6px; font-size:12px; }
+  .hint { font-size:11px; color:rgba(255,255,255,0.35); margin-top:5px; line-height:1.6; }
+  .error-msg { background:rgba(248,113,113,0.12); color:var(--err); padding:8px 12px; border-radius:8px; font-size:13px; margin-top:4px; }
+  .preview-wrap { display:none; margin-top:10px; border-radius:8px; overflow:hidden; max-height:150px; }
+  .preview-wrap img { width:100%; max-height:150px; object-fit:cover; }
+  .submit-btn { background:var(--accent); color:#0d0f1a; border:none; padding:12px 32px; border-radius:24px; font-size:15px; font-weight:700; cursor:pointer; transition:all .2s; width:100%; margin-top:6px; }
+  .submit-btn:hover { background:#81d4fa; }
+  .back { color:var(--accent); text-decoration:none; font-size:13px; display:inline-block; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="{% url 'chat:my_submissions' %}" class="back">← Мои заявки</a>
+  <h1>📦 Отправить 3D-модель</h1>
+
+  <form method="post" enctype="multipart/form-data" id="submitForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Название <span class="req">*</span></label>
+      <input type="text" name="title" value="{{ title|default:'' }}"
+             placeholder="Например: Двигатель V8" required maxlength="200">
+      {% if errors.title %}<div class="error-msg">{{ errors.title }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label>Описание</label>
+      <textarea name="description" placeholder="Расскажите о модели, её назначении…">{{ description|default:'' }}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>3D-файл <span class="req">*</span></label>
+      <div class="drop-zone" id="modelZone">
+        <input type="file" name="model_file" id="modelFile" required
+               accept=".glb,.gltf,.fbx,.stl,.obj,.ply,.dae,.3ds,.3mf,.wrl,.x3d,.amf,.off,.step,.stp,.iges,.igs,.blend,.abc,.usd,.usda,.usdc,.usdz,.xyz,.pcd,.pts">
+        <span class="dz-icon">📦</span>
+        <div>Перетащите файл или <strong>нажмите</strong></div>
+        <div class="dz-name" id="modelFileName">Файл не выбран</div>
+      </div>
+      <div class="hint">
+        🟢 GLB, GLTF, FBX, STL, OBJ, PLY, DAE и др.<br>
+        🟡 BLEND, STEP, IGES, ABC, USD — будут сконвертированы<br>
+        🔴 DWG, DXF, SKP — не поддерживаются
+      </div>
+      {% if errors.model_file %}<div class="error-msg">{{ errors.model_file }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label>Превью-изображение <span style="color:rgba(255,255,255,0.4)">(необязательно)</span></label>
+      <div class="drop-zone" id="imageZone">
+        <input type="file" name="thumbnail" id="imageFile" accept=".jpg,.jpeg,.png,.webp">
+        <span class="dz-icon">🖼️</span>
+        <div>Перетащите изображение или <strong>нажмите</strong></div>
+        <div class="dz-name" id="imageFileName">Не выбрано</div>
+      </div>
+      <div class="preview-wrap" id="previewWrap">
+        <img id="imagePreview" src="" alt="">
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">⬆️ Отправить на рассмотрение</button>
+  </form>
+</div>
+
+<script>
+document.getElementById('modelFile').addEventListener('change', function() {
+  if (this.files[0]) document.getElementById('modelFileName').textContent = this.files[0].name;
+});
+document.getElementById('imageFile').addEventListener('change', function() {
+  if (!this.files[0]) return;
+  document.getElementById('imageFileName').textContent = this.files[0].name;
+  var r = new FileReader();
+  r.onload = function(e) {
+    document.getElementById('imagePreview').src = e.target.result;
+    document.getElementById('previewWrap').style.display = 'block';
+  };
+  r.readAsDataURL(this.files[0]);
+});
+// Блокируем повторную отправку
+document.getElementById('submitForm').addEventListener('submit', function() {
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitBtn').textContent = '⏳ Отправка…';
+});
+</script>
+</body>
+</html>
+
+
+
+<!-- templates/chat/my_submissions.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Мои заявки</title>
+<style>
+  :root { --bg:#0d0f1a; --surface:#131627; --surface2:#1a1f35; --accent:#4fc3f7; --ok:#4ade80; --warn:#fbbf24; --err:#f87171; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:#e2e8f0; min-height:100vh; }
+  header { background:rgba(0,0,0,0.4); backdrop-filter:blur(14px); padding:16px 40px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(79,195,247,0.15); }
+  header h1 { color:var(--accent); font-size:20px; }
+  .new-btn { background:var(--accent); color:#0d0f1a; border:none; padding:9px 22px; border-radius:24px; font-weight:700; font-size:13px; cursor:pointer; text-decoration:none; }
+  .new-btn:hover { background:#81d4fa; }
+  .container { padding:32px 40px; max-width:900px; margin:0 auto; }
+  .empty { text-align:center; padding:80px 20px; color:rgba(255,255,255,0.3); }
+  .empty .icon { font-size:56px; margin-bottom:16px; }
+  .submissions { display:flex; flex-direction:column; gap:14px; }
+  .sub-card { background:var(--surface); border-radius:14px; border:1.5px solid transparent; display:flex; gap:16px; overflow:hidden; transition:all .2s; text-decoration:none; color:inherit; }
+  .sub-card:hover { border-color:rgba(79,195,247,0.3); transform:translateY(-2px); }
+  .sub-thumb { width:110px; flex-shrink:0; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; font-size:36px; }
+  .sub-thumb img { width:110px; height:100%; object-fit:cover; }
+  .sub-info { flex:1; padding:16px 16px 16px 0; display:flex; flex-direction:column; gap:4px; }
+  .sub-title { font-size:16px; font-weight:700; }
+  .sub-meta  { font-size:12px; color:rgba(255,255,255,0.4); }
+  .sub-status { margin-top:auto; display:flex; align-items:center; gap:10px; }
+  .badge { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+  .badge-pending  { background:rgba(251,191,36,0.15);  color:var(--warn); }
+  .badge-approved { background:rgba(74,222,128,0.15);  color:var(--ok); }
+  .badge-rejected { background:rgba(248,113,113,0.15); color:var(--err); }
+  .unread { background:var(--err); color:white; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+  .admin-comment { font-size:12px; color:rgba(255,255,255,0.5); font-style:italic; margin-top:4px; }
+  @media(max-width:600px) { header, .container { padding-left:20px; padding-right:20px; } .sub-thumb { width:80px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📋 Мои заявки</h1>
+  <a href="{% url 'chat:submit' %}" class="new-btn">+ Отправить модель</a>
+</header>
+
+<div class="container">
+  {% if not submissions %}
+    <div class="empty">
+      <div class="icon">📭</div>
+      <p>У вас ещё нет заявок.<br>Отправьте первую 3D-модель на рассмотрение!</p>
+    </div>
+  {% else %}
+    <div class="submissions">
+      {% for sub in submissions %}
+      <a href="{% url 'chat:room' sub.chat_room.pk %}" class="sub-card">
+        <div class="sub-thumb">
+          {% if sub.thumbnail %}
+            <img src="{{ sub.thumbnail.url }}" alt="">
+          {% else %}📦{% endif %}
+        </div>
+        <div class="sub-info">
+          <div class="sub-title">{{ sub.title }}</div>
+          <div class="sub-meta">{{ sub.model_extension }} · {{ sub.created_at|date:"d.m.Y H:i" }}</div>
+          {% if sub.admin_comment %}
+            <div class="admin-comment">💬 {{ sub.admin_comment|truncatechars:120 }}</div>
+          {% endif %}
+          <div class="sub-status">
+            <span class="badge badge-{{ sub.status }}">{{ sub.get_status_display }}</span>
+            {% if sub.unread > 0 %}
+              <span class="unread">{{ sub.unread }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>
+
+
+
+<!-- templates/chat/admin_inbox.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Входящие заявки</title>
+<style>
+  :root { --bg:#0d0f1a; --surface:#131627; --accent:#4fc3f7; --accent2:#a78bfa; --ok:#4ade80; --warn:#fbbf24; --err:#f87171; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:#e2e8f0; min-height:100vh; }
+  header { background:rgba(0,0,0,0.4); backdrop-filter:blur(14px); padding:16px 40px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(79,195,247,0.15); }
+  header h1 { color:var(--accent2); font-size:20px; }
+  .container { padding:28px 40px; max-width:1000px; margin:0 auto; }
+  .tabs { display:flex; gap:8px; margin-bottom:24px; }
+  .tab { padding:8px 20px; border-radius:24px; text-decoration:none; font-size:13px; font-weight:600; border:1px solid transparent; color:rgba(255,255,255,0.5); transition:all .2s; }
+  .tab:hover { color:white; }
+  .tab.active { border-color:var(--accent); color:var(--accent); background:rgba(79,195,247,0.1); }
+  .tab.tab-pending  { }
+  .tab.tab-approved { }
+  .tab.tab-rejected { }
+  .submissions { display:flex; flex-direction:column; gap:12px; }
+  .empty { text-align:center; padding:60px; color:rgba(255,255,255,0.3); }
+  .sub-card { background:var(--surface); border-radius:14px; border:1.5px solid transparent; display:flex; gap:16px; overflow:hidden; transition:all .2s; text-decoration:none; color:inherit; }
+  .sub-card:hover { border-color:rgba(79,195,247,0.3); transform:translateY(-2px); }
+  .sub-thumb { width:100px; flex-shrink:0; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; font-size:32px; }
+  .sub-thumb img { width:100px; height:100%; object-fit:cover; }
+  .sub-info { flex:1; padding:14px 14px 14px 0; display:flex; flex-direction:column; gap:4px; }
+  .sub-top { display:flex; align-items:center; gap:10px; }
+  .sub-title { font-size:15px; font-weight:700; }
+  .user-tag { font-size:12px; color:var(--accent2); background:rgba(167,139,250,0.1); padding:2px 10px; border-radius:12px; }
+  .sub-meta { font-size:12px; color:rgba(255,255,255,0.4); }
+  .sub-bottom { margin-top:auto; display:flex; align-items:center; gap:10px; }
+  .badge { padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; }
+  .badge-pending  { background:rgba(251,191,36,0.15);  color:var(--warn); }
+  .badge-approved { background:rgba(74,222,128,0.15);  color:var(--ok); }
+  .badge-rejected { background:rgba(248,113,113,0.15); color:var(--err); }
+  .unread { background:var(--err); color:white; border-radius:20px; padding:2px 10px; font-size:11px; font-weight:700; }
+  @media(max-width:600px) { header, .container { padding-left:20px; padding-right:20px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡 Панель администратора — Заявки</h1>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <a href="?status=pending"  class="tab {% if filter_status == 'pending'  %}active{% endif %}">⏳ На рассмотрении</a>
+    <a href="?status=approved" class="tab {% if filter_status == 'approved' %}active{% endif %}">✅ Принятые</a>
+    <a href="?status=rejected" class="tab {% if filter_status == 'rejected' %}active{% endif %}">❌ Отклонённые</a>
+  </div>
+
+  {% if not submissions %}
+    <div class="empty">Заявок нет</div>
+  {% else %}
+    <div class="submissions">
+      {% for sub in submissions %}
+      <a href="{% url 'chat:room' sub.chat_room.pk %}" class="sub-card">
+        <div class="sub-thumb">
+          {% if sub.thumbnail %}<img src="{{ sub.thumbnail.url }}" alt="">{% else %}📦{% endif %}
+        </div>
+        <div class="sub-info">
+          <div class="sub-top">
+            <div class="sub-title">{{ sub.title }}</div>
+            <span class="user-tag">👤 {{ sub.user.username }}</span>
+          </div>
+          <div class="sub-meta">{{ sub.model_extension }} · Подана {{ sub.created_at|date:"d.m.Y H:i" }}</div>
+          <div class="sub-bottom">
+            <span class="badge badge-{{ sub.status }}">{{ sub.get_status_display }}</span>
+            {% if sub.unread > 0 %}
+              <span class="unread">{{ sub.unread }} новых сообщений</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+</body>
+</html>
+
+
+<!-- website/chat/_message.html -->
+{% if msg.is_system %}
+  <div class="msg system">
+    <div class="msg-bubble">{{ msg.body }}</div>
+  </div>
+{% elif msg.sender == current_user %}
+  <div class="msg mine">
+    <div class="msg-bubble">{{ msg.body|linebreaksbr }}</div>
+    <div class="msg-meta"><span>{{ msg.created_at|date:"d.m.Y H:i" }}</span></div>
+  </div>
+{% else %}
+  <div class="msg theirs {% if msg.sender_is_admin %}admin{% endif %}">
+    <div class="msg-bubble">{{ msg.body|linebreaksbr }}</div>
+    <div class="msg-meta">
+      {% if msg.sender_is_admin %}<span class="admin-tag">Администратор</span>{% endif %}
+      <span>{{ msg.created_at|date:"d.m.Y H:i" }}</span>
+    </div>
+  </div>
+{% endif %}

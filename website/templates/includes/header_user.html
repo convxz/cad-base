@@ -1,0 +1,71 @@
+{% load static %}
+<div class="header-top">
+    <a href="/" class="logo-link" style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+        <div class="logo">
+            <div class="logo-icon">
+                <img src="{% static 'img/cubelogo.png' %}" alt="Logo" width="70px">
+            </div>
+            <div class="logo-text">CAD<span>Base</span></div>
+        </div>
+    </a>
+    <div class="header-actions">
+        <!-- Ссылка на профиль вместо телефона или рядом -->
+        <a href="{% url 'settings' %}" class="user-info" style="
+            display: flex;             /* Включаем гибкий контейнер */
+            flex-direction: row;       /* Выстраиваем элементы в ряд */
+            align-items: center;       /* Центрируем по вертикали */
+            text-decoration: none; 
+            color: #fff; 
+            gap: 12px;                /* Расстояние между фото и текстом */
+            text-align: left;          /* Текст всегда прижат влево */
+        ">
+            <div class="user-avatar" style="flex-shrink: 0;">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" style="
+                        width: 45px; 
+                        height: 45px; 
+                        border-radius: 50%; 
+                        object-fit: cover;
+                        display: block;
+                    ">
+                {% else %}
+                    <img src="{% static 'img/default_avatar.png' %}" alt="Default" style="
+                        width: 45px; 
+                        height: 45px; 
+                        border-radius: 50%;
+                        display: block;
+                    ">
+                {% endif %}
+            </div>
+
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <span style="font-weight: 500; font-size: 1rem; line-height: 1.2;">
+                    {{ user.get_full_name|default:user.username }}
+                </span>
+                <span style="font-size: 0.8em; opacity: 0.6; margin-top: 2px;">
+                    {% if user.is_staff %}Администратор{% else %}Пользователь{% endif %}
+                </span>
+            </div>
+        </a>
+        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="login-btn" style="background:none; border:none; color:inherit; cursor:pointer;">
+                <i class='bx bx-log-out'></i> Выход
+            </button>
+        </form>
+    </div>
+</div>
+{% if request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'settings' and "acatalog" not in request.path and "adocumentation" not in request.path and "anews" not in request.path %}
+<hr class="header-divider">
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Главная</a></li>
+            <li><a href="{% url 'catalog' %}" class="{% if request.resolver_match.url_name == 'catalog' %}active{% endif %}">Каталог</a></li>
+            <li><a href="{% url 'documentation' %}" class="{% if request.resolver_match.url_name == 'documentation' %}active{% endif %}">Документация</a></li>
+            <li><a href="{% url 'about_platform' %}" class="{% if request.resolver_match.url_name == 'about_platform' %}active{% endif %}">О платформе</a></li>
+            <li><a href="{% url 'news' %}" class="{% if request.resolver_match.url_name == 'news' %}active{% endif %}">Новости</a></li>
+            <li><a href="{% url 'contacts' %}" class="{% if request.resolver_match.url_name == 'contacts' %}active{% endif %}">Контакты</a></li>
+            <li><a href="{% url 'questions' %}" class="{% if request.resolver_match.url_name == 'questions' %}active{% endif %}">Поддержка</a></li>
+        </ul>
+    </nav>
+{% endif %}

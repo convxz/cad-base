@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="catalog-section">
+    <div class="container">
+        <nav class="breadcrumbs">
+            <a href="/">Главная</a> | <span>Каталог</span>
+        </nav>
+
+        <h1 class="catalog-main-title">Каталог изделий</h1>
+
+        <div class="catalog-layout">
+            <aside class="catalog-sidebar">
+                <h3 class="filter-title">Форматы</h3>
+                <form method="get">
+                    <div class="filter-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="STEP" {% if 'STEP' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>STEP</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="STL" {% if 'STL' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>STL</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="IGES" {% if 'IGES' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>IGES</span>
+                        </label>
+                    </div>
+                </form>
+            </aside>
+
+            <main class="catalog-main">
+                <form method="get" class="search-wrapper">
+                    <input type="text" name="q" class="search-bar-input" placeholder="Поиск..." value="{{ query|default:'' }}">
+                    <button type="submit" style="display:none"></button>
+                </form>
+
+                <div class="catalog-grid">
+                    {% for model in models %}
+                    <div class="catalog-card">
+                        <div class="card-main-info">
+                            <div class="card-image">
+                                {% if model.thumbnail %}
+                                    <img src="{{ model.thumbnail.url }}" alt="">
+                                {% else %}
+                                    <div class="no-image">Нет фото</div>
+                                {% endif %}
+                                <span class="badge-ext">{{ model.model_extension }}</span>
+                            </div>
+                            <div class="card-content">
+                                <a href="{% url 'model_detail' model.pk %}" style="text-decoration:none; color:inherit;">
+                                    <h4 class="model-name">{{ model.title }}</h4>
+                                    <p style="color:#666">{{ model.standard|default:"" }}</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            {% if model.file_stp %}
+                                <a href="{{ model.file_stp.url }}" class="download-link" download>Скачать STP</a>
+                            {% elif model.file_stl %}
+                                <a href="{{ model.file_stl.url }}" class="download-link" download>Скачать STL</a>
+                            {% else %}
+                                <span style="font-size: 12px; color: #999;">Файлы недоступны</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="padding: 40px; grid-column: span 2; text-align: center;">
+                        <p>В базе пока пусто. Добавь модели через админку.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                </main>
+        </div>
+    </div>
+</section>
+{% endblock %}
