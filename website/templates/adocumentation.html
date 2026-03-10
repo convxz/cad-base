@@ -2,21 +2,20 @@
 
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
+    <aside class="st-sidebar-bg">
         <nav class="st-left-menu">
-            <a href="#" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
-            
+            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
             {% if user.is_superuser %}
-                <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-                <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-                <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
+            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
             {% endif %}
-
             <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
             <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
-            <a href="#" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
         </nav>
     </aside>
+
 
     <main class="st-content-area">
         <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">Документация</h1>

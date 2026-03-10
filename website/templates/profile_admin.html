@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Основные контейнеры */
+    .adm-dashboard-wrapper {
+        display: flex;
+        min-height: 100vh;
+        background-color: #f4f7fa;
+    }
+
+    .adm-main-content {
+        flex-grow: 1;
+        padding: 40px;
+    }
+
+    /* Карточки */
+    .adm-stat-card {
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s ease;
+    }
+
+    .adm-stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .adm-card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 25px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 15px;
+    }
+
+    /* Типографика и ссылки */
+    .adm-header-title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .adm-header-subtitle {
+        color: #64748b;
+        font-size: 16px;
+        margin-top: 8px;
+    }
+
+    .adm-link-more {
+        color: #3e5281;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Таблицы и списки */
+    .adm-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .adm-table th {
+        text-align: left;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 600;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 12px;
+    }
+
+    .adm-table td {
+        padding: 16px 12px;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .adm-badge-blue {
+        background: #3e5281;
+        color: white;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 25px;
+        font-weight: 600;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(62, 82, 129, 0.2);
+    }
+
+    .adm-action-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .adm-avatar-img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #f1f5f9;
+    }
+</style>
+
+<div class="adm-dashboard-wrapper">
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
+
+    <div class="adm-main-content">
+        <div class="container-fluid">
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px;">
+                <div>
+                    <h1 class="adm-header-title">Личный кабинет Администратора</h1>
+                    <p class="adm-header-subtitle">Добро пожаловать!</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px;">
+                <div class="adm-stat-card">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                        <img src="{% static 'img/users-icon.svg' %}" style="width: 48px; height: 48px;">
+                        <div>
+                            <div style="font-size: 32px; font-weight: 800; color: #1e293b;">{{ users_count }}</div>
+                            <div style="color: #64748b; font-size: 14px; font-weight: 500;">Пользователи</div>
+                        </div>
+                    </div>
+                    <a href="#" class="adm-link-more">Все пользователи <span>›</span></a>
+                </div>
+
+                <div class="adm-stat-card">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                        <img src="{% static 'img/box-icon.svg' %}" style="width: 48px; height: 48px;">
+                        <div>
+                            <div style="font-size: 32px; font-weight: 800; color: #1e293b;">{{ models_count }}</div>
+                            <div style="color: #64748b; font-size: 14px; font-weight: 500;">Изделия</div>
+                        </div>
+                    </div>
+                    <a href="#" class="adm-link-more">Весь каталог <span>›</span></a>
+                </div>
+
+                <div class="adm-stat-card">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                        <img src="{% static 'img/docs-icon.svg' %}" style="width: 48px; height: 48px;">
+                        <div>
+                            <div style="font-size: 32px; font-weight: 800; color: #1e293b;">{{ docs_count }}</div>
+                            <div style="color: #64748b; font-size: 14px; font-weight: 500;">Документы</div>
+                        </div>
+                    </div>
+                    <a href="#" class="adm-link-more">Вся документация <span>›</span></a>
+                </div>
+
+                <div class="adm-stat-card">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+                        <img src="{% static 'img/news-icon.svg' %}" style="width: 48px; height: 48px;">
+                        <div>
+                            <div style="font-size: 32px; font-weight: 800; color: #1e293b;">{{ news_count }}</div>
+                            <div style="color: #64748b; font-size: 14px; font-weight: 500;">Новости</div>
+                        </div>
+                    </div>
+                    <a href="#" class="adm-link-more">Все новости <span>›</span></a>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 30px;">
+                
+                <div class="adm-stat-card">
+                    <h3 class="adm-card-title">Статистика</h3>
+                    
+                    <div class="adm-badge-blue">
+                        Топ-5 изделий по скачиванию
+                    </div>
+
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th>Изделия</th>
+                                <th style="text-align: right;">Скачивания</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model in top_models %}
+                            <tr>
+                                <td style="color: #334155; font-weight: 500;">{{ model.title }}</td>
+                                <td style="text-align: right; color: #1e293b; font-weight: 700;">{{ model.download_count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" style="padding: 20px; text-align: center; color: #94a3b8;">Нет данных</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="adm-stat-card">
+                    <h3 class="adm-card-title">Последние действия</h3>
+                    
+                    <div style="display: flex; flex-direction: column;">
+                        {% for log in recent_actions %}
+                        <div class="adm-action-item">
+                            <img src="{% if log.user.profile.avatar %}{{ log.user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
+                                 class="adm-avatar-img">
+                            <div style="flex-grow: 1;">
+                                <div style="font-size: 13px; color: #1e293b;">
+                                    <strong>{{ log.user.first_name|default:log.user.username }}</strong> 
+                                    <span style="color: #64748b;">скачал файл</span> 
+                                    <span style="color: #3e5281; font-weight: 600;">{{ log.model_item.title }}</span>
+                                </div>
+                                <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">{{ log.timestamp|timesince }} назад</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div style="text-align: center; padding: 40px; color: #94a3b8;">
+                            Действий пока нет
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -40,7 +40,7 @@ urlpatterns = [
 
 
     # ── Профиль ─────────────────────────────────────────────
-    path('settings/',  views.profile_view, name='settings'),
+    path('settings/',  views.settings_view, name='settings'),
     path('anews/', views.anews_view, name='anews'),
     path('anews/create/', views.create_news_view, name='create_news'),
     path('anews/edit/<int:pk>/', views.edit_news_view, name='edit_news'),
@@ -60,4 +60,10 @@ urlpatterns = [
     # Страница "Безопасность"
     path('security/', views.security_view, name='security'),
     path('security/change-password/', views.password_change_view, name='password_change'),
+
+    path('profile/', views.profile_view, name='profile'),
+    path('download/<int:pk>/<str:file_format>/', views.download_file, name='download_file'),
+
+    path('chat/', views.chat_list, name='chat'),
+    path('chat/<int:room_id>/', views.chat_room_view, name='chat_room'),
 ]

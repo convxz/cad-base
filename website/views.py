@@ -2,12 +2,13 @@
 
 import os
 from time import timezone
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.views.decorators.http import require_POST
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
@@ -15,11 +16,20 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.db.models import F
+from django.contrib.auth.models import User
+
 
 from website.models import ModelSubmission, NewsItem, Profile, Document
 from .forms import DocumentForm, UserUpdateForm, ProfileUpdateForm, ModelSubmissionForm
 from .forms import SignUpForm
 
+from django.db.models import Q
+from django.core.paginator import Paginator
+
+from django.shortcuts import render
+from django.db.models import Q
+from .models import ChatRoom, DownloadLog, ModelSubmission, ChatMessage
 
 # Декоратор для проверки прав суперпользователя (можно использовать для админки и т.п.)
 def superuser_required(user):
@@ -41,6 +51,7 @@ def news_list_view(request):
 
 def news_detail_view(request, pk):
     news_item = get_object_or_404(NewsItem, pk=pk)
+    NewsItem.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
     return render(request, 'news_detail.html', {'item': news_item})
 
 def documentation(request):
@@ -94,45 +105,57 @@ def questions(request):
 # Каталог одобренных моделей
 # ══════════════════════════════════════════════════════════════
 
-from django.db.models import Q
-from django.core.paginator import Paginator
 
-from django.shortcuts import render
-from django.db.models import Q
-from .models import ModelSubmission
 
 
 def catalog(request):
-    # Убрали фильтр по статусу APPROVED, чтобы увидеть всё, что есть в БД
+    # Берем все модели, так как теперь их добавляет только админ
     models_queryset = ModelSubmission.objects.all()
 
-    # Поиск
+    # 1. Поиск по названию или стандарту
     query = request.GET.get('q')
     if query:
         models_queryset = models_queryset.filter(
             Q(title__icontains=query) | Q(standard__icontains=query)
         )
 
-    # Фильтр по форматам
+    # 2. Фильтр по форматам (проверяем, что поле с файлом не пустое)
     selected_formats = request.GET.getlist('formats')
-    if 'STEP' in selected_formats:
-        models_queryset = models_queryset.filter(file_stp__icontains='') # Проверка на наличие файла
-    if 'STL' in selected_formats:
-        models_queryset = models_queryset.filter(file_stl__icontains='')
-    if 'IGES' in selected_formats:
-        models_queryset = models_queryset.filter(file_igs__icontains='')
+    if selected_formats:
+        format_queries = Q()
+        if 'STEP' in selected_formats:
+            # Проверяем, что поле file_stp не пустое и не None
+            format_queries |= Q(file_stp__isnull=False) & ~Q(file_stp='')
+        if 'STL' in selected_formats:
+            format_queries |= Q(file_stl__isnull=False) & ~Q(file_stl='')
+        if 'IGES' in selected_formats:
+            format_queries |= Q(file_igs__isnull=False) & ~Q(file_igs='')
+        
+        models_queryset = models_queryset.filter(format_queries)
 
     context = {
-        'models': models_queryset,
+        'models': models_queryset, # В шаблоне используй {% for item in models %}
         'query': query,
         'selected_formats': selected_formats,
     }
     return render(request, 'catalog.html', context)
 
+
 def model_detail(request, pk):
-    # Деталка (чтобы URL не падал с ошибкой)
-    model_item = get_object_or_404(ModelSubmission, pk=pk)
-    return render(request, 'model_detail.html', {'model': model_item})
+    # БЫЛО (с ошибкой):
+    # submission = get_object_or_404(ModelSubmission, pk=pk, status=ModelSubmission.STATUS_APPROVED)
+    
+    # СТАЛО (правильно):
+    submission = get_object_or_404(ModelSubmission, pk=pk)
+    
+    # Логика для "Похожих моделей" (если используешь категорию)
+    related = ModelSubmission.objects.filter(category=submission.category).exclude(pk=pk)[:4]
+
+    return render(request, 'model_detail.html', {
+        'submission': submission,
+        'related': related
+    })
+
 
 # ══════════════════════════════════════════════════════════════
 # Авторизация / регистрация
@@ -162,10 +185,9 @@ def login_view(request):
             login(request, user)
             return redirect('settings')
         else:
-            messages.error(request, "Неверный Email или пароль")
-            return render(request, 'login.html')
+            # Передаем ошибку напрямую в контекст шаблона
+            return render(request, 'login.html', {'error': "Неверный Email или пароль"})
     return render(request, 'login.html')
-
 
 def logout_user(request):
     logout(request)
@@ -173,7 +195,7 @@ def logout_user(request):
 
 
 @login_required
-def profile_view(request):
+def settings_view(request):
     is_edit = request.GET.get('edit') == '1'
     
     if request.method == 'POST':
@@ -254,41 +276,6 @@ def delete_news_view(request, pk):
     return redirect('anews')
 
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-def acatalog_view(request):
-    query = request.GET.get('q')
-    
-    # Берем все модели, КРОМЕ отклоненных
-    submissions = ModelSubmission.objects.exclude(status=ModelSubmission.STATUS_REJECTED)
-    
-    # Если есть поисковый запрос, фильтруем отфильтрованный список
-    if query:
-        submissions = submissions.filter(
-            Q(title__icontains=query) | 
-            Q(description__icontains=query)
-        )
-        
-    return render(request, 'acatalog.html', {
-        'submissions': submissions,
-        'total_count': submissions.count()
-    })
-
-
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-def acatalog_view(request):
-    query = request.GET.get('q')
-    # Исключаем отклоненные
-    submissions = ModelSubmission.objects.exclude(status=ModelSubmission.STATUS_REJECTED)
-    
-    if query:
-        submissions = submissions.filter(Q(title__icontains=query))
-        
-    return render(request, 'acatalog.html', {
-        'submissions': submissions,
-        'total_count': submissions.count()
-    })
 
 
 @login_required
@@ -313,6 +300,21 @@ def model_edit_view(request, pk=None):
         'edit_mode': pk is not None,
         'instance': instance
     })
+
+
+def acatalog_view(request):
+    # Просто получаем все модели, так как статусов больше нет
+    query = request.GET.get('q', '')
+    if query:
+        submissions = ModelSubmission.objects.filter(title__icontains=query)
+    else:
+        submissions = ModelSubmission.objects.all()
+
+    context = {
+        'submissions': submissions,
+        'total_count': submissions.count(),
+    }
+    return render(request, 'acatalog.html', context)
 
 
 @login_required
@@ -355,12 +357,158 @@ def password_change_view(request):
         
     return render(request, 'password_change_form.html', {'form': form})
 
+@login_required
+def profile_view(request):
+    if request.user.is_superuser:
+        # Логика для админа
+        return render(request, 'profile_admin.html')
+    else:
+        # 1. Получаем избранные модели
+        favorite_models = request.user.profile.favorite_models.all()
+        
+        # 2. Считаем количество УНИКАЛЬНЫХ скачанных изделий пользователем
+        # .values('model_item') сгруппирует логи по моделям, .distinct() уберет повторы
+        downloaded_count = DownloadLog.objects.filter(user=request.user).count()
+        # downloaded_count = DownloadLog.objects.filter(user=request.user).values('model_item').distinct().count()
+        
+        context = {
+            'favorite_models': favorite_models,
+            'fav_count': favorite_models.count(),
+            'downloaded_count': downloaded_count,
+            # last_login уже есть в объекте user по умолчанию
+        }
+        return render(request, 'profile_user.html', context)
 
-def model_detail(request, pk):
-    """Отображение страницы конкретной модели"""
-    model_item = get_object_or_404(ModelSubmission, pk=pk, status=ModelSubmission.STATUS_APPROVED)
+
+def download_file(request, pk, file_format):
+    model_item = get_object_or_404(ModelSubmission, pk=pk)
     
+    # 1. Получаем IP адрес (для истории)
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    # 2. Создаем запись в логах
+    DownloadLog.objects.create(
+        model_item=model_item,
+        user=request.user if request.user.is_authenticated else None,
+        file_format=file_format.upper(),
+        ip_address=ip
+    )
+
+    # 3. Увеличиваем общий счетчик в основной модели
+    ModelSubmission.objects.filter(pk=pk).update(download_count=F('download_count') + 1)
+
+    # 4. Редирект на сам файл
+    file_field = getattr(model_item, f'file_{file_format.lower()}', None)
+    if file_field:
+        return redirect(file_field.url)
+    
+    return redirect('model_detail', pk=pk)
+
+
+@login_required
+@require_POST
+def toggle_favorite(request, model_id):
+    model_item = get_object_or_404(ModelSubmission, id=model_id)
+    profile = request.user.profile
+    
+    if model_item in profile.favorite_models.all():
+        profile.favorite_models.remove(model_item)
+        action = 'removed'
+    else:
+        profile.favorite_models.add(model_item)
+        action = 'added'
+        
+    return JsonResponse({'status': 'ok', 'action': action})
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def admin_profile_view(request):
+    # Собираем реальные цифры из базы
     context = {
-        'model': model_item,
+        'users_count': User.objects.count(),
+        'models_count': ModelSubmission.objects.count(),
+        'news_count': NewsItem.objects.count(),
+        'docs_count': 6,  # Если будет модель документов, замени на .count()
+        
+        # Топ изделий по скачиванию
+        'top_models': ModelSubmission.objects.order_by('-download_count')[:5],
+        
+        # Последние действия (скачивания)
+        'recent_actions': DownloadLog.objects.select_related('user', 'model_item').order_by('-timestamp')[:5]
     }
-    return render(request, 'model_detail.html', context)
+    return render(request, 'profile_admin.html', context)
+
+
+
+
+@login_required
+def chat_stub_view(request):
+    # Если это админ, можно передать другой заголовок
+    is_admin = request.user.is_superuser
+    return render(request, 'chat_stub.html', {'is_admin': is_admin})
+
+
+@login_required
+def chat_list(request):
+    if request.user.is_staff:
+        # 1. Проверяем, есть ли непрочитанные сообщения от клиентов для индикатора в меню
+        has_unread = ChatMessage.objects.filter(is_read=False).exclude(sender__is_staff=True).exists()
+
+        # 2. Получаем список всех комнат с последним временем сообщения
+        rooms = ChatRoom.objects.select_related('user', 'user__profile').annotate(
+            last_msg_time=Max('messages__created_at')
+        ).order_by('-last_msg_time')
+
+        return render(request, 'chat/chat_list.html', {
+            'rooms': rooms,
+            'has_unread': has_unread  # Передаем статус непрочитанных
+        })
+
+    # ДЛЯ КЛИЕНТА: Перенаправляем в его единственный чат
+    room, created = ChatRoom.objects.get_or_create(user=request.user)
+    return redirect('chat_room', room_id=room.id)
+
+
+@login_required
+def chat_room_view(request, room_id):
+    room = get_object_or_404(ChatRoom, id=room_id)
+    
+    # Защита: клиент может зайти только в СВОЙ чат. Админ может в любой.
+    if not request.user.is_staff and room.user != request.user:
+        return redirect('home')
+
+    # ПОМЕТКА ПРОЧИТАННЫМ:
+    # Когда кто-то открывает чат, все сообщения в этой комнате, 
+    # отправленные НЕ этим пользователем, становятся прочитанными.
+    room.messages.exclude(sender=request.user).filter(is_read=False).update(is_read=True)
+
+    if request.method == 'POST':
+        body = request.POST.get('message', '').strip()
+        file = request.FILES.get('file') # Получаем файл из запроса
+
+        # Создаем сообщение, если есть текст ИЛИ файл
+        if body or file:
+            ChatMessage.objects.create(
+                room=room,
+                sender=request.user,
+                body=body,
+                file=file
+            )
+            
+            # Если это AJAX запрос (от Drag-and-Drop или JS), возвращаем пустой ответ или статус
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return redirect('chat_room', room_id=room.id)
+            
+            return redirect('chat_room', room_id=room.id)
+
+    # Оптимизированная загрузка сообщений
+    chat_messages = room.messages.select_related('sender', 'sender__profile').all().order_by('created_at')
+    
+    return render(request, 'chat/chat_room.html', {
+        'room': room,
+        'chat_messages': chat_messages
+    })

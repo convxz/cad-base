@@ -16,11 +16,11 @@
 </head>
  
     <header class="site-header 
-    {% if request.resolver_match.url_name == 'home' %}
+    {% if request.resolver_match.url_name == 'home' %} 
         header-home
-    {% elif request.resolver_match.url_name == 'profile' %}
-        site-header-lk
-    {% endif %}">
+    {% endif %}"> 
+    <!--     { elif request.resolver_match.url_name == 'profile' }
+        site-header-lk -->
         <div class="container">
             {% if user.is_authenticated %}
                 {% include 'includes/header_user.html' %}

@@ -2,21 +2,20 @@
 
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
+    <aside class="st-sidebar-bg">
         <nav class="st-left-menu">
-            <a href="#" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
-            
+            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
             {% if user.is_superuser %}
-                <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-                <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-                <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
+            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
             {% endif %}
-
             <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
             <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
-            <a href="#" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
         </nav>
     </aside>
+
 
     <main class="st-content-area">
         <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">Каталог изделий</h1>
@@ -34,11 +33,10 @@
 
             <div style="padding: 15px 30px;">
                 <form method="get">
-                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Поиск по названию или описанию" 
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Поиск по названию..." 
                            style="width: 100%; padding: 12px 15px; border: 1px solid #eee; border-radius: 8px; outline: none;">
                 </form>
             </div>
-
 
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
@@ -56,27 +54,31 @@
                             <a href="{% url 'model_detail' item.pk %}" style="text-decoration: none; color: #3e5281; font-weight: 600;">
                                 {{ item.title }}
                             </a>
-                            <div style="color: #999; font-size: 11px;">от {{ item.user.username }}</div>
+                            <div style="color: #999; font-size: 11px;">{{ item.standard|default:"" }}</div>
                         </td>
                         <td style="padding: 12px;">
-                            <span class="badge-ext" style="position: static; background: #eee; color: #666;">
+                            <span style="background: #eee; color: #666; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
                                 {{ item.model_extension }}
                             </span>
                         </td>
-                        <td style="padding: 12px; text-align: center;">{{ item.created_at|date:"d.m.Y" }}</td>
+                        <td style="padding: 12px; text-align: center; color: #666;">{{ item.created_at|date:"d.m.Y" }}</td>
                         <td style="padding: 12px 30px; text-align: right;">
                             <div style="display: inline-flex; gap: 6px;">
-                                <a href="{% url 'edit_model' item.pk %}" class="st-btn-blue" style="padding: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                                    <span style="font-size: 14px;">✎</span>
+                                <a href="{% url 'edit_model' item.pk %}" style="background: #3e5281; color: white; text-decoration: none; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                    ✎
                                 </a>
                                 <form action="{% url 'delete_model' item.pk %}" method="post" onsubmit="return confirm('Удалить модель?')">
                                     {% csrf_token %}
                                     <button type="submit" style="background: #e74c3c; color: white; border-radius: 4px; width: 32px; height: 32px; border: none; cursor: pointer;">
-                                        <span style="font-size: 14px;">🗑</span>
+                                        🗑
                                     </button>
                                 </form>
                             </div>
                         </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 40px; text-align: center; color: #999;">В каталоге пока нет изделий.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

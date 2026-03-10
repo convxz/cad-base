@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="st-main-wrapper" style="display: flex; min-height: 100vh; background: #e9eef3;">
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+                <a href="{% url 'acatalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+                <a href="{% url 'adocumentation' %}">ДОКУМЕНТАЦИЯ</a>
+                <a href="{% url 'anews' %}">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}" class="st-active">
+                ЧАТ С ВОПРОСАМИ
+                {% if has_unread %}
+                    <span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; margin-left: 5px; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);"></span>
+                {% endif %}
+            </a>
+        </nav>
+    </aside>
+
+    <div style="flex-grow: 1; padding: 40px; overflow-y: auto;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h2 style="font-weight: 700; color: #1e293b; margin-bottom: 30px;">Все диалоги</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for room in rooms %}
+                    <a href="{% url 'chat_room' room.id %}" style="text-decoration: none; color: inherit;">
+                        <div style="background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.2s;"
+                             onmouseover="this.style.background='#fafafa'; this.style.transform='translateY(-2px)'" 
+                             onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
+                            
+                            <div style="flex-shrink: 0;">
+                                {% if room.user.profile.avatar %}
+                                    <img src="{{ room.user.profile.avatar.url }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f1f5f9;">
+                                {% else %}
+                                    <img src="{% static 'img/default.png' %}" style="width: 60px; height: 60px; border-radius: 50%; background: #e2e8f0;">
+                                {% endif %}
+                            </div>
+
+                            <div style="flex-grow: 1; min-width: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <h4 style="margin: 0; font-weight: 700; color: #1e293b;">
+                                        {{ room.user.get_full_name|default:room.user.username }}
+                                    </h4>
+                                    {% with last_msg=room.messages.last %}
+                                        {% if last_msg %}
+                                            <span style="font-size: 12px; color: #94a3b8;">{{ last_msg.created_at|date:"d.m H:i" }}</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </div>
+
+                                {% with last_msg=room.messages.last %}
+                                    <p style="margin: 0; color: #64748b; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        {% if last_msg %}
+                                            {% if last_msg.sender == request.user %}<b>Вы:</b> {% endif %}
+                                            {{ last_msg.body|truncatechars:80 }}
+                                            {% if last_msg.file %} [Файл] {% endif %}
+                                        {% else %}
+                                            <i>Сообщений пока нет</i>
+                                        {% endif %}
+                                    </p>
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <p style="text-align: center; color: #94a3b8; padding: 50px;">Диалогов пока нет.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
