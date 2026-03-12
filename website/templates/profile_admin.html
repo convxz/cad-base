@@ -110,19 +110,46 @@
 </style>
 
 <div class="adm-dashboard-wrapper">
-    <aside class="st-sidebar-bg">
-        <nav class="st-left-menu">
-            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
-            {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
-            {% endif %}
-            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
-            <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
-            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
-        </nav>
-    </aside>
+<aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+        <a href="{% url 'profile' %}" 
+           class="{% if 'profile' in request.path %}st-active{% endif %}">
+           ПРОФИЛЬ
+        </a>
+
+        {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" 
+               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               КАТАЛОГ ИЗДЕЛИЙ
+            </a>
+
+            <a href="{% url 'adocumentation' %}" 
+               class="{% if 'documentation' in request.path %}st-active{% endif %}">
+               ДОКУМЕНТАЦИЯ
+            </a>
+
+            <a href="{% url 'anews' %}" 
+               class="{% if 'news' in request.path %}st-active{% endif %}">
+               НОВОСТИ
+            </a>
+        {% endif %}
+
+        <a href="{% url 'settings' %}" 
+           class="{% if 'settings' in request.path %}st-active{% endif %}">
+           НАСТРОЙКИ
+        </a>
+
+        <a href="{% url 'security' %}" 
+           class="{% if 'security' in request.path %}st-active{% endif %}">
+           БЕЗОПАСНОСТЬ
+        </a>
+
+        <a href="{% url 'chat' %}" 
+           class="{% if 'chat' in request.path %}st-active{% endif %}">
+           ЧАТ С ВОПРОСАМИ
+        </a>
+    </nav>
+</aside>
 
     <div class="adm-main-content">
         <div class="container-fluid">
@@ -143,7 +170,7 @@
                             <div style="color: #64748b; font-size: 14px; font-weight: 500;">Пользователи</div>
                         </div>
                     </div>
-                    <a href="#" class="adm-link-more">Все пользователи <span>›</span></a>
+                    <a href="{% url 'admin:auth_user_changelist' %}" class="adm-link-more">Все пользователи <span>›</span></a>
                 </div>
 
                 <div class="adm-stat-card">
@@ -154,7 +181,7 @@
                             <div style="color: #64748b; font-size: 14px; font-weight: 500;">Изделия</div>
                         </div>
                     </div>
-                    <a href="#" class="adm-link-more">Весь каталог <span>›</span></a>
+                    <a href="{% url 'catalog' %}" class="adm-link-more">Весь каталог <span>›</span></a>
                 </div>
 
                 <div class="adm-stat-card">
@@ -165,7 +192,7 @@
                             <div style="color: #64748b; font-size: 14px; font-weight: 500;">Документы</div>
                         </div>
                     </div>
-                    <a href="#" class="adm-link-more">Вся документация <span>›</span></a>
+                    <a href="{% url 'documentation' %}" class="adm-link-more">Вся документация <span>›</span></a>
                 </div>
 
                 <div class="adm-stat-card">
@@ -176,7 +203,7 @@
                             <div style="color: #64748b; font-size: 14px; font-weight: 500;">Новости</div>
                         </div>
                     </div>
-                    <a href="#" class="adm-link-more">Все новости <span>›</span></a>
+                    <a href="{% url 'news' %}" class="adm-link-more">Все новости <span>›</span></a>
                 </div>
             </div>
 

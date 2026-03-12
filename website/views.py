@@ -51,7 +51,10 @@ def news_list_view(request):
 
 def news_detail_view(request, pk):
     news_item = get_object_or_404(NewsItem, pk=pk)
-    NewsItem.objects.filter(pk=pk).update(views_count=F('views_count') + 1)
+
+    news_item.views_count += 1
+    news_item.save()
+    
     return render(request, 'news_detail.html', {'item': news_item})
 
 def documentation(request):
@@ -360,22 +363,39 @@ def password_change_view(request):
 @login_required
 def profile_view(request):
     if request.user.is_superuser:
-        # Логика для админа
-        return render(request, 'profile_admin.html')
+        # --- ЛОГИКА ДЛЯ АДМИНА ---
+        # Собираем статистику для карточек
+        users_count = User.objects.count()
+        models_count = ModelSubmission.objects.count()
+        docs_count = Document.objects.count()
+        news_count = NewsItem.objects.count()
+        
+        # Топ-5 изделий по скачиванию (поле download_count добавлено в миграции 0009)
+        top_models = ModelSubmission.objects.order_by('-download_count')[:5]
+        
+        # Последние действия (скачивания)
+        recent_actions = DownloadLog.objects.select_related('user', 'model_item').order_by('-timestamp')[:5]
+        
+        context = {
+            'users_count': users_count,
+            'models_count': models_count,
+            'docs_count': docs_count,
+            'news_count': news_count,
+            'top_models': top_models,
+            'recent_actions': recent_actions,
+        }
+        return render(request, 'profile_admin.html', context)
     else:
-        # 1. Получаем избранные модели
+        # --- ЛОГИКА ДЛЯ ОБЫЧНОГО ПОЛЬЗОВАТЕЛЯ ---
         favorite_models = request.user.profile.favorite_models.all()
         
-        # 2. Считаем количество УНИКАЛЬНЫХ скачанных изделий пользователем
-        # .values('model_item') сгруппирует логи по моделям, .distinct() уберет повторы
+        # Считаем количество скачиваний текущего пользователя
         downloaded_count = DownloadLog.objects.filter(user=request.user).count()
-        # downloaded_count = DownloadLog.objects.filter(user=request.user).values('model_item').distinct().count()
         
         context = {
             'favorite_models': favorite_models,
             'fav_count': favorite_models.count(),
             'downloaded_count': downloaded_count,
-            # last_login уже есть в объекте user по умолчанию
         }
         return render(request, 'profile_user.html', context)
 
@@ -511,4 +531,22 @@ def chat_room_view(request, room_id):
     return render(request, 'chat/chat_room.html', {
         'room': room,
         'chat_messages': chat_messages
+    })
+
+@login_required
+def toggle_favorite(request, pk):
+    model_obj = get_object_or_404(ModelSubmission, pk=pk)
+    profile = request.user.profile
+    
+    if model_obj in profile.favorite_models.all():
+        profile.favorite_models.remove(model_obj)
+        is_favorite = False
+    else:
+        profile.favorite_models.add(model_obj)
+        is_favorite = True
+        
+    return JsonResponse({
+        'status': 'ok',
+        'is_favorite': is_favorite,
+        'count': profile.favorite_models.count()
     })

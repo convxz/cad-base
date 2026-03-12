@@ -34,6 +34,8 @@ CSRF_TRUSTED_ORIGINS = [
 
 # На всякий случай проверь, что этот домен есть и в ALLOWED_HOSTS
 ALLOWED_HOSTS = [
+    'bruce-council-retailers-arrange.trycloudflare.com',
+    '8fa86b17d6ccd7.lhr.life',
     'unsatirically-unfailed-alec.ngrok-free.dev',
     'localhost',
     '127.0.0.1',

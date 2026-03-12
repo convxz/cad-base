@@ -1,19 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-    <aside class="st-sidebar-bg">
-        <nav class="st-left-menu">
-            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
-            {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
-            {% endif %}
-            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
-            <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
-            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
-        </nav>
-    </aside>
+<aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+        <a href="{% url 'profile' %}" 
+           class="{% if 'profile' in request.path %}st-active{% endif %}">
+           ПРОФИЛЬ
+        </a>
+
+        {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" 
+               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               КАТАЛОГ ИЗДЕЛИЙ
+            </a>
+
+            <a href="{% url 'adocumentation' %}" 
+               class="{% if 'documentation' in request.path %}st-active{% endif %}">
+               ДОКУМЕНТАЦИЯ
+            </a>
+
+            <a href="{% url 'anews' %}" 
+               class="{% if 'news' in request.path %}st-active{% endif %}">
+               НОВОСТИ
+            </a>
+        {% endif %}
+
+        <a href="{% url 'settings' %}" 
+           class="{% if 'settings' in request.path %}st-active{% endif %}">
+           НАСТРОЙКИ
+        </a>
+
+        <a href="{% url 'security' %}" 
+           class="{% if 'security' in request.path %}st-active{% endif %}">
+           БЕЗОПАСНОСТЬ
+        </a>
+
+        <a href="{% url 'chat' %}" 
+           class="{% if 'chat' in request.path %}st-active{% endif %}">
+           ЧАТ С ВОПРОСАМИ
+        </a>
+    </nav>
+</aside>
 
 
 
@@ -49,17 +76,24 @@
                 <tbody>
                     {% for item in news_items %}
                     <tr style="border-bottom: 1px solid #f9f9f9; transition: background 0.2s;" onmouseover="this.style.background='#fcfcfc'" onmouseout="this.style.background='transparent'">
-                        <td style="padding: 12px 30px;">
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <div style="width: 40px; height: 30px; background: #eee; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
-                                    {% if item.image %}
-                                        <img src="{{ item.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                    {% endif %}
-                                </div>
-                                <span style="font-size: 14px; color: #333; font-weight: 500;">{{ item.title }}</span>
+                    <td style="padding: 12px 30px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 30px; background: #eee; border-radius: 4px; overflow: hidden; flex-shrink: 0;">
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
                             </div>
+                            <a href="{% url 'news_detail' item.pk %}" target="_blank" 
+                            style="font-size: 14px; color: #3e5281; font-weight: 500; text-decoration: none; transition: 0.2s;"
+                            onmouseover="this.style.textDecoration='underline'" 
+                            onmouseout="this.style.textDecoration='none'">
+                                {{ item.title }}
+                            </a>
+                        </div>
+                    </td>
+                        <td style="padding: 12px; color: #666; font-size: 14px; text-align: center;">
+                            {{ item.views_count }}
                         </td>
-                        <td style="padding: 12px; color: #666; font-size: 14px; text-align: center;">0</td>
                         <td style="padding: 12px 30px; text-align: right;">
                             <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
                                 <a href="{% url 'edit_news' item.pk %}" title="Редактировать"

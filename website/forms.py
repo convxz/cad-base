@@ -81,7 +81,8 @@ class ModelSubmissionForm(forms.ModelForm):
             'standard', 
             'file_stp', 
             'file_igs', 
-            'file_stl'
+            'file_stl',
+            'thumbnail',
         ]
         # Твои виджеты (оставляем как есть для текстовых полей)
         widgets = {

@@ -103,17 +103,46 @@
 </style>
 
 <div class="st-main-wrapper">
-    <aside class="st-sidebar-bg" style="width: 260px; flex-shrink: 0;">
-        <nav class="st-left-menu">
-            <a href="{% url 'profile' %}">ПРОФИЛЬ</a>
-            <a href="{% url 'acatalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-            <a href="{% url 'adocumentation' %}">ДОКУМЕНТАЦИЯ</a>
-            <a href="{% url 'anews' %}">НОВОСТИ</a>
-            <a href="{% url 'settings' %}">НАСТРОЙКИ</a>
-            <a href="{% url 'security' %}">БЕЗОПАСНОСТЬ</a>
-            <a href="{% url 'chat' %}" class="st-active">ЧАТ С ВОПРОСАМИ</a>
-        </nav>
-    </aside>
+<aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+        <a href="{% url 'profile' %}" 
+           class="{% if 'profile' in request.path %}st-active{% endif %}">
+           ПРОФИЛЬ
+        </a>
+
+        {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" 
+               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               КАТАЛОГ ИЗДЕЛИЙ
+            </a>
+
+            <a href="{% url 'adocumentation' %}" 
+               class="{% if 'documentation' in request.path %}st-active{% endif %}">
+               ДОКУМЕНТАЦИЯ
+            </a>
+
+            <a href="{% url 'anews' %}" 
+               class="{% if 'news' in request.path %}st-active{% endif %}">
+               НОВОСТИ
+            </a>
+        {% endif %}
+
+        <a href="{% url 'settings' %}" 
+           class="{% if 'settings' in request.path %}st-active{% endif %}">
+           НАСТРОЙКИ
+        </a>
+
+        <a href="{% url 'security' %}" 
+           class="{% if 'security' in request.path %}st-active{% endif %}">
+           БЕЗОПАСНОСТЬ
+        </a>
+
+        <a href="{% url 'chat' %}" 
+           class="{% if 'chat' in request.path %}st-active{% endif %}">
+           ЧАТ С ВОПРОСАМИ
+        </a>
+    </nav>
+</aside>
 
     <main class="st-chat-column">
         <header class="st-chat-header">
@@ -167,32 +196,74 @@
     const chatBox = document.getElementById('chat-box');
     const chatForm = document.getElementById('chat-form');
     const fileInput = document.getElementById('file-input');
+    const chatInput = document.getElementById('chat-input');
 
-    // Авто-скролл вниз
-    chatBox.scrollTop = chatBox.scrollHeight;
+    // Функция прокрутки вниз
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
+    // Первоначальный скролл
+    scrollToBottom();
+
+    // Отправка данных без перезагрузки всей страницы
     function sendData() {
         const formData = new FormData(chatForm);
+        const text = chatInput.value;
+        
+        // Очищаем поле сразу для "отклика" интерфейса
+        chatInput.value = ''; 
+        
         fetch(window.location.href, {
             method: 'POST',
             body: formData,
             headers: {'X-Requested-With': 'XMLHttpRequest'}
-        }).then(() => {
-            chatForm.reset();
-            location.reload(); // Перезагружаем для обновления
+        }).then(response => {
+            if (response.ok) {
+                updateChat(); // Сразу обновляем, чтобы увидеть свое сообщение
+            }
         });
     }
 
+    // ФУНКЦИЯ ОБНОВЛЕНИЯ ЧАТА
+    function updateChat() {
+        // Запрашиваем ту же страницу, но просим только содержимое чата
+        fetch(window.location.href, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newMessages = doc.getElementById('chat-box').innerHTML;
+            
+            // Если контент изменился, обновляем
+            if (chatBox.innerHTML !== newMessages) {
+                const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
+                chatBox.innerHTML = newMessages;
+                
+                // Скроллим вниз только если юзер и так был внизу
+                if (isAtBottom) {
+                    scrollToBottom();
+                }
+            }
+        });
+    }
+
+    // ЗАПУСК АВТООБНОВЛЕНИЯ (каждые 2 секунды)
+    // 0.5 слишком часто для обычного сервера, 2сек — "золотая середина"
+    setInterval(updateChat, 2000);
+
     chatForm.onsubmit = (e) => {
         e.preventDefault();
-        if (document.getElementById('chat-input').value.trim() !== "" || fileInput.files.length > 0) {
+        if (chatInput.value.trim() !== "" || fileInput.files.length > 0) {
             sendData();
         }
     };
 
     fileInput.onchange = () => { if(fileInput.files.length > 0) sendData(); };
 
-    // Drag-and-Drop
+    // Drag-and-Drop (оставляем твой код)
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
         chatBox.addEventListener(event, e => { e.preventDefault(); e.stopPropagation(); });
     });

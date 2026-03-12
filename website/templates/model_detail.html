@@ -2,6 +2,12 @@
 {% load static %}
 
 {% block content %}
+<style>
+    /* Добавляем стили состояний для кнопки, чтобы не ломать кавычки в инлайне */
+    .fav-active { background: #3e5281 !important; color: white !important; }
+    .fav-active svg { fill: white !important; }
+</style>
+
 <div class="catalog-section">
     <div class="container">
         <nav class="breadcrumbs">
@@ -58,7 +64,8 @@
                         {% if submission.file_igs %}
                             <a href="{% url 'download_file' submission.pk 'igs' %}" class="download-link" style="justify-content: center; background: #7a8bb3;">Скачать IGES</a>
                         {% endif %}
-                            <button type="button" style="
+                            
+                            <button type="button" id="fav-btn" data-id="{{ submission.pk }}" style="
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
@@ -73,11 +80,15 @@
                                 cursor: pointer;
                                 transition: 0.3s;
                                 margin-top: 5px;
-                            " onmouseover="this.style.background='#f0f2f5'" onmouseout="this.style.background='white'">
+                            " class="{% if submission in user.profile.favorite_models.all %}fav-active{% endif %}" 
+                               onmouseover="if(!this.classList.contains('fav-active')) this.style.background='#f0f2f5'" 
+                               onmouseout="if(!this.classList.contains('fav-active')) this.style.background='white'">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
-                                Сохранить в избранное
+                                <span id="fav-text">
+                                    {% if submission in user.profile.favorite_models.all %}В избранном{% else %}Сохранить в избранное{% endif %}
+                                </span>
                             </button>
                         </div>
 
@@ -105,7 +116,6 @@ import * as THREE from 'https://esm.sh/three@0.158.0';
 import { OrbitControls } from 'https://esm.sh/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/STLLoader.js';
 
-// Используем STL файл для отрисовки
 const MODEL_URL = '{% if submission.file_stl %}{{ submission.file_stl.url }}{% endif %}';
 
 if (!MODEL_URL) {
@@ -125,7 +135,6 @@ if (!MODEL_URL) {
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
 
-    // Освещение
     scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(5, 10, 7);
@@ -133,7 +142,6 @@ if (!MODEL_URL) {
 
     const loader = new STLLoader();
     loader.load(MODEL_URL, (geometry) => {
-        // Цвет модели из твоего брендбука (#3e5281)
         const material = new THREE.MeshStandardMaterial({ 
             color: 0x3e5281, 
             metalness: 0.5, 
@@ -141,20 +149,17 @@ if (!MODEL_URL) {
         });
         const mesh = new THREE.Mesh(geometry, material);
         
-        // Центрирование модели
         geometry.computeBoundingBox();
         const center = new THREE.Vector3();
         geometry.boundingBox.getCenter(center);
         mesh.position.sub(center);
         scene.add(mesh);
 
-        // Авто-фокус камеры
         const size = geometry.boundingBox.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
         camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
         camera.lookAt(0, 0, 0);
         
-        // Убираем загрузчик
         document.getElementById('viewerOverlay').style.display = 'none';
         document.getElementById('viewerHint').style.display = 'block';
     }, (xhr) => {
@@ -177,5 +182,46 @@ if (!MODEL_URL) {
         renderer.setSize(wrap.clientWidth, wrap.clientHeight);
     });
 }
+</script>
+
+<script>
+document.getElementById('fav-btn').addEventListener('click', function() {
+    const btn = this;
+    const modelId = btn.getAttribute('data-id');
+    const textSpan = document.getElementById('fav-text');
+
+    // Используем Django-тег для генерации URL, заменяя заглушку "0" на реальный ID
+    const url = "{% url 'toggle_favorite' 0 %}".replace('0', modelId);
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Сервер ответил ошибкой 404 или 500');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === 'ok') {
+            if (data.is_favorite) {
+                btn.classList.add('fav-active');
+                textSpan.innerText = 'В избранном';
+            } else {
+                btn.classList.remove('fav-active');
+                btn.style.background = 'white'; 
+                textSpan.innerText = 'Сохранить в избранное';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Не удалось обновить избранное. Проверьте, зарегистрирован ли путь в urls.py');
+    });
+});
 </script>
 {% endblock %}

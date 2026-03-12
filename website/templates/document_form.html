@@ -1,11 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-    <aside class="st-sidebar-bg">
-        <nav class="st-left-menu">
-            <a href="{% url 'adocumentation' %}" class="st-active">ДОКУМЕНТАЦИЯ</a>
-            </nav>
-    </aside>
+<aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+        <a href="{% url 'profile' %}" 
+           class="{% if 'profile' in request.path %}st-active{% endif %}">
+           ПРОФИЛЬ
+        </a>
+
+        {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" 
+               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               КАТАЛОГ ИЗДЕЛИЙ
+            </a>
+
+            <a href="{% url 'adocumentation' %}" 
+               class="{% if 'documentation' in request.path %}st-active{% endif %}">
+               ДОКУМЕНТАЦИЯ
+            </a>
+
+            <a href="{% url 'anews' %}" 
+               class="{% if 'news' in request.path %}st-active{% endif %}">
+               НОВОСТИ
+            </a>
+        {% endif %}
+
+        <a href="{% url 'settings' %}" 
+           class="{% if 'settings' in request.path %}st-active{% endif %}">
+           НАСТРОЙКИ
+        </a>
+
+        <a href="{% url 'security' %}" 
+           class="{% if 'security' in request.path %}st-active{% endif %}">
+           БЕЗОПАСНОСТЬ
+        </a>
+
+        <a href="{% url 'chat' %}" 
+           class="{% if 'chat' in request.path %}st-active{% endif %}">
+           ЧАТ С ВОПРОСАМИ
+        </a>
+    </nav>
+</aside>
 
     <main class="st-content-area">
         <h1 style="font-size: 28px; margin-bottom: 5px; color: #333; font-weight: bold;">

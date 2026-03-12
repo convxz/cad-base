@@ -1,19 +1,46 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-    <aside class="st-sidebar-bg">
-        <nav class="st-left-menu">
-            <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}st-active{% endif %}">ПРОФИЛЬ</a>
-            {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" class="{% if request.resolver_match.url_name == 'acatalog' %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-            <a href="{% url 'adocumentation' %}" class="{% if request.resolver_match.url_name == 'adocumentation' %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-            <a href="{% url 'anews' %}" class="{% if request.resolver_match.url_name == 'anews' %}st-active{% endif %}">НОВОСТИ</a>
-            {% endif %}
-            <a href="{% url 'settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}st-active{% endif %}">НАСТРОЙКИ</a>
-            <a href="{% url 'security' %}" class="{% if request.resolver_match.url_name == 'security' %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
-            <a href="{% url 'chat' %}" class="{% if request.resolver_match.url_name == 'chat' %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
-        </nav>
-    </aside>
+<aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+        <a href="{% url 'profile' %}" 
+           class="{% if 'profile' in request.path %}st-active{% endif %}">
+           ПРОФИЛЬ
+        </a>
+
+        {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}" 
+               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               КАТАЛОГ ИЗДЕЛИЙ
+            </a>
+
+            <a href="{% url 'adocumentation' %}" 
+               class="{% if 'documentation' in request.path %}st-active{% endif %}">
+               ДОКУМЕНТАЦИЯ
+            </a>
+
+            <a href="{% url 'anews' %}" 
+               class="{% if 'news' in request.path %}st-active{% endif %}">
+               НОВОСТИ
+            </a>
+        {% endif %}
+
+        <a href="{% url 'settings' %}" 
+           class="{% if 'settings' in request.path %}st-active{% endif %}">
+           НАСТРОЙКИ
+        </a>
+
+        <a href="{% url 'security' %}" 
+           class="{% if 'security' in request.path %}st-active{% endif %}">
+           БЕЗОПАСНОСТЬ
+        </a>
+
+        <a href="{% url 'chat' %}" 
+           class="{% if 'chat' in request.path %}st-active{% endif %}">
+           ЧАТ С ВОПРОСАМИ
+        </a>
+    </nav>
+</aside>
 
 
     <main class="st-content-area">
