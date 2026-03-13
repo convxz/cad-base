@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Наш контейнер с базой данных
+  db:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=catalog_db
+      - POSTGRES_USER=catalog_user
+      - POSTGRES_PASSWORD=winterarc1221
+    ports:
+      - "5432:5432" # Прокидываем порт, чтобы ты мог зайти через pgAdmin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Сохраняем данные БД на диск, чтобы не удалились
+
+  # Наш контейнер с кодом Django
+  web:
+    build: . # Собираем образ по нашему Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000 # Команда запуска
+    volumes:
+      - .:/app # "Синхронизируем" твою папку с контейнером. Будешь менять код - он обновится в Докере без перезагрузки
+    ports:
+      - "8000:8000" # Прокидываем порт для браузера
+    depends_on:
+      - db # Ждем, пока запустится БД, прежде чем запускать Питон
+
+# Место, где Докер будет физически хранить файлы базы данных
+volumes:
+  postgres_data:

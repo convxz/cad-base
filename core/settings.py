@@ -93,7 +93,7 @@ DATABASES = {
         'NAME': 'catalog_db',
         'USER': 'catalog_user',
         'PASSWORD': 'winterarc1221',
-        'HOST': '127.0.0.1',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
