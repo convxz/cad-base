@@ -50,7 +50,7 @@ urlpatterns = [
     path('adocumentation/', views.adocumentation_view, name='adocumentation'),
     path('adocumentation/add/', views.document_edit_view, name='add_document'),
     path('adocumentation/edit/<int:pk>/', views.document_edit_view, name='edit_document'),
-    path('adocumentation/delete/<int:pk>/', views.adocumentation_view, name='delete_document'),
+    path('adocumentation/delete/<int:pk>/', views.delete_document_view, name='delete_document'),
 
     path('acatalog/', views.acatalog_view, name='acatalog'),
     path('acatalog/add/', views.model_edit_view, name='add_model'),

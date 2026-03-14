@@ -1,29 +1,41 @@
 version: '3.8'
 
 services:
-  # Наш контейнер с базой данных
   db:
-    image: postgres:16
+    image: postgres:14
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=catalog_db
       - POSTGRES_USER=catalog_user
       - POSTGRES_PASSWORD=winterarc1221
-    ports:
-      - "5432:5432" # Прокидываем порт, чтобы ты мог зайти через pgAdmin
-    volumes:
-      - postgres_data:/var/lib/postgresql/data # Сохраняем данные БД на диск, чтобы не удалились
+    restart: always
 
-  # Наш контейнер с кодом Django
   web:
-    build: . # Собираем образ по нашему Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000 # Команда запуска
+    build: .
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - .:/app # "Синхронизируем" твою папку с контейнером. Будешь менять код - он обновится в Докере без перезагрузки
-    ports:
-      - "8000:8000" # Прокидываем порт для браузера
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    env_file:
+      - .env
     depends_on:
-      - db # Ждем, пока запустится БД, прежде чем запускать Питон
+      - db
+    restart: always
 
-# Место, где Докер будет физически хранить файлы базы данных
+  nginx:
+    image: nginx:1.21-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: always
+
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:

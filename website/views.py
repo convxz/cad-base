@@ -550,3 +550,22 @@ def toggle_favorite(request, pk):
         'is_favorite': is_favorite,
         'count': profile.favorite_models.count()
     })
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+@require_POST
+def delete_document_view(request, pk):
+    # Находим документ по ID или выдаем 404 ошибку
+    document = get_object_or_404(Document, pk=pk)
+    
+    # Необязательно, но полезно: удаляем физический файл с сервера
+    if document.file:
+        if os.path.isfile(document.file.path):
+            os.remove(document.file.path)
+            
+    # Удаляем запись из базы данных
+    document.delete()
+    
+    # Возвращаемся на страницу со списком документов
+    return redirect('adocumentation')
+

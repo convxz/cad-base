@@ -15,31 +15,45 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Читаем переменные окружения (работает и локально, и в Docker)
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Секретный ключ теперь берем из окружения!
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-unsafe-key')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yu+w67(7!ik$xp5(84^n#g-+u-kf2i!ds+c@=x)eq905f3&2$$'
+# Разрешенные хосты (через запятую в .env)
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-# Обязательно с указанием протокола (https://)
-CSRF_TRUSTED_ORIGINS = [
-    'https://unsatirically-unfailed-alec.ngrok-free.dev',
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
 
-# На всякий случай проверь, что этот домен есть и в ALLOWED_HOSTS
-ALLOWED_HOSTS = [
-    'bruce-council-retailers-arrange.trycloudflare.com',
-    '8fa86b17d6ccd7.lhr.life',
-    'unsatirically-unfailed-alec.ngrok-free.dev',
-    'localhost',
-    '127.0.0.1',
-]
+# # Build paths inside the project like this: BASE_DIR / 'subdir'.
+# BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# # Quick-start development settings - unsuitable for production
+# # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+
+# # SECURITY WARNING: keep the secret key used in production secret!
+# SECRET_KEY = 'django-insecure-yu+w67(7!ik$xp5(84^n#g-+u-kf2i!ds+c@=x)eq905f3&2$$'
+
+# # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = True
+# # Обязательно с указанием протокола (https://)
+# CSRF_TRUSTED_ORIGINS = [
+#     'https://unsatirically-unfailed-alec.ngrok-free.dev',
+# ]
+
+# # На всякий случай проверь, что этот домен есть и в ALLOWED_HOSTS
+# ALLOWED_HOSTS = [
+#     'bruce-council-retailers-arrange.trycloudflare.com',
+#     '8fa86b17d6ccd7.lhr.life',
+#     'unsatirically-unfailed-alec.ngrok-free.dev',
+#     'localhost',
+#     '127.0.0.1',
+# ]
 
 # Application definition
 
@@ -133,6 +147,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # ВАЖНО ДЛЯ NGINX
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -3,192 +3,244 @@
 
 {% block content %}
 <style>
-    /* 1. Настройка фоновой области и структуры */
+/* 1. Блокируем скролл абсолютно для всей страницы (html и body) */
+    html, body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden !important; 
+    }
+
+    /* 2. Основной контейнер. Вычитаем шапку и ТОЖЕ блокируем скролл */
     .st-main-wrapper {
         display: flex;
-        min-height: 100vh;
-        background: #e9eef3;
-        overflow: hidden; /* Запрещаем общий скролл страницы */
+        height: calc(100vh - 185px); 
+        background: #f8f9fc; 
+        overflow: hidden !important; /* Ключевой момент */
     }
 
-    /* 2. Правая часть (Чат) */
-    .st-chat-column {
+    /* 3. Правая область. Запрещаем ей растягиваться вниз */
+    .st-content-area {
         flex-grow: 1;
+        padding: 25px 40px;
         display: flex;
         flex-direction: column;
-        height: 100vh;
-        position: relative;
+        height: 100%; /* Строго 100% от доступного места */
+        overflow: hidden !important; /* Ключевой момент №2 */
     }
 
-    /* 3. Шапка чата — всегда сверху */
-    .st-chat-header {
-        position: sticky;
-        top: 0;
+    /* 4. САМО "ОКНО" ЧАТА (Крутая идея) */
+    .chat-window {
+        flex: 1;
+        min-height: 0; /* Магия Flexbox: не дает окну распирать родителя */
+        background: #f8fafc;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* Красивая тень окна */
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100% - 180px);
+        overflow: hidden; /* Чтобы углы оставались круглыми */
+    }
+
+    /* 5. Шапка внутри окна */
+    .chat-header {
         background: white;
-        padding: 15px 25px;
+        padding: 15px 30px;
         border-bottom: 1px solid #e2e8f0;
-        z-index: 100;
         display: flex;
         align-items: center;
         gap: 15px;
+        flex-shrink: 0;
+        z-index: 10;
     }
 
-    /* 4. Область сообщений (Скроллируемая) */
+    /* 6. Область сообщений */
     #chat-box {
         flex: 1;
         overflow-y: auto;
-        padding: 20px 25px 120px 25px; /* 120px снизу, чтобы текст не прятался за инпутом */
-        background: #f8fafc;
+        padding: 25px 30px;
         display: flex;
         flex-direction: column;
         gap: 15px;
+        scroll-behavior: smooth;
     }
 
-    /* Стили сообщений как на твоих скринах */
-    .msg { max-width: 70%; padding: 12px 16px; border-radius: 12px; font-size: 15px; position: relative; }
-    .my-msg { align-self: flex-end; background: #3e5281; color: white; }
-    .other-msg { align-self: flex-start; background: white; border: 1px solid #e2e8f0; color: #1e293b; }
-    .file-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 8px; text-decoration: none; color: inherit; margin-top: 5px; }
+    /* Стили пузырей сообщений */
+    .msg { max-width: 70%; padding: 12px 18px; border-radius: 16px; font-size: 15px; line-height: 1.4; position: relative; }
+    .my-msg { align-self: flex-end; background: #3e5281; color: white; border-bottom-right-radius: 4px; }
+    .other-msg { align-self: flex-start; background: white; border: 1px solid #e2e8f0; color: #1e293b; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .file-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 8px; text-decoration: none; color: inherit; margin-top: 8px; }
 
-    /* 5. ФИКСИРОВАННОЕ ПОЛЕ ВВОДА — привязано к низу экрана */
-    .chat-footer-fixed {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        /* Ширина подстраивается (вычитаем ширину бокового меню, обычно около 260px) */
-        left: 260px; 
-        background: white;
-        padding: 15px 40px;
-        border-top: 1px solid #e2e8f0;
-        z-index: 1000;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+    /* 7. Подвал окна (с парящим инпутом) */
+    .chat-footer {
+        padding: 10px 30px 25px 30px;
+        background: transparent;
+        flex-shrink: 0;
+        position: relative;
     }
 
-    /* Для адаптивности: если меню скрыто или сужается */
-    @media (max-width: 992px) {
-        .chat-footer-fixed { left: 0; }
-    }
-
-    .chat-form {
+    /* Таблетка ввода Telegram-style */
+    .chat-form-pill {
         display: flex;
-        gap: 15px;
         align-items: center;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .chat-input {
-        flex: 1;
-        padding: 14px 25px;
-        border: 1px solid #e2e8f0;
+        background: white;
         border-radius: 30px;
-        outline: none;
-        font-size: 14px;
-        background: #f8fafc;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        padding: 8px 10px;
+        gap: 10px;
+        border: 1px solid #e2e8f0;
+        position: relative;
     }
-    .chat-input:focus { border-color: #3e5281; background: white; }
 
-    .btn-send {
+    .btn-attach {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+        color: #94a3b8;
+    }
+    .btn-attach:hover { background: #f1f5f9; color: #3e5281; }
+
+    .chat-input-pill {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 15px;
+        padding: 10px 5px;
+        color: #1e293b;
+    }
+
+    .btn-send-pill {
         background: #3e5281;
         color: white;
         border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
-        cursor: pointer;
+        border-radius: 24px;
+        padding: 10px 24px;
         font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn-send-pill:hover { background: #2d3d63; }
+
+    /* Плашка файла над таблеткой */
+    #file-indicator {
+        position: absolute;
+        top: -45px;
+        left: 20px;
+        background: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        color: #3e5281;
+        font-weight: 600;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #e2e8f0;
     }
 
-    /* Эффект при перетаскивании файла */
     #chat-box.drag-over { background: #e2e8f0; outline: 2px dashed #3e5281; outline-offset: -10px; }
 </style>
 
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
+    <!-- Боковое меню -->
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+                <a href="{% url 'acatalog' %}" class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+                <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+                <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
 
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
-            </a>
-
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
-            </a>
-
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
-            </a>
-        {% endif %}
-
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
-
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
-
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
-
-    <main class="st-chat-column">
-        <header class="st-chat-header">
-            <a href="{% url 'chat' %}" style="text-decoration: none; color: #64748b; font-size: 20px;">←</a>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 700;">
-                Чат с {{ room.user.username }}
-            </h3>
-        </header>
-
-        <div id="chat-box">
-            {% for msg in chat_messages %}
-                <div class="msg {% if msg.sender == request.user %}my-msg{% else %}other-msg{% endif %}">
-                    {% if msg.body %}<div>{{ msg.body }}</div>{% endif %}
-                    
-                    {% if msg.file %}
-                        <a href="{{ msg.file.url }}" class="file-box" download>
-                            📄 <span style="font-size: 12px;">{{ msg.file.name|cut:"chat_files/" }}</span>
-                        </a>
-                    {% endif %}
-
-                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; margin-top: 5px;">
-                        {{ msg.created_at|date:"H:i" }}
-                        {% if msg.sender == request.user %}
-                            <span>{% if msg.is_read %}✓✓{% else %}✓{% endif %}</span>
-                        {% endif %}
-                    </div>
+    <!-- Основная область с отступами -->
+    <main class="st-content-area">
+        
+        <!-- ТО САМОЕ ОКНО ЧАТА -->
+        <div class="chat-window">
+            
+            <!-- Шапка окна -->
+            <header class="chat-header">
+                <a href="{% url 'chat' %}" style="text-decoration: none; color: #64748b; font-size: 22px; margin-right: 5px;">←</a>
+                {% if room.user.profile.avatar %}
+                    <img src="{{ room.user.profile.avatar.url }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'img/default-avatar.png' %}" style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0;">
+                {% endif %}
+                <div>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">{{ room.user.get_full_name|default:room.user.username }}</h3>
+                    <span style="font-size: 13px; color: #94a3b8;">Чат поддержки</span>
                 </div>
-            {% endfor %}
-        </div>
+            </header>
 
-        <footer class="chat-footer-fixed">
-            <form id="chat-form" class="chat-form" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="file" name="file" id="file-input" style="display: none;">
-                
-                <button type="button" onclick="document.getElementById('file-input').click()" 
-                        style="background: none; border: none; cursor: pointer; font-size: 22px; color: #94a3b8;">
-                    📎
-                </button>
-                
-                <input type="text" name="message" id="chat-input" class="chat-input" 
-                       placeholder="Напишите сообщение..." autocomplete="off">
-                
-                <button type="submit" class="btn-send">Отправить</button>
-            </form>
-        </footer>
+            <!-- Сообщения -->
+            <div id="chat-box">
+                {% for msg in chat_messages %}
+                    <div class="msg {% if msg.sender == request.user %}my-msg{% else %}other-msg{% endif %}">
+                        {% if msg.body %}<div>{{ msg.body }}</div>{% endif %}
+                        
+                        {% if msg.file %}
+                            <a href="{{ msg.file.url }}" class="file-box" download>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span style="font-size: 13px;">{{ msg.file.name|cut:"chat_files/" }}</span>
+                            </a>
+                        {% endif %}
+
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; margin-top: 6px;">
+                            {{ msg.created_at|date:"H:i" }}
+                            {% if msg.sender == request.user %}
+                                <span>{% if msg.is_read %}✓✓{% else %}✓{% endif %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Подвал окна -->
+            <footer class="chat-footer">
+                <form id="chat-form" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="chat-form-pill">
+                        
+                        <!-- Индикатор прикрепленного файла -->
+                        <div id="file-indicator">
+                            📎 <span id="file-name-text">Файл</span>
+                            <button type="button" id="remove-file-btn" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-weight:bold; margin-left:8px; padding:0;">✕</button>
+                        </div>
+
+                        <input type="file" name="file" id="file-input" style="display: none;">
+                        
+                        <!-- Скрепка -->
+                        <button type="button" class="btn-attach" onclick="document.getElementById('file-input').click()" title="Прикрепить файл">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Поле ввода -->
+                        <input type="text" name="message" id="chat-input" class="chat-input-pill" placeholder="Напишите сообщение..." autocomplete="off">
+                        
+                        <!-- Отправить -->
+                        <button type="submit" class="btn-send-pill">Отправить</button>
+                    </div>
+                </form>
+            </footer>
+
+        </div>
     </main>
 </div>
 
@@ -197,61 +249,56 @@
     const chatForm = document.getElementById('chat-form');
     const fileInput = document.getElementById('file-input');
     const chatInput = document.getElementById('chat-input');
+    const fileIndicator = document.getElementById('file-indicator');
+    const fileNameText = document.getElementById('file-name-text');
+    const removeFileBtn = document.getElementById('remove-file-btn');
 
-    // Функция прокрутки вниз
-    function scrollToBottom() {
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // Первоначальный скролл
+    function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
     scrollToBottom();
 
-    // Отправка данных без перезагрузки всей страницы
+    fileInput.addEventListener('change', function() {
+        if (this.files && this.files.length > 0) {
+            fileNameText.textContent = this.files[0].name;
+            fileIndicator.style.display = 'flex';
+        }
+    });
+
+    removeFileBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        fileIndicator.style.display = 'none';
+    });
+
     function sendData() {
         const formData = new FormData(chatForm);
-        const text = chatInput.value;
-        
-        // Очищаем поле сразу для "отклика" интерфейса
         chatInput.value = ''; 
+        fileInput.value = '';
+        fileIndicator.style.display = 'none'; 
         
         fetch(window.location.href, {
             method: 'POST',
             body: formData,
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         }).then(response => {
-            if (response.ok) {
-                updateChat(); // Сразу обновляем, чтобы увидеть свое сообщение
-            }
+            if (response.ok) updateChat();
         });
     }
 
-    // ФУНКЦИЯ ОБНОВЛЕНИЯ ЧАТА
     function updateChat() {
-        // Запрашиваем ту же страницу, но просим только содержимое чата
-        fetch(window.location.href, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
+        fetch(window.location.href, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
         .then(response => response.text())
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const newMessages = doc.getElementById('chat-box').innerHTML;
             
-            // Если контент изменился, обновляем
             if (chatBox.innerHTML !== newMessages) {
                 const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
                 chatBox.innerHTML = newMessages;
-                
-                // Скроллим вниз только если юзер и так был внизу
-                if (isAtBottom) {
-                    scrollToBottom();
-                }
+                if (isAtBottom) scrollToBottom();
             }
         });
     }
 
-    // ЗАПУСК АВТООБНОВЛЕНИЯ (каждые 2 секунды)
-    // 0.5 слишком часто для обычного сервера, 2сек — "золотая середина"
     setInterval(updateChat, 2000);
 
     chatForm.onsubmit = (e) => {
@@ -261,9 +308,7 @@
         }
     };
 
-    fileInput.onchange = () => { if(fileInput.files.length > 0) sendData(); };
-
-    // Drag-and-Drop (оставляем твой код)
+    // Drag-and-Drop
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
         chatBox.addEventListener(event, e => { e.preventDefault(); e.stopPropagation(); });
     });
@@ -273,7 +318,8 @@
         chatBox.classList.remove('drag-over');
         if (e.dataTransfer.files.length > 0) {
             fileInput.files = e.dataTransfer.files;
-            sendData();
+            fileNameText.textContent = e.dataTransfer.files[0].name;
+            fileIndicator.style.display = 'flex';
         }
     });
 </script>

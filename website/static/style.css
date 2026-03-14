@@ -365,14 +365,17 @@ html {
 
 .contacts-inner {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Снова расталкиваем по краям... */
     align-items: center;
+    max-width: 1100px; /* ...но ограничиваем ширину невидимой "коробки" */
+    margin: 0 auto; /* И ставим эту коробку ровно по центру экрана */
 }
 
 .contacts-info h2 {
     color: #2d5a9e;
     font-size: 40px;
     margin-bottom: 40px;
+    flex-shrink: 0;
 }
 
 .contact-item {
@@ -392,7 +395,8 @@ html {
 }
 
 .contacts-image img {
-    width: 30vw;
+    width: 100%;
+    max-width: 450px;
 }
 
 /* --- ФУТЕР --- */

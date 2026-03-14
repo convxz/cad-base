@@ -1,18 +1,21 @@
-# 1. Берем за основу официальный образ Python (версия 3.10, легкая версия)
+# Используем официальный образ Python
 FROM python:3.10-slim
 
-# 2. Устанавливаем рабочую папку внутри контейнера
-WORKDIR /app
-
-# 3. Запрещаем Питону создавать лишние файлы кэша и просим выводить логи сразу
+# Запрещаем Python писать файлы .pyc на диск и буферизовать stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# 4. Копируем файл с зависимостями внутрь контейнера
-COPY requirements.txt .
+# Рабочая директория внутри контейнера
+WORKDIR /app
 
-# 5. Устанавливаем библиотеки
+# Устанавливаем зависимости системы (нужны для сборки некоторых пакетов)
+RUN apt-get update \
+    && apt-get install -y gcc libpq-dev \
+    && apt-get clean
+
+# Устанавливаем зависимости Python
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 6. Копируем весь остальной код проекта в контейнер
-COPY . .
+# Копируем весь проект
+COPY . /app/
