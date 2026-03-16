@@ -19,34 +19,43 @@ body, html {
     min-height: 100vh;
 }
 
-/* 3. Левая панель (Сайдбар) с наклоном */
+/* 3. Сайдбар и его фон */
 .sidebar {
     position: relative;
     flex: 1.3;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     padding-left: 8%;
-    
-    /* Глубокий сине-фиолетовый градиент поверх картинки */
-    background: 
-        linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
-        url('img/background.png');
-    
-    background-size: cover;
-    background-position: center;
-    
-    /* Эффект наклона (срез справа) */
-    clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
     z-index: 2;
 }
 
-.sidebar-text h1 {
+/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+.sidebar-bg {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
+                url('img/background.png');
+    background-size: cover;
+    background-position: center;
+    clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    z-index: -1;
+}
+
+.sidebar-text {
+    z-index: 1;
     color: white;
+}
+
+.sidebar-text h1 {
     font-size: 64px;
     font-weight: 400;
     line-height: 1.1;
     text-transform: uppercase;
-    font-family: 'Playfair Display', serif; /* Шрифт с засечками */
+    font-family: 'Playfair Display', serif;
     letter-spacing: 2px;
 }
 
@@ -57,8 +66,6 @@ body, html {
     justify-content: center;
     align-items: center;
     padding: 40px;
-    /* Нахлест на область сайдбара из-за наклона */
-    margin-left: -12%; 
     z-index: 1;
 }
 
@@ -113,7 +120,6 @@ body, html {
     border-color: #cbd5e0;
 }
 
-/* Обертка пароля и иконка */
 .password-wrapper {
     position: relative;
 }
@@ -151,11 +157,11 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка (Серая в покое, Синяя при заполнении) */
+/* 7. Кнопка */
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0;
     color: white;
     border: none;
     border-radius: 40px;
@@ -166,9 +172,8 @@ body, html {
     margin-bottom: 20px;
 }
 
-/* Класс добавляется через JavaScript при заполнении всех полей */
 .submit-btn.active {
-    background-color: #1A1C41; /* Темно-синий под цвет сайдбара */
+    background-color: #1A1C41;
     cursor: pointer;
 }
 
@@ -176,30 +181,19 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Ссылки внизу */
-.login-redirect {
-    text-align: center;
-    font-size: 14px;
-    color: #718096;
-}
-
-.bold-link {
-    color: #1a1a1a;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-/* 9. Адаптивность */
-@media (max-width: 1024px) {
-    .sidebar-text h1 { font-size: 48px; }
+/* 8. Адаптивность */
+@media (max-width: 1100px) {
+    .sidebar-bg {
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+    }
 }
 
 @media (max-width: 850px) {
     .sidebar {
-        display: none; /* Скрываем сайдбар на мобильных */
+        display: none;
     }
     .form-container {
-        margin-left: 0;
+        width: 100%;
         padding: 20px;
     }
 }

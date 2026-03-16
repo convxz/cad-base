@@ -101,9 +101,9 @@
             <div class="st-form-footer">
                 {% if is_edit %}
                     <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
-                    <button type="submit" class="st-btn-blue">✓ Сохранить</button>
+                    <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
                 {% else %}
-                    <a href="?edit=1" class="st-btn-blue">✎ Редактировать</a>
+                    <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
                 {% endif %}
             </div>
         </form>

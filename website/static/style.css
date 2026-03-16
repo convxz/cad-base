@@ -193,7 +193,7 @@ html {
     /* Высота на весь экран */
 
     /* Добавляем отступ сверху, равный высоте хедера (примерно 150-180px) */
-    padding-top: 360px;
+    padding-top: 250px;
 
     display: flex;
     flex-direction: column;
@@ -1192,4 +1192,25 @@ html {
     .news-detail-title {
         font-size: 22px;
     }
+}
+
+
+.feature-item {
+    background: #2d5a9e;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    
+    /* Добавляем плавность анимации */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Эффект при наведении */
+.feature-item:hover {
+    transform: translateY(-10px); /* Поднимает блок на 10px вверх */
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2); /* Усиливает тень для объема */
+    background: #3a72c7; /* Немного осветляем фон при наведении */
+    cursor: pointer;
 }

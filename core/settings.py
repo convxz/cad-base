@@ -19,7 +19,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Читаем переменные окружения (работает и локально, и в Docker)
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = False
 
 # Секретный ключ теперь берем из окружения!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-unsafe-key')
@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'website',  # <--- Проверьте наличие этой строки!
+    'website', 
 ]
 
 MIDDLEWARE = [
@@ -107,7 +107,7 @@ DATABASES = {
         'NAME': 'catalog_db',
         'USER': 'catalog_user',
         'PASSWORD': 'winterarc1221',
-        'HOST': 'db',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -134,11 +134,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
-USE_I18N = True
+LANGUAGE_CODE = 'ru-ru'
+USE_I18N = False
 
 USE_TZ = True
 
@@ -157,7 +157,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'  # Имя URL главной страницы
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/media/'
