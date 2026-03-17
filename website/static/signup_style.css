@@ -1,4 +1,4 @@
-/* 1. Сброс стилей и базовые настройки */
+
 * {
     margin: 0;
     padding: 0;
@@ -13,13 +13,13 @@ body, html {
     background-color: #f8faff;
 }
 
-/* 2. Контейнер страницы */
+
 .registration-page {
     display: flex;
     min-height: 100vh;
 }
 
-/* 3. Сайдбар и его фон */
+
 .sidebar {
     position: relative;
     flex: 1.3;
@@ -30,7 +30,7 @@ body, html {
     z-index: 2;
 }
 
-/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+
 .sidebar-bg {
     position: absolute;
     top: 0; 
@@ -59,7 +59,7 @@ body, html {
     letter-spacing: 2px;
 }
 
-/* 4. Правая панель (Форма) */
+
 .form-container {
     flex: 1;
     display: flex;
@@ -93,7 +93,7 @@ body, html {
     text-decoration: underline;
 }
 
-/* 5. Поля ввода */
+
 .input-group {
     margin-bottom: 20px;
 }
@@ -143,7 +143,7 @@ body, html {
     line-height: 1.4;
 }
 
-/* 6. Текст условий */
+
 .policy-text {
     font-size: 13px;
     color: #718096;
@@ -157,7 +157,7 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка */
+
 .submit-btn {
     width: 100%;
     padding: 18px;
@@ -181,7 +181,7 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Адаптивность */
+
 @media (max-width: 1100px) {
     .sidebar-bg {
         clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);

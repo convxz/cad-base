@@ -17,7 +17,7 @@ body, html {
     background-color: #f8faff;
 }
 
-/* Форма слева */
+
 .form-container {
     flex: 1.2;
     display: flex;
@@ -40,7 +40,7 @@ body, html {
     text-align: center;
 }
 
-/* Элементы ввода */
+
 .input-group {
     margin-bottom: 25px;
 }
@@ -70,12 +70,12 @@ body, html {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px; /* Увеличили размер иконки */
+    font-size: 18px; 
     color: #888;
     user-select: none;
 }
 
-/* Чекбокс "Запомни меня" */
+
 .options-row {
     margin-bottom: 25px;
 }
@@ -97,7 +97,7 @@ body, html {
     cursor: pointer;
 }
 
-/* Текст и кнопка */
+
 .policy-text {
     font-size: 13px;
     color: #1a1a1a;
@@ -142,7 +142,7 @@ body, html {
     font-weight: 700;
 }
 
-/* Сайдбар справа */
+
 .sidebar {
     position: relative;
     flex: 1;
@@ -152,48 +152,55 @@ body, html {
     background-size: cover;
     background-position: center;
     
-    /* Зеркальный наклон для правой стороны */
+    
     clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
     
+    
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: -10%; /* Нахлест на белую часть */
+    align-items: center;      
+    justify-content: flex-end; 
+    padding-right: 5%;        
+}
+
+.sidebar-text {
+    
+    width: 60%; 
 }
 
 .sidebar-text h1 {
     color: white;
-    font-size: 56px;
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     text-align: center;
-    padding-left: 20%; /* Чтобы текст не "резался" наклоном */
+    font-size: 2.5vw; 
+    white-space: nowrap; 
+    margin: 0;
 }
 
-/* Адаптивность */
+
 @media (max-width: 900px) {
     .sidebar { display: none; }
-    .form-container { margin-left: 0; }
 }
 
-/* Стандартное состояние кнопки (серая) */
+
+
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0; 
     color: #FFFFFF;
     border: none;
     border-radius: 40px;
     font-size: 18px;
     font-weight: 600;
-    cursor: not-allowed; /* Курсор запрета */
+    cursor: not-allowed; 
     transition: all 0.3s ease;
     margin-top: 20px;
 }
 
-/* Состояние, когда поля заполнены (черная или темно-синяя) */
+
 .submit-btn.active {
-    background-color: #1A1C41; /* Темный цвет как на макете */
+    background-color: #1A1C41; 
     cursor: pointer;
 }
 

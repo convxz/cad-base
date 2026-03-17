@@ -1,46 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">
+                ПРОФИЛЬ
             </a>
 
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
+            {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}"
+                class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+                КАТАЛОГ ИЗДЕЛИЙ
             </a>
 
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
+            <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">
+                ДОКУМЕНТАЦИЯ
             </a>
-        {% endif %}
 
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
+            <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">
+                НОВОСТИ
+            </a>
+            {% endif %}
 
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
+            <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">
+                НАСТРОЙКИ
+            </a>
 
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">
+                БЕЗОПАСНОСТЬ
+            </a>
+
+            <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">
+                ЧАТ С ВОПРОСАМИ
+            </a>
+        </nav>
+    </aside>
 
 
     <main class="st-content-area">
@@ -50,33 +44,33 @@
 
         <form method="post" enctype="multipart/form-data" class="st-form">
             {% csrf_token %}
-            
+
             <div class="st-white-card">
                 <div class="st-avatar-container">
                     {% if is_edit %}
-                        <label class="st-avatar-label" style="cursor: pointer;">
-                            <input type="file" name="avatar" accept="image/*" id="id_avatar" style="display: none;">
-                            
-                            <div class="st-avatar-circle st-clickable">
-                                <div class="st-upload-overlay">
-                                    <i>✎</i>
-                                    <span>Поменять фото</span>
-                                </div>
-                                {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" id="avatar-preview">
-                                {% else %}
-                                    <div class="no-avatar" style="color: #ccc;">N/A</div>
-                                {% endif %}
+                    <label class="st-avatar-label" style="cursor: pointer;">
+                        <input type="file" name="avatar" accept="image/*" id="id_avatar" style="display: none;">
+
+                        <div class="st-avatar-circle st-clickable">
+                            <div class="st-upload-overlay">
+                                <i>✎</i>
+                                <span>Поменять фото</span>
                             </div>
-                        </label>
-                    {% else %}
-                        <div class="st-avatar-circle">
                             {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}">
+                            <img src="{{ user.profile.avatar.url }}" id="avatar-preview">
                             {% else %}
-                                <div class="no-avatar" style="color: #ccc;">N/A</div>
+                            <div class="no-avatar" style="color: #ccc;">N/A</div>
                             {% endif %}
                         </div>
+                    </label>
+                    {% else %}
+                    <div class="st-avatar-circle">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}">
+                        {% else %}
+                        <div class="no-avatar" style="color: #ccc;">N/A</div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
 
@@ -100,10 +94,10 @@
 
             <div class="st-form-footer">
                 {% if is_edit %}
-                    <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
-                    <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
+                <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
+                <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
                 {% else %}
-                    <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
+                <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
                 {% endif %}
             </div>
         </form>

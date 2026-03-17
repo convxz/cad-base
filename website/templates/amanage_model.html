@@ -11,7 +11,7 @@
 
         {% if user.is_superuser %}
             <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               class="{% if 'acatalog' in request.path %}st-active{% endif %}">
                КАТАЛОГ ИЗДЕЛИЙ
             </a>
 
@@ -50,76 +50,126 @@
 
         <div class="st-white-card" style="padding: 40px; border-radius: 8px; border: 1px solid #eef0f3; background: #fff;">
             <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
+    {% csrf_token %}
+    
+    <!-- ВЕРХНИЙ БЛОК: Характеристики и Фото -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Название</label>
+                {{ form.title }}
+            </div>
+
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Тип изделия</label>
+                {{ form.category }}
+            </div>
+
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
+                {{ form.standard }}
+            </div>
+        </div>
+
+        <!-- ПРЕВЬЮ ФОТО -->
+        <div class="st-group">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Превью изделия</label>
+            <div>
+                {% if instance.thumbnail %}
+                    <div class="drop-zone" id="dz-photo" style="border: 2px solid #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                {% else %}
+                    <div class="drop-zone" id="dz-photo" style="border: 2px dashed #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                {% endif %}
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Название</label>
-                            {{ form.title }}
-                        </div>
-
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Тип изделия</label>
-                            {{ form.category }}
-                        </div>
-
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
-                            {{ form.standard }}
-                        </div>
-                    </div>
-
-                    <div class="st-group">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Превью изделия</label>
-                        <div class="drop-zone" id="dz-photo" style="border: 2px dashed #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                            <input type="file" name="thumbnail" id="id_thumbnail" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;" accept="image/*">
-                            
-                            <div id="photo-preview-container" style="display: none; width: 100%; height: 100%; padding: 10px;">
-                                <img id="photo-preview" src="#" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
-                            </div>
-
-                            <div id="photo-placeholder">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
-                                    <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
-                                </svg>
-                                <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
-                                <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <input type="file" name="thumbnail" id="id_thumbnail" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 5;" accept="image/*">
                     
-                    <div class="drop-zone" id="dz-stp" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_stp" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>STP</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
+                    {% if instance.thumbnail %}
+                        <div id="photo-preview-container" style="display: block; width: 100%; height: 100%; padding: 10px; z-index: 1;">
+                            <img id="photo-preview" src="{{ instance.thumbnail.url }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                        </div>
 
-                    <div class="drop-zone" id="dz-igs" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_igs" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>IGS</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
+                        <div id="photo-placeholder" style="display: none; z-index: 1;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
+                                <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
+                            </svg>
+                            <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
+                            <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
+                        </div>
+                    {% else %}
+                        <div id="photo-preview-container" style="display: none; width: 100%; height: 100%; padding: 10px; z-index: 1;">
+                            <img id="photo-preview" src="#" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                        </div>
 
-                    <div class="drop-zone" id="dz-stl" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_stl" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>STL</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
-
+                        <div id="photo-placeholder" style="display: block; z-index: 1;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
+                                <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
+                            </svg>
+                            <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
+                            <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
+                        </div>
+                    {% endif %}
                 </div>
-
-                <div style="display: flex; justify-content: center; gap: 20px;">
-                    <a href="{% url 'acatalog' %}" style="padding: 12px 60px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 500;">Отменить</a>
-                    <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Сохранить</button>
+                
+                {% if instance.thumbnail %}
+                <div class="download-link-container" style="text-align: center; margin-top: 8px;">
+                    <a href="{{ instance.thumbnail.url }}" target="_blank" download style="font-size: 13px; color: #3e5281; text-decoration: underline;">Скачать текущее фото</a>
                 </div>
-            </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: Описание изделия -->
+    <div style="margin-bottom: 30px;">
+        <div class="st-group">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Описание изделия</label>
+            <textarea name="{{ form.description.name }}" 
+                      id="{{ form.description.id_for_label }}" 
+                      style="width: 100%; box-sizing: border-box; padding: 12px 16px; border: 1px solid #cbd5e0; border-radius: 8px; background: #fff; font-family: inherit; font-size: 14px; color: #333; outline: none; resize: vertical; min-height: 120px; transition: border-color 0.2s;" 
+                      placeholder="Введите подробное описание изделия..."
+                      >{% if form.description.value %}{{ form.description.value }}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <!-- ФАЙЛЫ (генерируются в цикле) -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        {% for field_name, ext, file_url, file_basename in file_fields %}
+        <div>
+            {% if file_url %}
+                <div class="drop-zone" id="dz-{{ ext|lower }}" style="border: 2px solid #3e5281; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #eef2ff; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s;">
+            {% else %}
+                <div class="drop-zone" id="dz-{{ ext|lower }}" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s;">
+            {% endif %}
+                
+                <input type="file" name="{{ field_name }}" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 5;">
+                
+                <span style="font-size: 30px; z-index: 1;">📄</span>
+                <p style="font-size: 13px; margin: 5px 0; z-index: 1;">Формат <strong>{{ ext }}</strong></p>
+                
+                <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px; z-index: 1;">
+                    {% if file_url %}
+                        <span style="color: #2e7d32; font-weight: bold;">✅ Загружен:</span><br>{{ file_basename }}
+                    {% else %}
+                        Файл не загружен
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if file_url %}
+            <div class="download-link-container" style="text-align: center; margin-top: 8px;">
+                <a href="{{ file_url }}" download style="font-size: 13px; color: #3e5281; text-decoration: underline;">Скачать {{ ext }}</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- КНОПКИ -->
+    <div style="display: flex; justify-content: center; gap: 20px;">
+        <a href="{% url 'acatalog' %}" style="padding: 12px 60px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 500;">Отменить</a>
+        <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Сохранить</button>
+    </div>
+</form>
         </div>
     </main>
 </div>
@@ -136,14 +186,15 @@
         });
 
         zone.addEventListener('dragleave', () => {
-            zone.style.borderColor = '#cbd5e0';
-            zone.style.background = '#f8f9fb';
+            // Если файл уже выбран или был загружен ранее (рамка solid) - сохраняем стили
+            if(zone.style.borderStyle !== 'solid') {
+                zone.style.borderColor = '#cbd5e0';
+                zone.style.background = '#f8f9fb';
+            }
         });
 
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
-            zone.style.borderColor = '#cbd5e0';
-            zone.style.background = '#f8f9fb';
             if (e.dataTransfer.files.length) {
                 input.files = e.dataTransfer.files;
                 handlePreview(input);
@@ -156,10 +207,18 @@
     });
 
     function handlePreview(input) {
-        const zone = input.parentElement;
+        // zone - это область драг-н-дропа. wrapper - обертка, включающая ссылку на скачивание
+        const zone = input.closest('.drop-zone');
+        const wrapper = zone.parentElement;
         const fileNameDiv = zone.querySelector('.file-name');
+        const downloadLink = wrapper.querySelector('.download-link-container');
         
         if (input.files && input.files[0]) {
+            // Скрываем старую ссылку на скачивание (так как выбран новый файл на замену)
+            if(downloadLink) {
+                downloadLink.style.display = 'none';
+            }
+
             // Если это фото
             if (input.name === 'thumbnail') {
                 const reader = new FileReader();
@@ -168,15 +227,17 @@
                     document.getElementById('photo-preview-container').style.display = 'block';
                     document.getElementById('photo-placeholder').style.display = 'none';
                     zone.style.borderStyle = 'solid';
+                    zone.style.borderColor = '#3e5281';
                 }
                 reader.readAsDataURL(input.files[0]);
             } else {
-                // Если это файлы
+                // Если это CAD-файлы
                 if (fileNameDiv) {
-                    fileNameDiv.textContent = '✅ ' + input.files[0].name;
+                    fileNameDiv.innerHTML = '<span style="color: #e65100; font-weight: bold;">⏳ Будет загружен:</span><br>' + input.files[0].name;
                 }
                 zone.style.background = '#eef2ff';
                 zone.style.borderColor = '#3e5281';
+                zone.style.borderStyle = 'solid';
             }
         }
     }

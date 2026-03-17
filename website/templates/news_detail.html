@@ -1,25 +1,108 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="news-detail-page-bg">
-    <div class="container">
-        <nav class="news-detail-breadcrumbs">
-            <a href="/">Главная</a> | <a href="{% url 'news' %}">Новости</a> | <span>Новость</span>
-        </nav>
+<style>
+    /* Фон страницы */
+    .news-bg-area {
+        background-color: #f8f9fb;
+        padding: 40px 0 100px;
+        min-height: 100vh;
+    }
+    
+    /* Хлебные крошки (навигация) - выровнены по ширине новой карточки */
+    .nd-breadcrumbs {
+        max-width: 1300px;
+        margin: 0 auto 20px auto;
+        font-size: 14px;
+        color: #666;
+    }
+    .nd-breadcrumbs a {
+        color: #666;
+        text-decoration: none;
+    }
+    .nd-breadcrumbs a:hover {
+        color: #3e5281;
+    }
+    
+    /* Сама карточка из макета (расширили до 1300px) */
+    .nd-card {
+        max-width: 1300px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #eaedf1;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); /* Мягкая тень */
+        padding: 50px 60px; /* Оптимальные отступы по краям */
+    }
+    
+    /* Заголовок (крупный, жирный, по центру) */
+    .nd-title {
+        text-align: center;
+        font-size: 34px;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 40px;
+    }
+    
+    /* Текст новости */
+    .nd-text {
+        font-size: 20px; 
+        line-height: 1.6;
+        color: #1a1a1a;
+        margin-bottom: 50px;
+        
+        /* ЭТИ ТРИ СТРОЧКИ НЕ ДАЮТ ТЕКСТУ ВЫЛЕЗТИ ЗА КРАЯ */
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+    
+    /* Блок с картинкой */
+    .nd-img-wrapper {
+        text-align: center;
+        width: 100%;
+    }
+    .nd-img-wrapper img {
+        max-width: 100%; /* Картинка не вылезет по ширине */
+        max-height: 500px; /* Картинка не вылезет по высоте (будет адекватного размера) */
+        object-fit: contain; /* Сохраняет пропорции без обрезки */
+        border-radius: 8px;
+    }
+    
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .nd-breadcrumbs { padding: 0 15px; }
+        .nd-card { 
+            padding: 30px 20px; 
+            border-radius: 12px; 
+            margin: 0 10px;
+        }
+        .nd-title { font-size: 26px; }
+        .nd-text { font-size: 18px; }
+        .nd-img-wrapper img { max-height: 350px; }
+    }
+</style>
 
-        <div class="news-detail-card">
-            <h1 class="news-detail-title">{{ item.title }}</h1>
-            
-            <div class="news-detail-content">
-                <p>{{ item.content }}</p>
-                
-                {% if item.image %}
-                <div class="news-detail-main-image">
-                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
-                </div>
-                {% endif %}
-            </div>
+<div class="news-bg-area">
+    <nav class="nd-breadcrumbs">
+        <a href="/">Главная</a> | <a href="{% url 'news' %}">Новости</a> | <span>Новость</span>
+    </nav>
+
+    <div class="nd-card">
+        <!-- Заголовок -->
+        <h1 class="nd-title">{{ item.title }}</h1>
+        
+        <!-- Текст с сохранением переносов строк -->
+        <div class="nd-text">
+            {{ item.content|linebreaksbr }}
         </div>
+        
+        <!-- Фотография (ужатая до нормальных размеров) -->
+        {% if item.image %}
+        <div class="nd-img-wrapper">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

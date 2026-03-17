@@ -1,3 +1,41 @@
+
+==================================================
+FILE: .\all.py
+==================================================
+
+import os
+
+def collect_files(output_filename="result_code.txt"):
+    target_extensions = ('.py', '.html', '.css')
+    exclude_dirs = {'venv', '.git', '__pycache__'}
+
+    with open(output_filename, 'w', encoding='utf-8') as outfile:
+        for root, dirs, files in os.walk('.'):
+            # Исключаем ненужные папки
+            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+
+            for file in files:
+                if file.endswith(target_extensions):
+                    file_path = os.path.join(root, file)
+                    
+                    # Формируем аккуратный заголовок
+                    outfile.write(f"\n{'='*50}\n")
+                    outfile.write(f"FILE: {file_path}\n")
+                    outfile.write(f"{'='*50}\n\n")
+
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as infile:
+                            outfile.write(infile.read())
+                    except Exception as e:
+                        outfile.write(f"[Ошибка при чтении файла {file_path}: {e}]\n")
+                    
+                    outfile.write("\n")
+
+    print(f"Готово! Весь код собран в: {output_filename}")
+
+if __name__ == "__main__":
+    collect_files()
+
 ==================================================
 FILE: .\manage.py
 ==================================================
@@ -79,7 +117,7 @@ DEBUG = True
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-unsafe-key')
 
 # Разрешенные хосты (через запятую в .env)
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS = ['*']
 
 CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
 
@@ -161,7 +199,7 @@ DATABASES = {
         'NAME': 'catalog_db',
         'USER': 'catalog_user',
         'PASSWORD': 'winterarc1221',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '5432',
     }
 }
@@ -188,11 +226,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
-USE_I18N = True
+LANGUAGE_CODE = 'ru-ru'
+USE_I18N = False
 
 USE_TZ = True
 
@@ -211,13 +249,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/'  # Имя URL главной страницы
 LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'm.kadzaev77@gmail.com'
-EMAIL_HOST_PASSWORD = 'iejkdiwaimhneylu' # Без пробелов!
-DEFAULT_FROM_EMAIL = 'm.kadzaev77@gmail.com'
 
 
 MEDIA_URL = '/media/'
@@ -651,29 +682,36 @@ body, html {
     background-size: cover;
     background-position: center;
     
-    /* Зеркальный наклон для правой стороны */
+    /* Наклон. 35% - это точка начала. Все, что левее 35% по X — прозрачно */
     clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
     
+    /* ВАЖНО: используем Flex для центрирования текста в ОСТАВШЕЙСЯ части */
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: -10%; /* Нахлест на белую часть */
+    align-items: center;      /* Вертикальное центрирование */
+    justify-content: flex-end; /* Прижимаем к правой части */
+    padding-right: 5%;        /* Отступ от правого края */
+}
+
+.sidebar-text {
+    /* Ограничиваем ширину текста, чтобы он не заходил на наклонную область */
+    width: 60%; 
 }
 
 .sidebar-text h1 {
     color: white;
-    font-size: 56px;
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     text-align: center;
-    padding-left: 20%; /* Чтобы текст не "резался" наклоном */
+    font-size: 2.5vw; /* Размер адаптируется под ширину */
+    white-space: nowrap; /* В одну строку */
+    margin: 0;
 }
 
-/* Адаптивность */
+/* На случай, если экран совсем узкий */
 @media (max-width: 900px) {
     .sidebar { display: none; }
-    .form-container { margin-left: 0; }
 }
+
 
 /* Стандартное состояние кнопки (серая) */
 .submit-btn {
@@ -1046,34 +1084,43 @@ body, html {
     min-height: 100vh;
 }
 
-/* 3. Левая панель (Сайдбар) с наклоном */
+/* 3. Сайдбар и его фон */
 .sidebar {
     position: relative;
     flex: 1.3;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     padding-left: 8%;
-    
-    /* Глубокий сине-фиолетовый градиент поверх картинки */
-    background: 
-        linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
-        url('img/background.png');
-    
-    background-size: cover;
-    background-position: center;
-    
-    /* Эффект наклона (срез справа) */
-    clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
     z-index: 2;
 }
 
-.sidebar-text h1 {
+/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+.sidebar-bg {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
+                url('img/background.png');
+    background-size: cover;
+    background-position: center;
+    clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    z-index: -1;
+}
+
+.sidebar-text {
+    z-index: 1;
     color: white;
+}
+
+.sidebar-text h1 {
     font-size: 64px;
     font-weight: 400;
     line-height: 1.1;
     text-transform: uppercase;
-    font-family: 'Playfair Display', serif; /* Шрифт с засечками */
+    font-family: 'Playfair Display', serif;
     letter-spacing: 2px;
 }
 
@@ -1084,8 +1131,6 @@ body, html {
     justify-content: center;
     align-items: center;
     padding: 40px;
-    /* Нахлест на область сайдбара из-за наклона */
-    margin-left: -12%; 
     z-index: 1;
 }
 
@@ -1140,7 +1185,6 @@ body, html {
     border-color: #cbd5e0;
 }
 
-/* Обертка пароля и иконка */
 .password-wrapper {
     position: relative;
 }
@@ -1178,11 +1222,11 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка (Серая в покое, Синяя при заполнении) */
+/* 7. Кнопка */
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0;
     color: white;
     border: none;
     border-radius: 40px;
@@ -1193,9 +1237,8 @@ body, html {
     margin-bottom: 20px;
 }
 
-/* Класс добавляется через JavaScript при заполнении всех полей */
 .submit-btn.active {
-    background-color: #1A1C41; /* Темно-синий под цвет сайдбара */
+    background-color: #1A1C41;
     cursor: pointer;
 }
 
@@ -1203,30 +1246,19 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Ссылки внизу */
-.login-redirect {
-    text-align: center;
-    font-size: 14px;
-    color: #718096;
-}
-
-.bold-link {
-    color: #1a1a1a;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-/* 9. Адаптивность */
-@media (max-width: 1024px) {
-    .sidebar-text h1 { font-size: 48px; }
+/* 8. Адаптивность */
+@media (max-width: 1100px) {
+    .sidebar-bg {
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+    }
 }
 
 @media (max-width: 850px) {
     .sidebar {
-        display: none; /* Скрываем сайдбар на мобильных */
+        display: none;
     }
     .form-container {
-        margin-left: 0;
+        width: 100%;
         padding: 20px;
     }
 }
@@ -1430,7 +1462,7 @@ html {
     /* Высота на весь экран */
 
     /* Добавляем отступ сверху, равный высоте хедера (примерно 150-180px) */
-    padding-top: 360px;
+    padding-top: 250px;
 
     display: flex;
     flex-direction: column;
@@ -2216,6 +2248,30 @@ html {
     border-radius: 8px !important;
     padding: 12px 15px !important;
     font-size: 14px;
+
+    /* appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a7a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+
+    background-position: calc(100% - 30px) center !important; 
+    
+    padding-right: 45px !important; */
+}
+
+#id_gender {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%237a7a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+
+    background-position: calc(100% - 15px) center !important; 
+    
+    padding-right: 45px !important;
 }
 
 /* КНОПКИ */
@@ -2429,6 +2485,31 @@ html {
     .news-detail-title {
         font-size: 22px;
     }
+}
+
+
+.feature-item {
+    background: #2d5a9e;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    
+    /* Добавляем плавность анимации */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Эффект при наведении */
+.feature-item:hover {
+    transform: translateY(-10px); /* Поднимает блок на 10px вверх */
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2); /* Усиливает тень для объема */
+    background: #3a72c7; /* Немного осветляем фон при наведении */
+    cursor: pointer;
+}
+
+.st-page-title {
+    font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;
 }
 
 ==================================================
@@ -7709,17 +7790,17 @@ class DocumentForm(forms.ModelForm):
 class ModelSubmissionForm(forms.ModelForm):
     class Meta:
         model = ModelSubmission
-        # Убираем 'model_file' и добавляем три новых поля
         fields = [
             'title', 
             'category', 
-            'standard', 
+            'standard',
+            'description', 
             'file_stp', 
             'file_igs', 
             'file_stl',
             'thumbnail',
         ]
-        # Твои виджеты (оставляем как есть для текстовых полей)
+        
         widgets = {
             'title': forms.TextInput(attrs={
                 'placeholder': 'Название модели', 
@@ -7735,7 +7816,6 @@ class ModelSubmissionForm(forms.ModelForm):
             }),
         }
 
-    # Не забудь про методы очистки для каждого файла, если ты их еще не добавил
     def clean_file_stp(self):
         return self.validate_extension('file_stp', ['.stp', '.step'])
 
@@ -8162,7 +8242,7 @@ FILE: .\website\views.py
 # website/views.py
 
 import os
-from time import timezone
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -8407,15 +8487,12 @@ def create_news_view(request):
         content = request.POST.get('content')
         image = request.FILES.get('image')
         
-        if title and image: # Простая проверка на обязательные поля
-            NewsItem.objects.create(
-                title=title,
-                content=content,
-                image=image
-            )
-            return redirect('anews') # Возвращаемся в таблицу новостей
+        if title: 
+            NewsItem.objects.create(title=title, content=content, image=image)
+            return redirect('anews')
 
-    return render(request, 'create_news.html')
+    # Передаем is_edit=False
+    return render(request, 'create_news.html', {'is_edit': False})
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -8450,21 +8527,34 @@ def model_edit_view(request, pk=None):
     if request.method == 'POST':
         form = ModelSubmissionForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            model_obj = form.save(commit=False)
-            if not pk:
-                model_obj.user = request.user
-            model_obj.save()
+            form.save()
             return redirect('acatalog')
     else:
         form = ModelSubmissionForm(instance=instance)
 
-    # ВОТ ЗДЕСЬ БЫЛА ОШИБКА. Меняем 'model_form.html' на 'amanage_model.html'
+    # ПОДГОТОВКА ФАЙЛОВ ДЛЯ ЦИКЛА (добавлено извлечение имени файла)
+    file_fields = []
+    fields_info = [('file_stp', 'STP'), ('file_igs', 'IGS'), ('file_stl', 'STL')]
+    
+    for field_name, ext in fields_info:
+        file_obj = getattr(instance, field_name) if instance else None
+        if file_obj and hasattr(file_obj, 'url'):
+            # Файл существует
+            file_url = file_obj.url
+            file_basename = os.path.basename(file_obj.name)
+        else:
+            # Файла нет
+            file_url = None
+            file_basename = None
+            
+        file_fields.append((field_name, ext, file_url, file_basename))
+
     return render(request, 'amanage_model.html', {
         'form': form,
         'edit_mode': pk is not None,
-        'instance': instance
+        'instance': instance,
+        'file_fields': file_fields
     })
-
 
 def acatalog_view(request):
     # Просто получаем все модели, так как статусов больше нет
@@ -9575,29 +9665,36 @@ body, html {
     background-size: cover;
     background-position: center;
     
-    /* Зеркальный наклон для правой стороны */
+    /* Наклон. 35% - это точка начала. Все, что левее 35% по X — прозрачно */
     clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
     
+    /* ВАЖНО: используем Flex для центрирования текста в ОСТАВШЕЙСЯ части */
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: -10%; /* Нахлест на белую часть */
+    align-items: center;      /* Вертикальное центрирование */
+    justify-content: flex-end; /* Прижимаем к правой части */
+    padding-right: 5%;        /* Отступ от правого края */
+}
+
+.sidebar-text {
+    /* Ограничиваем ширину текста, чтобы он не заходил на наклонную область */
+    width: 60%; 
 }
 
 .sidebar-text h1 {
     color: white;
-    font-size: 56px;
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     text-align: center;
-    padding-left: 20%; /* Чтобы текст не "резался" наклоном */
+    font-size: 2.5vw; /* Размер адаптируется под ширину */
+    white-space: nowrap; /* В одну строку */
+    margin: 0;
 }
 
-/* Адаптивность */
+/* На случай, если экран совсем узкий */
 @media (max-width: 900px) {
     .sidebar { display: none; }
-    .form-container { margin-left: 0; }
 }
+
 
 /* Стандартное состояние кнопки (серая) */
 .submit-btn {
@@ -9970,34 +10067,43 @@ body, html {
     min-height: 100vh;
 }
 
-/* 3. Левая панель (Сайдбар) с наклоном */
+/* 3. Сайдбар и его фон */
 .sidebar {
     position: relative;
     flex: 1.3;
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     padding-left: 8%;
-    
-    /* Глубокий сине-фиолетовый градиент поверх картинки */
-    background: 
-        linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
-        url('img/background.png');
-    
-    background-size: cover;
-    background-position: center;
-    
-    /* Эффект наклона (срез справа) */
-    clip-path: polygon(0 0, 100% 0, 75% 100%, 0% 100%);
     z-index: 2;
 }
 
-.sidebar-text h1 {
+/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+.sidebar-bg {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: linear-gradient(135deg, rgba(20, 22, 60, 0.85) 0%, rgba(50, 40, 110, 0.7) 100%),
+                url('img/background.png');
+    background-size: cover;
+    background-position: center;
+    clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+    z-index: -1;
+}
+
+.sidebar-text {
+    z-index: 1;
     color: white;
+}
+
+.sidebar-text h1 {
     font-size: 64px;
     font-weight: 400;
     line-height: 1.1;
     text-transform: uppercase;
-    font-family: 'Playfair Display', serif; /* Шрифт с засечками */
+    font-family: 'Playfair Display', serif;
     letter-spacing: 2px;
 }
 
@@ -10008,8 +10114,6 @@ body, html {
     justify-content: center;
     align-items: center;
     padding: 40px;
-    /* Нахлест на область сайдбара из-за наклона */
-    margin-left: -12%; 
     z-index: 1;
 }
 
@@ -10064,7 +10168,6 @@ body, html {
     border-color: #cbd5e0;
 }
 
-/* Обертка пароля и иконка */
 .password-wrapper {
     position: relative;
 }
@@ -10102,11 +10205,11 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка (Серая в покое, Синяя при заполнении) */
+/* 7. Кнопка */
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0;
     color: white;
     border: none;
     border-radius: 40px;
@@ -10117,9 +10220,8 @@ body, html {
     margin-bottom: 20px;
 }
 
-/* Класс добавляется через JavaScript при заполнении всех полей */
 .submit-btn.active {
-    background-color: #1A1C41; /* Темно-синий под цвет сайдбара */
+    background-color: #1A1C41;
     cursor: pointer;
 }
 
@@ -10127,30 +10229,19 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Ссылки внизу */
-.login-redirect {
-    text-align: center;
-    font-size: 14px;
-    color: #718096;
-}
-
-.bold-link {
-    color: #1a1a1a;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-/* 9. Адаптивность */
-@media (max-width: 1024px) {
-    .sidebar-text h1 { font-size: 48px; }
+/* 8. Адаптивность */
+@media (max-width: 1100px) {
+    .sidebar-bg {
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
+    }
 }
 
 @media (max-width: 850px) {
     .sidebar {
-        display: none; /* Скрываем сайдбар на мобильных */
+        display: none;
     }
     .form-container {
-        margin-left: 0;
+        width: 100%;
         padding: 20px;
     }
 }
@@ -10354,7 +10445,7 @@ html {
     /* Высота на весь экран */
 
     /* Добавляем отступ сверху, равный высоте хедера (примерно 150-180px) */
-    padding-top: 360px;
+    padding-top: 250px;
 
     display: flex;
     flex-direction: column;
@@ -11140,6 +11231,30 @@ html {
     border-radius: 8px !important;
     padding: 12px 15px !important;
     font-size: 14px;
+
+    /* appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%237a7a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+
+    background-position: calc(100% - 30px) center !important; 
+    
+    padding-right: 45px !important; */
+}
+
+#id_gender {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%237a7a7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+
+    background-position: calc(100% - 15px) center !important; 
+    
+    padding-right: 45px !important;
 }
 
 /* КНОПКИ */
@@ -11353,6 +11468,31 @@ html {
     .news-detail-title {
         font-size: 22px;
     }
+}
+
+
+.feature-item {
+    background: #2d5a9e;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    
+    /* Добавляем плавность анимации */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+/* Эффект при наведении */
+.feature-item:hover {
+    transform: translateY(-10px); /* Поднимает блок на 10px вверх */
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2); /* Усиливает тень для объема */
+    background: #3a72c7; /* Немного осветляем фон при наведении */
+    cursor: pointer;
+}
+
+.st-page-title {
+    font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;
 }
 
 ==================================================
@@ -11795,7 +11935,7 @@ FILE: .\website\templates\amanage_model.html
 
         {% if user.is_superuser %}
             <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+               class="{% if 'acatalog' in request.path %}st-active{% endif %}">
                КАТАЛОГ ИЗДЕЛИЙ
             </a>
 
@@ -11834,76 +11974,126 @@ FILE: .\website\templates\amanage_model.html
 
         <div class="st-white-card" style="padding: 40px; border-radius: 8px; border: 1px solid #eef0f3; background: #fff;">
             <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
+    {% csrf_token %}
+    
+    <!-- ВЕРХНИЙ БЛОК: Характеристики и Фото -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Название</label>
+                {{ form.title }}
+            </div>
+
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Тип изделия</label>
+                {{ form.category }}
+            </div>
+
+            <div class="st-group">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
+                {{ form.standard }}
+            </div>
+        </div>
+
+        <!-- ПРЕВЬЮ ФОТО -->
+        <div class="st-group">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Превью изделия</label>
+            <div>
+                {% if instance.thumbnail %}
+                    <div class="drop-zone" id="dz-photo" style="border: 2px solid #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                {% else %}
+                    <div class="drop-zone" id="dz-photo" style="border: 2px dashed #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                {% endif %}
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Название</label>
-                            {{ form.title }}
-                        </div>
-
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Тип изделия</label>
-                            {{ form.category }}
-                        </div>
-
-                        <div class="st-group">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
-                            {{ form.standard }}
-                        </div>
-                    </div>
-
-                    <div class="st-group">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Превью изделия</label>
-                        <div class="drop-zone" id="dz-photo" style="border: 2px dashed #cbd5e0; border-radius: 12px; height: 215px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
-                            <input type="file" name="thumbnail" id="id_thumbnail" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;" accept="image/*">
-                            
-                            <div id="photo-preview-container" style="display: none; width: 100%; height: 100%; padding: 10px;">
-                                <img id="photo-preview" src="#" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
-                            </div>
-
-                            <div id="photo-placeholder">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
-                                    <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
-                                </svg>
-                                <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
-                                <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <input type="file" name="thumbnail" id="id_thumbnail" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 5;" accept="image/*">
                     
-                    <div class="drop-zone" id="dz-stp" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_stp" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>STP</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
+                    {% if instance.thumbnail %}
+                        <div id="photo-preview-container" style="display: block; width: 100%; height: 100%; padding: 10px; z-index: 1;">
+                            <img id="photo-preview" src="{{ instance.thumbnail.url }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                        </div>
 
-                    <div class="drop-zone" id="dz-igs" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_igs" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>IGS</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
+                        <div id="photo-placeholder" style="display: none; z-index: 1;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
+                                <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
+                            </svg>
+                            <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
+                            <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
+                        </div>
+                    {% else %}
+                        <div id="photo-preview-container" style="display: none; width: 100%; height: 100%; padding: 10px; z-index: 1;">
+                            <img id="photo-preview" src="#" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+                        </div>
 
-                    <div class="drop-zone" id="dz-stl" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <input type="file" name="file_stl" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
-                        <span style="font-size: 30px;">📄</span>
-                        <p style="font-size: 13px; margin: 5px 0;">Формат <strong>STL</strong></p>
-                        <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px;"></div>
-                    </div>
-
+                        <div id="photo-placeholder" style="display: block; z-index: 1;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
+                                <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
+                            </svg>
+                            <p style="font-size: 13px; color: #3e5281; margin: 0;">Добавить фото</p>
+                            <p style="font-size: 11px; color: #a0aec0; margin-top: 4px;">PNG, JPG</p>
+                        </div>
+                    {% endif %}
                 </div>
-
-                <div style="display: flex; justify-content: center; gap: 20px;">
-                    <a href="{% url 'acatalog' %}" style="padding: 12px 60px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 500;">Отменить</a>
-                    <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Сохранить</button>
+                
+                {% if instance.thumbnail %}
+                <div class="download-link-container" style="text-align: center; margin-top: 8px;">
+                    <a href="{{ instance.thumbnail.url }}" target="_blank" download style="font-size: 13px; color: #3e5281; text-decoration: underline;">Скачать текущее фото</a>
                 </div>
-            </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- НОВЫЙ БЛОК: Описание изделия -->
+    <div style="margin-bottom: 30px;">
+        <div class="st-group">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Описание изделия</label>
+            <textarea name="{{ form.description.name }}" 
+                      id="{{ form.description.id_for_label }}" 
+                      style="width: 100%; box-sizing: border-box; padding: 12px 16px; border: 1px solid #cbd5e0; border-radius: 8px; background: #fff; font-family: inherit; font-size: 14px; color: #333; outline: none; resize: vertical; min-height: 120px; transition: border-color 0.2s;" 
+                      placeholder="Введите подробное описание изделия..."
+                      >{% if form.description.value %}{{ form.description.value }}{% endif %}</textarea>
+        </div>
+    </div>
+
+    <!-- ФАЙЛЫ (генерируются в цикле) -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+        {% for field_name, ext, file_url, file_basename in file_fields %}
+        <div>
+            {% if file_url %}
+                <div class="drop-zone" id="dz-{{ ext|lower }}" style="border: 2px solid #3e5281; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #eef2ff; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s;">
+            {% else %}
+                <div class="drop-zone" id="dz-{{ ext|lower }}" style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; position: relative; background: #f8f9fb; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s;">
+            {% endif %}
+                
+                <input type="file" name="{{ field_name }}" class="file-input" style="position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 5;">
+                
+                <span style="font-size: 30px; z-index: 1;">📄</span>
+                <p style="font-size: 13px; margin: 5px 0; z-index: 1;">Формат <strong>{{ ext }}</strong></p>
+                
+                <div class="file-name" style="font-size: 11px; color: #3e5281; word-break: break-all; padding: 0 10px; z-index: 1;">
+                    {% if file_url %}
+                        <span style="color: #2e7d32; font-weight: bold;">✅ Загружен:</span><br>{{ file_basename }}
+                    {% else %}
+                        Файл не загружен
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if file_url %}
+            <div class="download-link-container" style="text-align: center; margin-top: 8px;">
+                <a href="{{ file_url }}" download style="font-size: 13px; color: #3e5281; text-decoration: underline;">Скачать {{ ext }}</a>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- КНОПКИ -->
+    <div style="display: flex; justify-content: center; gap: 20px;">
+        <a href="{% url 'acatalog' %}" style="padding: 12px 60px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 500;">Отменить</a>
+        <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Сохранить</button>
+    </div>
+</form>
         </div>
     </main>
 </div>
@@ -11920,14 +12110,15 @@ FILE: .\website\templates\amanage_model.html
         });
 
         zone.addEventListener('dragleave', () => {
-            zone.style.borderColor = '#cbd5e0';
-            zone.style.background = '#f8f9fb';
+            // Если файл уже выбран или был загружен ранее (рамка solid) - сохраняем стили
+            if(zone.style.borderStyle !== 'solid') {
+                zone.style.borderColor = '#cbd5e0';
+                zone.style.background = '#f8f9fb';
+            }
         });
 
         zone.addEventListener('drop', (e) => {
             e.preventDefault();
-            zone.style.borderColor = '#cbd5e0';
-            zone.style.background = '#f8f9fb';
             if (e.dataTransfer.files.length) {
                 input.files = e.dataTransfer.files;
                 handlePreview(input);
@@ -11940,10 +12131,18 @@ FILE: .\website\templates\amanage_model.html
     });
 
     function handlePreview(input) {
-        const zone = input.parentElement;
+        // zone - это область драг-н-дропа. wrapper - обертка, включающая ссылку на скачивание
+        const zone = input.closest('.drop-zone');
+        const wrapper = zone.parentElement;
         const fileNameDiv = zone.querySelector('.file-name');
+        const downloadLink = wrapper.querySelector('.download-link-container');
         
         if (input.files && input.files[0]) {
+            // Скрываем старую ссылку на скачивание (так как выбран новый файл на замену)
+            if(downloadLink) {
+                downloadLink.style.display = 'none';
+            }
+
             // Если это фото
             if (input.name === 'thumbnail') {
                 const reader = new FileReader();
@@ -11952,15 +12151,17 @@ FILE: .\website\templates\amanage_model.html
                     document.getElementById('photo-preview-container').style.display = 'block';
                     document.getElementById('photo-placeholder').style.display = 'none';
                     zone.style.borderStyle = 'solid';
+                    zone.style.borderColor = '#3e5281';
                 }
                 reader.readAsDataURL(input.files[0]);
             } else {
-                // Если это файлы
+                // Если это CAD-файлы
                 if (fileNameDiv) {
-                    fileNameDiv.textContent = '✅ ' + input.files[0].name;
+                    fileNameDiv.innerHTML = '<span style="color: #e65100; font-weight: bold;">⏳ Будет загружен:</span><br>' + input.files[0].name;
                 }
                 zone.style.background = '#eef2ff';
                 zone.style.borderColor = '#3e5281';
+                zone.style.borderStyle = 'solid';
             }
         }
     }
@@ -12265,95 +12466,67 @@ FILE: .\website\templates\create_news.html
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
-            </a>
-
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
-            </a>
-
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
-            </a>
-        {% endif %}
-
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
-
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
-
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+    <!-- Боковое меню (оставляем как есть) -->
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}">ПРОФИЛЬ</a>
+            <a href="{% url 'acatalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+            <a href="{% url 'adocumentation' %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="st-active">НОВОСТИ</a>
+            <a href="{% url 'settings' %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
 
     <main class="st-content-area">
-        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">Добавить новость</h1>
+        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">
+            {% if is_edit %}Редактирование новости{% else %}Добавление новости{% endif %}
+        </h1>
 
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="st-white-card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid #eef0f3; background: #fff;">
-                <div style="padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
-                    <div style="background: #3e5281; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase;">news</div>
-                    <span style="font-weight: bold; font-size: 18px; color: #1e293b;">Новость</span>
+            <div class="st-white-card" style="padding: 0; border-radius: 12px; border: 1px solid #eef0f3; background: #fff;">
+                <div style="padding: 20px 30px; border-bottom: 1px solid #eee;">
+                    <span style="font-weight: bold; font-size: 18px; color: #1e293b;">
+                        {% if is_edit %}Изменение текущей новости{% else %}Создать новую запись{% endif %}
+                    </span>
                 </div>
 
                 <div style="padding: 30px;">
                     <div class="st-group" style="margin-bottom: 25px;">
                         <label style="display: block; color: #333; font-weight: 600; margin-bottom: 10px;">Заголовок</label>
-                        <input type="text" name="title" placeholder="Введите название новости..." required 
+                        <input type="text" name="title" value="{{ news.title|default:'' }}" placeholder="Введите название новости..." required 
                                style="width: 100%; padding: 14px; border: 1px solid #eef0f3; border-radius: 8px; background: #f9f9f9; outline: none; font-size: 14px;">
                     </div>
 
                     <div class="st-group" style="margin-bottom: 25px;">
                         <label style="display: block; color: #333; font-weight: 600; margin-bottom: 10px;">Текст новости</label>
                         <textarea name="content" rows="8" placeholder="Введите основной текст..." required
-                                  style="width: 100%; padding: 14px; border: 1px solid #eef0f3; border-radius: 8px; background: #f9f9f9; resize: none; outline: none; font-size: 14px;"></textarea>
+                                  style="width: 100%; padding: 14px; border: 1px solid #eef0f3; border-radius: 8px; background: #f9f9f9; resize: none; outline: none; font-size: 14px;">{{ news.content|default:'' }}</textarea>
                     </div>
 
                     <div class="st-group">
-                        <label style="display: block; color: #333; font-weight: 600; margin-bottom: 10px;">Изображение новости</label>
-                        <div class="drop-zone" id="dz-news" style="border: 2px dashed #cbd5e0; border-radius: 12px; min-height: 200px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                        <label style="display: block; color: #333; font-weight: 600; margin-bottom: 10px;">Изображение</label>
+                        <div class="drop-zone" id="dz-news" style="border: 2px dashed #cbd5e0; border-radius: 12px; min-height: 200px; text-align: center; position: relative; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;">
                             <input type="file" name="image" id="id_image" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;" accept="image/*">
                             
-                            <div id="preview-container" style="display: none; width: 100%; padding: 15px;">
-                                <img id="image-preview" src="#" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain;">
-                                <p id="file-name-text" style="margin-top: 10px; font-size: 13px; color: #3e5281; font-weight: 600;"></p>
+                            <!-- Если новость редактируется и картинка есть -->
+                            <div id="preview-container" style="{% if news.image %}display: block;{% else %}display: none;{% endif %} width: 100%; padding: 15px;">
+                                <img id="image-preview" src="{% if news.image %}{{ news.image.url }}{% endif %}" style="max-width: 100%; max-height: 300px; border-radius: 8px; object-fit: contain;">
+                                <p id="file-name-text" style="margin-top: 10px; font-size: 13px; color: #3e5281; font-weight: 600;">{% if news.image %}Текущее изображение{% endif %}</p>
                             </div>
 
-                            <div id="placeholder-content">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 10px;">
-                                    <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="#3e5281"/>
-                                </svg>
-                                <p style="font-size: 14px; color: #3e5281; margin: 0; font-weight: 500;">Нажмите или перетащите изображение</p>
-                                <p style="font-size: 12px; color: #a0aec0; margin-top: 4px;">Рекомендуемый формат: JPG, PNG</p>
+                            <div id="placeholder-content" style="{% if news.image %}display: none;{% endif %}">
+                                <p style="font-size: 14px; color: #3e5281; font-weight: 500;">Нажмите для выбора изображения</p>
                             </div>
                         </div>
                     </div>
 
                     <div style="display: flex; justify-content: center; gap: 20px; margin-top: 40px;">
                         <a href="{% url 'anews' %}" style="width: 180px; padding: 12px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; text-align: center; font-weight: 500;">Отменить</a>
-                        <button type="submit" style="width: 180px; padding: 12px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <span>✎</span> Сохранить
+                        <button type="submit" style="width: 180px; padding: 12px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">
+                            {% if is_edit %}Обновить{% else %}Опубликовать{% endif %}
                         </button>
                     </div>
                 </div>
@@ -12362,56 +12535,26 @@ FILE: .\website\templates\create_news.html
     </main>
 </div>
 
+<!-- (Скрипт превью остается прежним) -->
 <script>
-    const dropZone = document.getElementById('dz-news');
     const fileInput = document.getElementById('id_image');
     const previewContainer = document.getElementById('preview-container');
     const previewImage = document.getElementById('image-preview');
     const placeholderContent = document.getElementById('placeholder-content');
     const fileNameText = document.getElementById('file-name-text');
 
-    // Подсветка при наведении файла
-    ['dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, e => e.preventDefault());
-    });
-
-    dropZone.addEventListener('dragover', () => {
-        dropZone.style.borderColor = '#3e5281';
-        dropZone.style.background = '#eef2ff';
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.style.borderColor = '#cbd5e0';
-        dropZone.style.background = '#f8f9fb';
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        dropZone.style.borderColor = '#cbd5e0';
-        dropZone.style.background = '#f8f9fb';
-        if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            handleImagePreview(fileInput);
-        }
-    });
-
     fileInput.addEventListener('change', function() {
-        handleImagePreview(this);
-    });
-
-    function handleImagePreview(input) {
-        if (input.files && input.files[0]) {
+        if (this.files && this.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImage.src = e.target.result;
                 previewContainer.style.display = 'block';
                 placeholderContent.style.display = 'none';
-                fileNameText.textContent = '✅ ' + input.files[0].name;
-                dropZone.style.borderStyle = 'solid';
-                dropZone.style.borderColor = '#3e5281';
+                fileNameText.textContent = 'Новый файл: ' + fileInput.files[0].name;
             }
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(this.files[0]);
         }
-    }
+    });
 </script>
 {% endblock %}
 
@@ -12624,226 +12767,104 @@ FILE: .\website\templates\document_form.html
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
-            </a>
-
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
-            </a>
-
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
-            </a>
-        {% endif %}
-
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
-
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
-
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+    <!-- Сайдбар -->
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+                <a href="{% url 'acatalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+                <a href="{% url 'adocumentation' %}" class="st-active">ДОКУМЕНТАЦИЯ</a>
+                <a href="{% url 'anews' %}">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
 
     <main class="st-content-area">
-        <h1 style="font-size: 28px; margin-bottom: 5px; color: #333; font-weight: bold;">
+        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">
             {% if edit_mode %}Редактировать документ{% else %}Добавить документ{% endif %}
         </h1>
-        <p style="color: #666; margin-bottom: 25px;">Добро пожаловать!</p>
 
-        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3;">
-    <div style="padding: 15px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 20px;">📄</span>
-        <strong style="font-size: 18px; color: #333;">Документ</strong>
-    </div>
-
-    <form method="post" enctype="multipart/form-data" style="padding: 30px;">
-        {% csrf_token %}
-        
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Номер стандарта</label>
-            {{ form.standard_number }}
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Название</label>
-            {{ form.name }}
-        </div>
-
-        <div style="margin-bottom: 30px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Файл документа (PDF)</label>
-            
-            <div class="st-file-upload-container" id="drop-zone">
-                <label class="st-file-upload-label">
-                    {{ form.file }}
-                    <div class="st-file-upload-content" id="upload-content">
-                        <div class="st-upload-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="12" y1="18" x2="12" y2="12"></line>
-                                <line x1="9" y1="15" x2="15" y2="15"></line>
-                            </svg>
-                        </div>
-                        <span class="st-upload-text" id="file-name-text">
-                            Загрузить файл документа PDF или перетащите его сюда
-                        </span>
-                    </div>
-                </label>
+        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3; border-radius: 8px; background: #fff;">
+            <div style="padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">📄</span>
+                <strong style="font-size: 18px; color: #333;">Данные документа</strong>
             </div>
+
+            <form method="post" enctype="multipart/form-data" style="padding: 30px;">
+                {% csrf_token %}
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Номер стандарта</label>
+                    <input type="text" name="standard_number" value="{{ form.instance.standard_number|default:'' }}" class="st-input" required>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Название</label>
+                    <input type="text" name="name" value="{{ form.instance.name|default:'' }}" class="st-input" required>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Файл документа (PDF)</label>
+                    
+{% if form.instance.file %}
+    <div style="margin-bottom: 15px; padding: 10px; background: #f1f4f8; border-radius: 6px; font-size: 13px;">
+        <span style="color: #666;">Текущий файл: </span>
+        <a href="{{ form.instance.file.url }}" 
+           download 
+           style="color: #3e5281; font-weight: 600; text-decoration: none;"
+           onmouseover="this.style.textDecoration='underline'" 
+           onmouseout="this.style.textDecoration='none'">
+           {{ form.instance.file.name|cut:"documents/pdfs/" }}
+        </a>
+    </div>
+{% endif %}
+
+                    <div class="st-file-upload-container" id="drop-zone" style="border: 2px dashed #d1d9e2; border-radius: 8px; background: #f1f4f8; cursor: pointer; transition: 0.3s; padding: 20px;">
+                        <label class="st-file-upload-label" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                            <!-- ВАЖНО: required только если это создание нового (not edit_mode) -->
+                            <input type="file" name="file" id="id_file" {% if not edit_mode %}required{% endif %} accept=".pdf" style="display: none;">
+                            
+                            <div class="st-upload-icon" style="opacity: 0.6; margin-bottom: 10px;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <span class="st-upload-text" id="file-name-text" style="font-size: 13px; color: #888;">
+                                {% if edit_mode %}Выберите файл, чтобы заменить текущий{% else %}Нажмите для выбора PDF файла{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #eee; padding-top: 25px;">
+                    <a href="{% url 'adocumentation' %}" style="padding: 12px 35px; border-radius: 6px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 600;">Отменить</a>
+                    <button type="submit" style="padding: 12px 35px; border-radius: 6px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 600;">
+                        {% if edit_mode %}Сохранить изменения{% else %}Создать документ{% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #eee; padding-top: 25px;">
-            <a href="{% url 'adocumentation' %}" class="st-btn-white">Отменить</a>
-            <button type="submit" class="st-btn-blue">
-                {% if edit_mode %}Сохранить изменения{% else %}Создать документ{% endif %}
-            </button>
-        </div>
-    </form>
-</div>
-
-<style>
-    .file-upload-wrapper input[type="file"] {
-        background: #f1f4f8;
-        padding: 20px;
-        border: 2px dashed #3e5281;
-        width: 100%;
-        cursor: pointer;
-        
-    }
-    /* Контейнер области загрузки */
-.st-file-upload-container {
-    width: 100%;
-    background: #f1f4f8; /* Цвет фона как в инпутах */
-    border-radius: 8px;
-    border: 1px solid #eef0f3;
-    transition: 0.3s;
-}
-
-.st-file-upload-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    cursor: pointer;
-    width: 100%;
-}
-
-/* Скрываем стандартный инпут Django */
-.st-file-upload-label input[type="file"] {
-    display: none;
-}
-
-.st-file-upload-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.st-upload-icon {
-    opacity: 0.6;
-}
-
-.st-upload-text {
-    font-size: 14px;
-    color: #999;
-    max-width: 250px;
-    line-height: 1.4;
-}
-
-/* Эффект при наведении */
-.st-file-upload-container:hover {
-    background: #eaeff5;
-    border-color: #3e5281;
-}
-.st-file-upload-container {
-    width: 100%;
-    background: #f1f4f8; /* Цвет фона из макета */
-    border: 2px dashed #d1d9e2; /* Пунктирная рамка для зоны загрузки */
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.st-file-upload-label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
-    cursor: pointer;
-    min-height: 160px;
-}
-
-.st-file-upload-label input[type="file"] {
-    display: none; /* Скрываем некрасивую кнопку "Выберите файл" */
-}
-
-.st-upload-text {
-    font-size: 14px;
-    color: #888;
-    text-align: center;
-    margin-top: 10px;
-    display: block;
-}
-</style>
-</main>
+    </main>
 </div>
 
 <script>
-    const fileInput = document.querySelector('input[type="file"]');
+    const fileInput = document.getElementById('id_file');
     const fileNameText = document.getElementById('file-name-text');
-    const uploadContent = document.getElementById('upload-content');
+    const dropZone = document.getElementById('drop-zone');
 
     fileInput.addEventListener('change', function() {
         if (this.files && this.files.length > 0) {
-            const fileName = this.files[0].name;
-            // Меняем текст на имя файла и подсвечиваем его
-            fileNameText.innerHTML = `<strong>Выбран файл:</strong><br>${fileName}`;
-            uploadContent.style.opacity = '1';
-            document.getElementById('drop-zone').style.borderColor = '#3e5281';
-            document.getElementById('drop-zone').style.background = '#eef2f7';
+            fileNameText.innerHTML = `<strong>Выбран файл:</strong> ${this.files[0].name}`;
+            dropZone.style.borderColor = '#3e5281';
+            dropZone.style.background = '#eef2f7';
         }
     });
-
-    // Опционально: эффект перетаскивания (Drag & Drop)
-    const dropZone = document.getElementById('drop-zone');
-    
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#e0e6ed';
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#f1f4f8';
-        }, false);
-    });
 </script>
+
 <style>
     .st-input {
         width: 100%;
@@ -12853,7 +12874,9 @@ FILE: .\website\templates\document_form.html
         padding: 12px 15px !important;
         font-size: 14px;
         color: #333;
+        outline: none;
     }
+    .st-input:focus { border: 1px solid #3e5281 !important; }
 </style>
 {% endblock %}
 
@@ -13031,7 +13054,6 @@ FILE: .\website\templates\index.html
             </div>
             <div class="footer-actions">
                 <span class="footer-phone">+7 (967) 899 77 55</span>
-                <a href="#" class="btn-contact"><i class='bx bx-user'></i> Связаться</a>
             </div>
         </div>
         <div class="footer-legal">
@@ -14509,9 +14531,9 @@ FILE: .\website\templates\settings.html
             <div class="st-form-footer">
                 {% if is_edit %}
                     <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
-                    <button type="submit" class="st-btn-blue">✓ Сохранить</button>
+                    <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
                 {% else %}
-                    <a href="?edit=1" class="st-btn-blue">✎ Редактировать</a>
+                    <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
                 {% endif %}
             </div>
         </form>
@@ -14537,6 +14559,7 @@ FILE: .\website\templates\signup.html
 <body>
     <div class="registration-page">
         <div class="sidebar">
+            <div class="sidebar-bg"></div> <!-- ЭТОТ БЛОК ДОЛЖЕН БЫТЬ -->
             <div class="sidebar-text">
                 <h1>ДОБРО<br>ПОЖАЛОВАТЬ!</h1>
             </div>

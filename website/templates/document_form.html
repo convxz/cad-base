@@ -1,226 +1,104 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
-            </a>
-
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
-            </a>
-
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
-            </a>
-        {% endif %}
-
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
-
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
-
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+    <!-- Сайдбар -->
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}">ПРОФИЛЬ</a>
+            {% if user.is_superuser %}
+                <a href="{% url 'acatalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a>
+                <a href="{% url 'adocumentation' %}" class="st-active">ДОКУМЕНТАЦИЯ</a>
+                <a href="{% url 'anews' %}">НОВОСТИ</a>
+            {% endif %}
+            <a href="{% url 'settings' %}">НАСТРОЙКИ</a>
+            <a href="{% url 'security' %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'chat' %}">ЧАТ С ВОПРОСАМИ</a>
+        </nav>
+    </aside>
 
     <main class="st-content-area">
-        <h1 style="font-size: 28px; margin-bottom: 5px; color: #333; font-weight: bold;">
+        <h1 style="font-size: 28px; margin-bottom: 25px; color: #333; font-weight: bold;">
             {% if edit_mode %}Редактировать документ{% else %}Добавить документ{% endif %}
         </h1>
-        <p style="color: #666; margin-bottom: 25px;">Добро пожаловать!</p>
 
-        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3;">
-    <div style="padding: 15px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
-        <span style="font-size: 20px;">📄</span>
-        <strong style="font-size: 18px; color: #333;">Документ</strong>
-    </div>
-
-    <form method="post" enctype="multipart/form-data" style="padding: 30px;">
-        {% csrf_token %}
-        
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Номер стандарта</label>
-            {{ form.standard_number }}
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Название</label>
-            {{ form.name }}
-        </div>
-
-        <div style="margin-bottom: 30px;">
-            <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Файл документа (PDF)</label>
-            
-            <div class="st-file-upload-container" id="drop-zone">
-                <label class="st-file-upload-label">
-                    {{ form.file }}
-                    <div class="st-file-upload-content" id="upload-content">
-                        <div class="st-upload-icon">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="12" y1="18" x2="12" y2="12"></line>
-                                <line x1="9" y1="15" x2="15" y2="15"></line>
-                            </svg>
-                        </div>
-                        <span class="st-upload-text" id="file-name-text">
-                            Загрузить файл документа PDF или перетащите его сюда
-                        </span>
-                    </div>
-                </label>
+        <div class="st-white-card" style="padding: 0; overflow: hidden; border: 1px solid #eef0f3; border-radius: 8px; background: #fff;">
+            <div style="padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 20px;">📄</span>
+                <strong style="font-size: 18px; color: #333;">Данные документа</strong>
             </div>
+
+            <form method="post" enctype="multipart/form-data" style="padding: 30px;">
+                {% csrf_token %}
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Номер стандарта</label>
+                    <input type="text" name="standard_number" value="{{ form.instance.standard_number|default:'' }}" class="st-input" required>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Название</label>
+                    <input type="text" name="name" value="{{ form.instance.name|default:'' }}" class="st-input" required>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <label style="display: block; font-size: 13px; color: #666; margin-bottom: 8px;">Файл документа (PDF)</label>
+                    
+{% if form.instance.file %}
+    <div style="margin-bottom: 15px; padding: 10px; background: #f1f4f8; border-radius: 6px; font-size: 13px;">
+        <span style="color: #666;">Текущий файл: </span>
+        <a href="{{ form.instance.file.url }}" 
+           download 
+           style="color: #3e5281; font-weight: 600; text-decoration: none;"
+           onmouseover="this.style.textDecoration='underline'" 
+           onmouseout="this.style.textDecoration='none'">
+           {{ form.instance.file.name|cut:"documents/pdfs/" }}
+        </a>
+    </div>
+{% endif %}
+
+                    <div class="st-file-upload-container" id="drop-zone" style="border: 2px dashed #d1d9e2; border-radius: 8px; background: #f1f4f8; cursor: pointer; transition: 0.3s; padding: 20px;">
+                        <label class="st-file-upload-label" style="display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                            <!-- ВАЖНО: required только если это создание нового (not edit_mode) -->
+                            <input type="file" name="file" id="id_file" {% if not edit_mode %}required{% endif %} accept=".pdf" style="display: none;">
+                            
+                            <div class="st-upload-icon" style="opacity: 0.6; margin-bottom: 10px;">
+                                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <span class="st-upload-text" id="file-name-text" style="font-size: 13px; color: #888;">
+                                {% if edit_mode %}Выберите файл, чтобы заменить текущий{% else %}Нажмите для выбора PDF файла{% endif %}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #eee; padding-top: 25px;">
+                    <a href="{% url 'adocumentation' %}" style="padding: 12px 35px; border-radius: 6px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 600;">Отменить</a>
+                    <button type="submit" style="padding: 12px 35px; border-radius: 6px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 600;">
+                        {% if edit_mode %}Сохранить изменения{% else %}Создать документ{% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div style="display: flex; justify-content: center; gap: 15px; border-top: 1px solid #eee; padding-top: 25px;">
-            <a href="{% url 'adocumentation' %}" class="st-btn-white">Отменить</a>
-            <button type="submit" class="st-btn-blue">
-                {% if edit_mode %}Сохранить изменения{% else %}Создать документ{% endif %}
-            </button>
-        </div>
-    </form>
-</div>
-
-<style>
-    .file-upload-wrapper input[type="file"] {
-        background: #f1f4f8;
-        padding: 20px;
-        border: 2px dashed #3e5281;
-        width: 100%;
-        cursor: pointer;
-        
-    }
-    /* Контейнер области загрузки */
-.st-file-upload-container {
-    width: 100%;
-    background: #f1f4f8; /* Цвет фона как в инпутах */
-    border-radius: 8px;
-    border: 1px solid #eef0f3;
-    transition: 0.3s;
-}
-
-.st-file-upload-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    cursor: pointer;
-    width: 100%;
-}
-
-/* Скрываем стандартный инпут Django */
-.st-file-upload-label input[type="file"] {
-    display: none;
-}
-
-.st-file-upload-content {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.st-upload-icon {
-    opacity: 0.6;
-}
-
-.st-upload-text {
-    font-size: 14px;
-    color: #999;
-    max-width: 250px;
-    line-height: 1.4;
-}
-
-/* Эффект при наведении */
-.st-file-upload-container:hover {
-    background: #eaeff5;
-    border-color: #3e5281;
-}
-.st-file-upload-container {
-    width: 100%;
-    background: #f1f4f8; /* Цвет фона из макета */
-    border: 2px dashed #d1d9e2; /* Пунктирная рамка для зоны загрузки */
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.st-file-upload-label {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
-    cursor: pointer;
-    min-height: 160px;
-}
-
-.st-file-upload-label input[type="file"] {
-    display: none; /* Скрываем некрасивую кнопку "Выберите файл" */
-}
-
-.st-upload-text {
-    font-size: 14px;
-    color: #888;
-    text-align: center;
-    margin-top: 10px;
-    display: block;
-}
-</style>
-</main>
+    </main>
 </div>
 
 <script>
-    const fileInput = document.querySelector('input[type="file"]');
+    const fileInput = document.getElementById('id_file');
     const fileNameText = document.getElementById('file-name-text');
-    const uploadContent = document.getElementById('upload-content');
+    const dropZone = document.getElementById('drop-zone');
 
     fileInput.addEventListener('change', function() {
         if (this.files && this.files.length > 0) {
-            const fileName = this.files[0].name;
-            // Меняем текст на имя файла и подсвечиваем его
-            fileNameText.innerHTML = `<strong>Выбран файл:</strong><br>${fileName}`;
-            uploadContent.style.opacity = '1';
-            document.getElementById('drop-zone').style.borderColor = '#3e5281';
-            document.getElementById('drop-zone').style.background = '#eef2f7';
+            fileNameText.innerHTML = `<strong>Выбран файл:</strong> ${this.files[0].name}`;
+            dropZone.style.borderColor = '#3e5281';
+            dropZone.style.background = '#eef2f7';
         }
     });
-
-    // Опционально: эффект перетаскивания (Drag & Drop)
-    const dropZone = document.getElementById('drop-zone');
-    
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#e0e6ed';
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, (e) => {
-            e.preventDefault();
-            dropZone.style.background = '#f1f4f8';
-        }, false);
-    });
 </script>
+
 <style>
     .st-input {
         width: 100%;
@@ -230,6 +108,8 @@
         padding: 12px 15px !important;
         font-size: 14px;
         color: #333;
+        outline: none;
     }
+    .st-input:focus { border: 1px solid #3e5281 !important; }
 </style>
 {% endblock %}

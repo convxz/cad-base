@@ -3,9 +3,31 @@
 
 {% block content %}
 <style>
-    /* Добавляем стили состояний для кнопки, чтобы не ломать кавычки в инлайне */
+    /* Стили для активной кнопки избранного */
     .fav-active { background: #3e5281 !important; color: white !important; }
     .fav-active svg { fill: white !important; }
+    
+    /* Контейнер для фото/3D (чтобы сохранять пропорции 16/10) */
+    .viewer-container {
+        width: 100%; 
+        aspect-ratio: 16/10; 
+        background: #f0f2f5; 
+        border-radius: 12px; 
+        border: 1px solid #e0e0e0; 
+        position: relative; 
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Изображение внутри контейнера (если нет 3D) */
+    .viewer-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Картинка помещается целиком без обрезки */
+        background: #fff;    /* Белый фон под картинкой смотрится лучше */
+    }
 </style>
 
 <div class="catalog-section">
@@ -23,48 +45,78 @@
 
             <div style="display: grid; grid-template-columns: 1fr 350px; gap: 40px;">
                 
+                <!-- ЛЕВАЯ ЧАСТЬ (Просмотр и Описание) -->
                 <div>
-                    <div id="viewerWrap" style="width: 100%; aspect-ratio: 16/10; background: #f0f2f5; border-radius: 12px; border: 1px solid #e0e0e0; position: relative; overflow: hidden;">
-                        <canvas id="threeCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                    <div id="viewerWrap" class="viewer-container">
                         
-                        <div id="viewerOverlay" style="position: absolute; inset: 0; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-                            <div id="ovIcon" style="font-size: 40px; margin-bottom: 15px;">📦</div>
-                            <div id="ovText" style="font-size: 14px; color: #666; margin-bottom: 15px;">Подготовка визуализации...</div>
-                            <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
-                                <div id="progressBar" style="width: 0%; height: 100%; background: #3e5281; transition: width 0.3s;"></div>
+                        {% if submission.file_stl %}
+                            <!-- ЕСЛИ ЕСТЬ STL ФАЙЛ: Включаем 3D Viewer -->
+                            <canvas id="threeCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                            
+                            <div id="viewerOverlay" style="position: absolute; inset: 0; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                                <div id="ovIcon" style="font-size: 40px; margin-bottom: 15px;">📦</div>
+                                <div id="ovText" style="font-size: 14px; color: #666; margin-bottom: 15px;">Подготовка визуализации...</div>
+                                <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                                    <div id="progressBar" style="width: 0%; height: 100%; background: #3e5281; transition: width 0.3s;"></div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="viewerHint" style="position: absolute; top: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; display: none;">
-                            ЛКМ — вращение · Колесо — масштаб
-                        </div>
+                            <div id="viewerHint" style="position: absolute; top: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; display: none;">
+                                ЛКМ — вращение · Колесо — масштаб
+                            </div>
+
+                        {% elif submission.thumbnail %}
+                            <!-- ЕСЛИ НЕТ STL, НО ЕСТЬ ФОТО: Показываем фото в том же блоке -->
+                            <img src="{{ submission.thumbnail.url }}" alt="{{ submission.title }}" class="viewer-image">
+                            
+                            <div style="position: absolute; bottom: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px;">
+                                3D-просмотр недоступен (отсутствует файл STL)
+                            </div>
+
+                        {% else %}
+                            <!-- ЕСЛИ НЕТ НИ STL, НИ ФОТО: Показываем заглушку -->
+                            <div style="text-align: center; color: #999;">
+                                <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
+                                <div style="font-size: 14px;">Нет изображения и 3D-модели</div>
+                            </div>
+                        {% endif %}
+
                     </div>
 
                     <div style="margin-top: 30px;">
                         <h3 style="font-size: 18px; color: #2d5a9e; margin-bottom: 15px;">Описание</h3>
                         <div class="news-detail-content" style="font-size: 16px;">
-                            {{ submission.description|linebreaks|default:"Описание для данной модели не предоставлено." }}
+                            {{ submission.description|linebreaks|default:"Описание для данного изделия не предоставлено." }}
                         </div>
                     </div>
                 </div>
 
+                <!-- ПРАВАЯ ЧАСТЬ (Кнопки действий и Информация) -->
                 <aside>
                     <div style="background: #f4f6f9; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
                         <h3 style="font-size: 16px; margin-bottom: 20px; color: #333;">Действия</h3>
                         
                         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
-                        {% if submission.file_stp %}
-                            <a href="{% url 'download_file' submission.pk 'stp' %}" class="download-link" style="justify-content: center;">Скачать STEP</a>
-                        {% endif %}
+                            {% if submission.file_stp %}
+                                <a href="{% url 'download_file' submission.pk 'stp' %}" class="download-link" style="justify-content: center;">Скачать STEP</a>
+                            {% endif %}
 
-                        {% if submission.file_stl %}
-                            <a href="{% url 'download_file' submission.pk 'stl' %}" class="download-link" style="justify-content: center; background: #5a6b94;">Скачать STL</a>
-                        {% endif %}
+                            {% if submission.file_stl %}
+                                <a href="{% url 'download_file' submission.pk 'stl' %}" class="download-link" style="justify-content: center;">Скачать STL</a>
+                            {% endif %}
 
-                        {% if submission.file_igs %}
-                            <a href="{% url 'download_file' submission.pk 'igs' %}" class="download-link" style="justify-content: center; background: #7a8bb3;">Скачать IGES</a>
-                        {% endif %}
+                            {% if submission.file_igs %}
+                                <a href="{% url 'download_file' submission.pk 'igs' %}" class="download-link" style="justify-content: center;">Скачать IGES</a>
+                            {% endif %}
                             
+                            {% if not submission.file_stp and not submission.file_stl and not submission.file_igs %}
+                                <div style="text-align: center; padding: 10px; color: #999; font-size: 13px; background: white; border-radius: 6px; border: 1px dashed #ccc;">
+                                    Файлы для скачивания отсутствуют
+                                </div>
+                            {% endif %}
+
+                            <!-- Кнопка Избранное -->
+                            {% if user.is_authenticated %}
                             <button type="button" id="fav-btn" data-id="{{ submission.pk }}" style="
                                 display: flex;
                                 align-items: center;
@@ -90,6 +142,7 @@
                                     {% if submission in user.profile.favorite_models.all %}В избранном{% else %}Сохранить в избранное{% endif %}
                                 </span>
                             </button>
+                            {% endif %}
                         </div>
 
                         <hr style="border: none; border-top: 1px solid #ddd; margin-bottom: 20px;">
@@ -100,97 +153,100 @@
                                 <span style="font-weight: 600;">{{ submission.standard|default:"—" }}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                                <span style="color: #888;">Категория:</span>
+                                <span style="font-weight: 600; text-align: right; max-width: 60%;">{{ submission.category|default:"—" }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px;">
                                 <span style="color: #888;">Добавлено:</span>
                                 <span style="font-weight: 600;">{{ submission.created_at|date:"d.m.Y" }}</span>
                             </div>
                         </div>
                     </div>
                 </aside>
+
             </div>
         </div>
     </div>
 </div>
 
+<!-- СКРИПТ 3D-Viewer'а (загружается только если есть STL) -->
+{% if submission.file_stl %}
 <script type="module">
 import * as THREE from 'https://esm.sh/three@0.158.0';
 import { OrbitControls } from 'https://esm.sh/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/STLLoader.js';
 
-const MODEL_URL = '{% if submission.file_stl %}{{ submission.file_stl.url }}{% endif %}';
+const MODEL_URL = '{{ submission.file_stl.url }}';
+const canvas = document.getElementById('threeCanvas');
+const wrap = document.getElementById('viewerWrap');
 
-if (!MODEL_URL) {
-    document.getElementById('ovText').innerHTML = "Предпросмотр недоступен<br><small>Требуется STL файл</small>";
-    document.getElementById('ovIcon').textContent = "⚠️";
-} else {
-    const canvas = document.getElementById('threeCanvas');
-    const wrap = document.getElementById('viewerWrap');
-    
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
-    
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
 
-    const loader = new STLLoader();
-    loader.load(MODEL_URL, (geometry) => {
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x3e5281, 
-            metalness: 0.5, 
-            roughness: 0.4 
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        
-        geometry.computeBoundingBox();
-        const center = new THREE.Vector3();
-        geometry.boundingBox.getCenter(center);
-        mesh.position.sub(center);
-        scene.add(mesh);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
-        const size = geometry.boundingBox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
-        camera.lookAt(0, 0, 0);
-        
-        document.getElementById('viewerOverlay').style.display = 'none';
-        document.getElementById('viewerHint').style.display = 'block';
-    }, (xhr) => {
-        if (xhr.lengthComputable) {
-            const pct = Math.round(xhr.loaded / xhr.total * 100);
-            document.getElementById('progressBar').style.width = pct + '%';
-        }
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 10, 7);
+scene.add(dirLight);
+
+const loader = new STLLoader();
+loader.load(MODEL_URL, (geometry) => {
+    const material = new THREE.MeshStandardMaterial({ 
+        color: 0x3e5281, 
+        metalness: 0.5, 
+        roughness: 0.4 
     });
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    geometry.computeBoundingBox();
+    const center = new THREE.Vector3();
+    geometry.boundingBox.getCenter(center);
+    mesh.position.sub(center);
+    scene.add(mesh);
 
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
+    const size = geometry.boundingBox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
+    camera.lookAt(0, 0, 0);
+    
+    document.getElementById('viewerOverlay').style.display = 'none';
+    document.getElementById('viewerHint').style.display = 'block';
+}, (xhr) => {
+    if (xhr.lengthComputable) {
+        const pct = Math.round(xhr.loaded / xhr.total * 100);
+        document.getElementById('progressBar').style.width = pct + '%';
     }
-    animate();
+});
 
-    window.addEventListener('resize', () => {
-        camera.aspect = wrap.clientWidth / wrap.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    });
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
 }
-</script>
+animate();
 
+window.addEventListener('resize', () => {
+    camera.aspect = wrap.clientWidth / wrap.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+});
+</script>
+{% endif %}
+
+<!-- СКРИПТ КНОПКИ ИЗБРАННОЕ -->
+{% if user.is_authenticated %}
 <script>
 document.getElementById('fav-btn').addEventListener('click', function() {
     const btn = this;
     const modelId = btn.getAttribute('data-id');
     const textSpan = document.getElementById('fav-text');
 
-    // Используем Django-тег для генерации URL, заменяя заглушку "0" на реальный ID
     const url = "{% url 'toggle_favorite' 0 %}".replace('0', modelId);
 
     fetch(url, {
@@ -201,9 +257,7 @@ document.getElementById('fav-btn').addEventListener('click', function() {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Сервер ответил ошибкой 404 или 500');
-        }
+        if (!response.ok) throw new Error('Сервер ответил ошибкой');
         return response.json();
     })
     .then(data => {
@@ -220,8 +274,8 @@ document.getElementById('fav-btn').addEventListener('click', function() {
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        alert('Не удалось обновить избранное. Проверьте, зарегистрирован ли путь в urls.py');
     });
 });
 </script>
+{% endif %}
 {% endblock %}

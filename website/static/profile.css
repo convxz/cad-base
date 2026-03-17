@@ -1,4 +1,4 @@
-/* 1. Глобальные сбросы */
+
 * {
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@
 
 .logo-text span {
     font-family: "Playfair Display", serif;
-    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+    color: #6a5acd; 
 }
 
 .header-top {
@@ -61,18 +61,18 @@
 }
 
 .user-name {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
 .user-role {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
