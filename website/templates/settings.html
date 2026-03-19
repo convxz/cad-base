@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div class="st-main-wrapper">
     <aside class="st-sidebar-bg">
@@ -73,7 +74,14 @@
                     </div>
                     {% endif %}
                 </div>
-
+                {% if is_edit %}
+                <div id="delete-avatar-box" style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="delete-avatar-link" 
+                    style="color: #e74c3c; font-size: 12px; text-decoration: underline; cursor: pointer;">
+                    Удалить
+                    </a>
+                </div>
+                {% endif %}
                 <div class="st-form-grid">
                     <div class="st-group"><label>Имя</label>{{ u_form.first_name }}</div>
                     <div class="st-group"><label>Фамилия</label>{{ u_form.last_name }}</div>
@@ -103,4 +111,31 @@
         </form>
     </main>
 </div>
+<script>
+    // Создаем переменную с путем к картинке в JS-пространстве
+    const defaultAvatarUrl = "{% static 'img/default-avatar.png' %}";
+    const deleteAvatarUrl = "{% url 'delete_avatar' %}";
+    
+    const delLink = document.getElementById('delete-avatar-link');
+    if (delLink) {
+        delLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Удалить фотографию?')) {
+                fetch(deleteAvatarUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        // Используем созданную переменную
+                        document.getElementById('avatar-preview').src = defaultAvatarUrl;
+                        document.getElementById('delete-avatar-box').style.display = 'none';
+                    }
+                });
+            }
+        });
+    }
+</script>
 {% endblock %}

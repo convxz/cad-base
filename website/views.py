@@ -555,3 +555,14 @@ def delete_document_view(request, pk):
     document.delete()
 
     return redirect("adocumentation")
+
+
+@login_required
+@require_POST
+def delete_avatar_view(request):
+    profile = request.user.profile
+    if profile.avatar:
+        profile.avatar.delete()
+        profile.avatar = None
+        profile.save()
+    return JsonResponse({"status": "success"})
