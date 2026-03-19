@@ -119,7 +119,7 @@ html {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 15px;
+    font-size: 18px;
     transition: 0.3s;
 }
 
@@ -662,15 +662,15 @@ html {
 /* Контейнер для фото и текста внутри карточки */
 .card-main-info {
     display: flex;
-    align-items: stretch;
-    /* Растягиваем по высоте */
+    align-items: center; /* Центрируем по вертикали, если нужно, или убираем для top */
     border-bottom: 1px solid #e0e0e0;
+    text-decoration: none;
+    color: inherit;
 }
 
 /* Блок изображения */
 .card-image {
     width: 140px;
-    /* Фиксированная ширина превью */
     min-width: 140px;
     height: 120px;
     position: relative;
@@ -679,6 +679,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* Чтобы фото не сжималось */
 }
 
 .card-image img {
@@ -703,13 +704,13 @@ html {
 
 /* Блок текста справа */
 .card-content {
-    padding: 15px 20px;
+    padding-left: 30px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-align: left;
-    /* Текст теперь по левому краю для удобства чтения */
+    align-items: flex-start;  /* ПРИЖИМАЕТ К ЛЕВОМУ КРАЮ по горизонтали */
+    text-align: left; 
 }
 
 .model-name {

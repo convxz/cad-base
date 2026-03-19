@@ -167,7 +167,11 @@
     <!-- КНОПКИ -->
     <div style="display: flex; justify-content: center; gap: 20px;">
         <a href="{% url 'acatalog' %}" style="padding: 12px 60px; border-radius: 8px; border: 1px solid #3e5281; text-decoration: none; color: #3e5281; font-weight: 500;">Отменить</a>
+        {% if is_edit %}
         <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Сохранить</button>
+        {% else %}
+        <button type="submit" style="padding: 12px 60px; border-radius: 8px; background: #3e5281; color: white; border: none; cursor: pointer; font-weight: 500;">Создать</button>
+        {% endif %}
     </div>
 </form>
         </div>

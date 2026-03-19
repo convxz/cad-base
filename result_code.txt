@@ -90,8 +90,6 @@ application = get_asgi_application()
 FILE: .\core\settings.py
 ==================================================
 
-# core/settings.py
-
 """
 Django settings for core project.
 
@@ -110,149 +108,108 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Читаем переменные окружения (работает и локально, и в Docker)
+
 DEBUG = True
 
-# Секретный ключ теперь берем из окружения!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-unsafe-key')
 
-# Разрешенные хосты (через запятую в .env)
-ALLOWED_HOSTS = ['*']
-
-CSRF_TRUSTED_ORIGINS = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
-
-# # Build paths inside the project like this: BASE_DIR / 'subdir'.
-# BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "default-unsafe-key")
 
 
-# # Quick-start development settings - unsuitable for production
-# # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+ALLOWED_HOSTS = ["*"]
 
-# # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-yu+w67(7!ik$xp5(84^n#g-+u-kf2i!ds+c@=x)eq905f3&2$$'
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost"
+).split(",")
 
-# # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-# # Обязательно с указанием протокола (https://)
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://unsatirically-unfailed-alec.ngrok-free.dev',
-# ]
-
-# # На всякий случай проверь, что этот домен есть и в ALLOWED_HOSTS
-# ALLOWED_HOSTS = [
-#     'bruce-council-retailers-arrange.trycloudflare.com',
-#     '8fa86b17d6ccd7.lhr.life',
-#     'unsatirically-unfailed-alec.ngrok-free.dev',
-#     'localhost',
-#     '127.0.0.1',
-# ]
-
-# Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'website', 
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "website",
 ]
 
 MIDDLEWARE = [
-    
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = "core.wsgi.application"
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'catalog_db',
-        'USER': 'catalog_user',
-        'PASSWORD': 'winterarc1221',
-        'HOST': 'db',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "catalog_db",
+        "USER": "catalog_user",
+        "PASSWORD": "winterarc1221",
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+TIME_ZONE = "Europe/Moscow"
 
-
-TIME_ZONE = 'Europe/Moscow'
-
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = "ru-ru"
 USE_I18N = False
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-STATIC_URL = '/static/'
-STATIC_ROOT = '/app/staticfiles/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-LOGIN_REDIRECT_URL = '/'  # Имя URL главной страницы
-LOGOUT_REDIRECT_URL = '/'
+STATIC_URL = "/static/"
+STATIC_ROOT = "/app/staticfiles/"
 
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/app/media/'
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = "/app/media/"
 LOGOUT_ON_GET = True
 
 
@@ -385,18 +342,18 @@ FILE: .\staticfiles\header_login.css
 }
 
 
-/* --- 1. ОБЩИЕ ПАРАМЕТРЫ КОНТЕЙНЕРА (Нужны для выравнивания шапки) --- */
+
 .container {
     width: 95%;           
     max-width: 1700px;    
     margin: 0 auto;
 }
 
-/* --- 2. ОСНОВНОЙ БЛОК ШАПКИ --- */
+
 .site-header {
     width: 100%;
     min-height: 180px;
-    /* Градиент + фоновая картинка куба */
+    
     background: linear-gradient(rgba(20, 30, 48, 0.85), rgba(36, 59, 85, 0.85)), 
                 url('img/background.png'); 
     background-size: cover;
@@ -408,7 +365,7 @@ FILE: .\staticfiles\header_login.css
     align-items: center;
 }
 
-/* --- 3. ВЕРХНЯЯ ЧАСТЬ (Логотип, Телефон, Кнопка Входа) --- */
+
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -416,7 +373,7 @@ FILE: .\staticfiles\header_login.css
     padding-bottom: 20px;
 }
 
-/* Логотип */
+
 .logo {
     display: flex;
     align-items: center;
@@ -433,10 +390,10 @@ FILE: .\staticfiles\header_login.css
     font-family: "Playfair Display", serif;
 }
 .logo-text span {
-    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+    color: #6a5acd; 
 }
 
-/* Правая часть (Телефон и Вход) */
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -470,7 +427,7 @@ FILE: .\staticfiles\header_login.css
     border-color: white;
 }
 
-/* --- 4. РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ И МЕНЮ --- */
+
 .header-divider {
     border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.3);
@@ -480,7 +437,7 @@ FILE: .\staticfiles\header_login.css
 .main-nav ul {
     list-style: none;
     display: flex;
-    justify-content: space-between; /* Ссылки растягиваются по ширине */
+    justify-content: space-between; 
 }
 .main-nav a {
     text-decoration: none;
@@ -496,7 +453,7 @@ FILE: .\staticfiles\header_login.css
     font-weight: 800;
 }
 
-/* --- 5. СПЕЦИАЛЬНЫЙ СТИЛЬ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ (Прозрачность) --- */
+
 .site-header.header-home {
     background: transparent; 
     position: absolute;      
@@ -510,7 +467,7 @@ FILE: .\staticfiles\header_login.css
     border-color: rgba(255, 255, 255, 0.1); 
 }
 
-/* --- 6. МОБИЛЬНАЯ АДАПТАЦИЯ ШАПКИ --- */
+
 @media (max-width: 992px) {
     .header-top {
         flex-direction: column;
@@ -547,7 +504,7 @@ body, html {
     background-color: #f8faff;
 }
 
-/* Форма слева */
+
 .form-container {
     flex: 1.2;
     display: flex;
@@ -570,7 +527,7 @@ body, html {
     text-align: center;
 }
 
-/* Элементы ввода */
+
 .input-group {
     margin-bottom: 25px;
 }
@@ -600,12 +557,12 @@ body, html {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px; /* Увеличили размер иконки */
+    font-size: 18px; 
     color: #888;
     user-select: none;
 }
 
-/* Чекбокс "Запомни меня" */
+
 .options-row {
     margin-bottom: 25px;
 }
@@ -627,7 +584,7 @@ body, html {
     cursor: pointer;
 }
 
-/* Текст и кнопка */
+
 .policy-text {
     font-size: 13px;
     color: #1a1a1a;
@@ -672,7 +629,7 @@ body, html {
     font-weight: 700;
 }
 
-/* Сайдбар справа */
+
 .sidebar {
     position: relative;
     flex: 1;
@@ -682,18 +639,18 @@ body, html {
     background-size: cover;
     background-position: center;
     
-    /* Наклон. 35% - это точка начала. Все, что левее 35% по X — прозрачно */
+    
     clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
     
-    /* ВАЖНО: используем Flex для центрирования текста в ОСТАВШЕЙСЯ части */
+    
     display: flex;
-    align-items: center;      /* Вертикальное центрирование */
-    justify-content: flex-end; /* Прижимаем к правой части */
-    padding-right: 5%;        /* Отступ от правого края */
+    align-items: center;      
+    justify-content: flex-end; 
+    padding-right: 5%;        
 }
 
 .sidebar-text {
-    /* Ограничиваем ширину текста, чтобы он не заходил на наклонную область */
+    
     width: 60%; 
 }
 
@@ -702,35 +659,35 @@ body, html {
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     text-align: center;
-    font-size: 2.5vw; /* Размер адаптируется под ширину */
-    white-space: nowrap; /* В одну строку */
+    font-size: 2.5vw; 
+    white-space: nowrap; 
     margin: 0;
 }
 
-/* На случай, если экран совсем узкий */
+
 @media (max-width: 900px) {
     .sidebar { display: none; }
 }
 
 
-/* Стандартное состояние кнопки (серая) */
+
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0; 
     color: #FFFFFF;
     border: none;
     border-radius: 40px;
     font-size: 18px;
     font-weight: 600;
-    cursor: not-allowed; /* Курсор запрета */
+    cursor: not-allowed; 
     transition: all 0.3s ease;
     margin-top: 20px;
 }
 
-/* Состояние, когда поля заполнены (черная или темно-синяя) */
+
 .submit-btn.active {
-    background-color: #1A1C41; /* Темный цвет как на макете */
+    background-color: #1A1C41; 
     cursor: pointer;
 }
 
@@ -742,7 +699,7 @@ body, html {
 FILE: .\staticfiles\profile.css
 ==================================================
 
-/* 1. Глобальные сбросы */
+
 * {
     margin: 0;
     padding: 0;
@@ -781,7 +738,7 @@ FILE: .\staticfiles\profile.css
 
 .logo-text span {
     font-family: "Playfair Display", serif;
-    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+    color: #6a5acd; 
 }
 
 .header-top {
@@ -805,18 +762,18 @@ FILE: .\staticfiles\profile.css
 }
 
 .user-name {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
 .user-role {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
@@ -854,10 +811,10 @@ body {
     color: #333;
 }
 
-/* Header */
+
 .top-header {
     height: 70px;
-    background: #23236e; /* Цвет из макета */
+    background: #23236e; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -893,13 +850,13 @@ body {
 .user-role { font-size: 10px; opacity: 0.7; }
 .header-avatar img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
 
-/* Main Layout */
+
 .wrapper { display: flex; min-height: calc(100vh - 70px); }
 
 .sidebar {
     width: 250px;
     background: var(--sidebar-grad);
-    /* Здесь можно добавить background-image: url('img/background.png') */
+    
     padding-top: 30px;
 }
 
@@ -923,7 +880,7 @@ body {
 
 h1 { font-size: 28px; margin-bottom: 50px; }
 
-/* Cards */
+
 .card {
     background: white;
     border-radius: 12px;
@@ -952,11 +909,11 @@ h1 { font-size: 28px; margin-bottom: 50px; }
     padding: 5px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Fields */
+
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 40px; }
 .field-group label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; }
 
-/* Стили для полей Django */
+
 input[type="text"], input[type="tel"], input[type="email"], select {
     width: 100%;
     background: var(--input-bg);
@@ -973,7 +930,7 @@ input[type="text"], input[type="tel"], input[type="email"], select {
 
 .section-title { font-size: 18px; margin-bottom: 25px; }
 
-/* Button */
+
 .actions { display: flex; justify-content: flex-end; }
 .btn-submit {
     background: #43458b; color: white; border: none; padding: 12px 30px;
@@ -1003,16 +960,16 @@ body, html {
     background-color: #fff;
 }
 
-/* Фигура треугольника */
+
 .triangle-bg {
     position: absolute;
     right: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    /* Глубокий фиолетовый градиент */
+    
     background: linear-gradient(135deg, #1A1C41 0%, #4B00B4 100%);
-    /* Рисуем треугольник: точка слева по центру, углы справа сверху и снизу */
+    
     clip-path: polygon(0 50%, 100% 0, 100% 100%);
     z-index: 1;
 }
@@ -1022,7 +979,7 @@ body, html {
     z-index: 2;
     width: 100%;
     max-width: 450px;
-    margin-left: 30%; /* Смещаем вправо в широкую часть треугольника */
+    margin-left: 30%; 
     text-align: center;
     color: white;
 }
@@ -1063,7 +1020,7 @@ input {
 FILE: .\staticfiles\signup_style.css
 ==================================================
 
-/* 1. Сброс стилей и базовые настройки */
+
 * {
     margin: 0;
     padding: 0;
@@ -1078,13 +1035,13 @@ body, html {
     background-color: #f8faff;
 }
 
-/* 2. Контейнер страницы */
+
 .registration-page {
     display: flex;
     min-height: 100vh;
 }
 
-/* 3. Сайдбар и его фон */
+
 .sidebar {
     position: relative;
     flex: 1.3;
@@ -1095,7 +1052,7 @@ body, html {
     z-index: 2;
 }
 
-/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+
 .sidebar-bg {
     position: absolute;
     top: 0; 
@@ -1124,7 +1081,7 @@ body, html {
     letter-spacing: 2px;
 }
 
-/* 4. Правая панель (Форма) */
+
 .form-container {
     flex: 1;
     display: flex;
@@ -1158,7 +1115,7 @@ body, html {
     text-decoration: underline;
 }
 
-/* 5. Поля ввода */
+
 .input-group {
     margin-bottom: 20px;
 }
@@ -1208,7 +1165,7 @@ body, html {
     line-height: 1.4;
 }
 
-/* 6. Текст условий */
+
 .policy-text {
     font-size: 13px;
     color: #718096;
@@ -1222,7 +1179,7 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка */
+
 .submit-btn {
     width: 100%;
     padding: 18px;
@@ -1246,7 +1203,7 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Адаптивность */
+
 @media (max-width: 1100px) {
     .sidebar-bg {
         clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
@@ -2805,7 +2762,7 @@ FILE: .\staticfiles\admin\css\base.css
     DJANGO Admin styles
 */
 
-/* VARIABLE DEFINITIONS */
+
 html[data-theme="light"],
 :root {
     --primary: #79aec8;
@@ -2841,8 +2798,8 @@ html[data-theme="light"],
     --message-warning-bg: #ffc;
     --message-error-bg: #ffefef;
 
-    --darkened-bg: #f8f8f8; /* A bit darker than --body-bg */
-    --selected-bg: #e4e4e4; /* E.g. selected table cells */
+    --darkened-bg: #f8f8f8; 
+    --selected-bg: #e4e4e4; 
     --selected-row: #ffc;
 
     --button-fg: #fff;
@@ -2905,7 +2862,7 @@ body {
     background: var(--body-bg);
 }
 
-/* LINKS */
+
 
 a:link, a:visited {
     color: var(--link-fg);
@@ -2934,7 +2891,7 @@ a.section:focus, a.section:hover {
     text-decoration: underline;
 }
 
-/* GLOBAL DEFAULTS */
+
 
 p, ol, ul, dl {
     margin: .2em 0 .8em 0;
@@ -3063,7 +3020,7 @@ hr {
     line-height: 1px;
 }
 
-/* TEXT STYLES & MODIFIERS */
+
 
 .small {
     font-size: 0.6875rem;
@@ -3107,7 +3064,7 @@ p img, h1 img, h2 img, h3 img, h4 img, td img {
     display: none !important;
 }
 
-/* TABLES */
+
 
 table {
     border-collapse: collapse;
@@ -3162,7 +3119,7 @@ tr:nth-child(odd) + .row-form-errors .errorlist {
     background: var(--darkened-bg);
 }
 
-/* SORTABLE TABLES */
+
 
 thead th {
     padding: 5px 10px;
@@ -3274,7 +3231,7 @@ table thead th.sorted .sortoptions a.descending:hover {
     background-position: 0 -70px;
 }
 
-/* FORM DEFAULTS */
+
 
 input, textarea, select, .form-row p, form .button {
     margin: 2px 0;
@@ -3322,12 +3279,12 @@ select {
 }
 
 select[multiple] {
-    /* Allow HTML size attribute to override the height in the rule above. */
+    
     height: auto;
     min-height: 150px;
 }
 
-/* FORM BUTTONS */
+
 
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
     background: var(--button-bg);
@@ -3372,7 +3329,7 @@ input[type=button][disabled].default {
 }
 
 
-/* MODULES */
+
 
 .module {
     border: none;
@@ -3418,7 +3375,7 @@ input[type=button][disabled].default {
     border-collapse: collapse;
 }
 
-/* MESSAGES & ERRORS */
+
 
 ul.messagelist {
     padding: 0;
@@ -3514,7 +3471,7 @@ td ul.errorlist + input, td ul.errorlist + select, td ul.errorlist + textarea {
     padding: 5px 0 0 12px;
 }
 
-/* BREADCRUMBS */
+
 
 div.breadcrumbs {
     background: var(--breadcrumbs-bg);
@@ -3532,7 +3489,7 @@ div.breadcrumbs a:focus, div.breadcrumbs a:hover {
     color: var(--breadcrumbs-fg);
 }
 
-/* ACTION ICONS */
+
 
 .viewlink, .inlineviewlink {
     padding-left: 16px;
@@ -3560,15 +3517,15 @@ div.breadcrumbs a:focus, div.breadcrumbs a:hover {
 }
 
 a.deletelink:link, a.deletelink:visited {
-    color: #CC3434; /* XXX Probably unused? */
+    color: #CC3434; 
 }
 
 a.deletelink:focus, a.deletelink:hover {
-    color: #993333; /* XXX Probably unused? */
+    color: #993333; 
     text-decoration: none;
 }
 
-/* OBJECT TOOLS */
+
 
 .object-tools {
     font-size: 0.625rem;
@@ -3624,7 +3581,7 @@ a.deletelink:focus, a.deletelink:hover {
     background-image: url(../img/tooltag-add.svg);
 }
 
-/* OBJECT HISTORY */
+
 
 #change-history table {
     width: 100%;
@@ -3641,7 +3598,7 @@ a.deletelink:focus, a.deletelink:hover {
     overflow: hidden;
 }
 
-/* PAGE STRUCTURE */
+
 
 #container {
     position: relative;
@@ -3703,7 +3660,7 @@ a.deletelink:focus, a.deletelink:hover {
   }
 }
 
-/* COLUMN TYPES */
+
 
 .colMS {
     margin-right: 300px;
@@ -3727,7 +3684,7 @@ a.deletelink:focus, a.deletelink:hover {
     width: auto;
 }
 
-/* HEADER */
+
 
 #header {
     width: auto;
@@ -3822,7 +3779,7 @@ a.deletelink:focus, a.deletelink:hover {
     margin-bottom: 1px;
 }
 
-/* SIDEBAR */
+
 
 #content-related {
     background: var(--darkened-bg);
@@ -3898,7 +3855,7 @@ a.deletelink:focus, a.deletelink:hover {
     background: var(--close-button-hover-bg);
 }
 
-/* POPUP */
+
 .popup #content {
     padding: 20px;
 }
@@ -3911,7 +3868,7 @@ a.deletelink:focus, a.deletelink:hover {
     padding: 10px 20px;
 }
 
-/* PAGINATOR */
+
 
 .paginator {
     display: flex;
@@ -3987,7 +3944,7 @@ a.deletelink:focus, a.deletelink:hover {
 FILE: .\staticfiles\admin\css\changelists.css
 ==================================================
 
-/* CHANGELISTS */
+
 
 #changelist {
     display: flex;
@@ -4039,7 +3996,7 @@ FILE: .\staticfiles\admin\css\changelists.css
     overflow: hidden;
 }
 
-/* CHANGELIST TABLES */
+
 
 #changelist table thead th {
     padding: 0;
@@ -4060,7 +4017,7 @@ FILE: .\staticfiles\admin\css\changelists.css
     color: var(--body-quiet-color);
 }
 
-/* TOOLBAR */
+
 
 #toolbar {
     padding: 8px 10px;
@@ -4118,7 +4075,7 @@ FILE: .\staticfiles\admin\css\changelists.css
     word-break: break-word;
 }
 
-/* FILTER COLUMN */
+
 
 #changelist-filter {
     flex: 0 0 240px;
@@ -4216,7 +4173,7 @@ FILE: .\staticfiles\admin\css\changelists.css
     border-bottom: 1px solid var(--hairline-color);
 }
 
-/* DATE DRILLDOWN */
+
 
 .change-list .toplinks {
     display: flex;
@@ -4239,7 +4196,7 @@ FILE: .\staticfiles\admin\css\changelists.css
     color: var(--link-hover-color);
 }
 
-/* ACTIONS */
+
 
 .filtered .actions {
     border-right: none;
@@ -4409,7 +4366,7 @@ html[data-theme="dark"] {
     color-scheme: dark;
 }
 
-/* THEME SWITCH */
+
 .theme-toggle {
     cursor: pointer;
     border: none;
@@ -4447,7 +4404,7 @@ html[data-theme="light"] .theme-toggle .theme-label-when-light {
     display: block;
 }
 
-/* ICONS */
+
 .theme-toggle svg.theme-icon-when-auto,
 .theme-toggle svg.theme-icon-when-dark,
 .theme-toggle svg.theme-icon-when-light {
@@ -4472,7 +4429,7 @@ html[data-theme="light"] .theme-toggle svg.theme-icon-when-light {
 FILE: .\staticfiles\admin\css\dashboard.css
 ==================================================
 
-/* DASHBOARD */
+
 .dashboard td, .dashboard th {
     word-break: break-word;
 }
@@ -4490,7 +4447,7 @@ FILE: .\staticfiles\admin\css\dashboard.css
     padding-right: .6em;
 }
 
-/* RECENT ACTIONS MODULE */
+
 
 .module ul.actionlist {
     margin-left: 0;
@@ -4509,7 +4466,7 @@ FILE: .\staticfiles\admin\css\forms.css
 
 @import url('widgets.css');
 
-/* FORM ROWS */
+
 
 .form-row {
     overflow: hidden;
@@ -4543,7 +4500,7 @@ form .form-row p {
     padding-bottom: 10px;
 }
 
-/* FORM LABELS */
+
 
 label {
     font-weight: normal;
@@ -4555,7 +4512,7 @@ label {
     font-weight: bold;
 }
 
-/* RADIO BUTTONS */
+
 
 form div.radiolist div {
     padding-right: 7px;
@@ -4584,7 +4541,7 @@ form ul.inline li {
     padding-right: 7px;
 }
 
-/* FIELDSETS */
+
 
 fieldset .fieldset-heading,
 fieldset .inline-heading,
@@ -4598,7 +4555,7 @@ fieldset .inline-heading,
     color: var(--header-link-color);
 }
 
-/* ALIGNED FIELDSETS */
+
 
 .aligned label {
     display: block;
@@ -4708,7 +4665,7 @@ fieldset .fieldBox {
     margin-right: 20px;
 }
 
-/* WIDE FIELDSETS */
+
 
 .wide label {
     width: 200px;
@@ -4729,7 +4686,7 @@ form div.help ul {
     width: 450px;
 }
 
-/* COLLAPSIBLE FIELDSETS */
+
 
 .collapse summary .fieldset-heading,
 .collapse summary .inline-heading {
@@ -4741,13 +4698,13 @@ form div.help ul {
     padding: 0;
 }
 
-/* MONOSPACE TEXTAREAS */
+
 
 fieldset.monospace textarea {
     font-family: var(--font-family-monospace);
 }
 
-/* SUBMIT ROW */
+
 
 .submit-row {
     padding: 12px 14px 12px;
@@ -4816,7 +4773,7 @@ body.popup .submit-row {
     text-decoration: none;
 }
 
-/* CUSTOM FORM FIELDS */
+
 
 .vSelectMultipleField {
     vertical-align: top;
@@ -4871,7 +4828,7 @@ body.popup .submit-row {
     width: 20em;
 }
 
-/* INLINES */
+
 
 .inline-group {
     padding: 0;
@@ -4980,7 +4937,7 @@ body.popup .submit-row {
     display: none;
 }
 
-/* RELATED FIELD ADD ONE / LOOKUP */
+
 
 .related-lookup {
     margin-left: 5px;
@@ -5011,7 +4968,7 @@ form .related-widget-wrapper ul {
 FILE: .\staticfiles\admin\css\login.css
 ==================================================
 
-/* LOGIN FORM */
+
 
 .login {
     background: var(--darkened-bg);
@@ -5234,7 +5191,7 @@ FILE: .\staticfiles\admin\css\nav_sidebar.css
 FILE: .\staticfiles\admin\css\responsive.css
 ==================================================
 
-/* Tablets */
+
 
 input[type="submit"], button {
     -webkit-appearance: none;
@@ -5242,7 +5199,7 @@ input[type="submit"], button {
 }
 
 @media (max-width: 1024px) {
-    /* Basic */
+    
 
     html {
         -webkit-text-size-adjust: 100%;
@@ -5257,7 +5214,7 @@ input[type="submit"], button {
         font-size: 0.75rem;
     }
 
-    /* Layout */
+    
 
     #container {
         min-width: 0;
@@ -5271,7 +5228,7 @@ input[type="submit"], button {
         padding: 10px 30px;
     }
 
-    /* Header */
+    
 
     #header {
         flex-direction: column;
@@ -5296,7 +5253,7 @@ input[type="submit"], button {
         line-height: 1.4;
     }
 
-    /* Dashboard */
+    
 
     .dashboard #content {
         width: auto;
@@ -5326,7 +5283,7 @@ input[type="submit"], button {
         font-size: 0.8125rem;
     }
 
-    /* Changelist */
+    
 
     #toolbar {
         border: none;
@@ -5397,14 +5354,14 @@ input[type="submit"], button {
     .filtered .actions,
 
     #changelist .paginator {
-        border-top-color: var(--hairline-color); /* XXX Is this used at all? */
+        border-top-color: var(--hairline-color); 
     }
 
     #changelist .results + .paginator {
         border-top: none;
     }
 
-    /* Forms */
+    
 
     label {
         font-size: 1rem;
@@ -5478,7 +5435,7 @@ input[type="submit"], button {
         padding: 7px;
     }
 
-    /* Selector */
+    
 
     .selector {
         display: flex;
@@ -5559,7 +5516,7 @@ input[type="submit"], button {
     }
 
     .datetimeshortcuts {
-        color: var(--border-color); /* XXX Redundant, .datetime span also sets #ccc */
+        color: var(--border-color); 
     }
 
     .form-row .datetime input.vDateField, .form-row .datetime input.vTimeField {
@@ -5570,7 +5527,7 @@ input[type="submit"], button {
         overflow: auto;
     }
 
-    /* Messages */
+    
 
     ul.messagelist li {
         padding-left: 55px;
@@ -5585,7 +5542,7 @@ input[type="submit"], button {
         background-position: 30px 14px;
     }
 
-    /* Login */
+    
 
     .login #header {
         padding: 15px 20px;
@@ -5595,7 +5552,7 @@ input[type="submit"], button {
         margin: 0;
     }
 
-    /* GIS */
+    
 
     div.olMap {
         max-width: calc(100vw - 30px);
@@ -5607,7 +5564,7 @@ input[type="submit"], button {
         margin-top: 10px;
     }
 
-    /* Docs */
+    
 
     .module table.xfull {
         width: 100%;
@@ -5618,10 +5575,10 @@ input[type="submit"], button {
     }
 }
 
-/* Mobile */
+
 
 @media (max-width: 767px) {
-    /* Layout */
+    
 
     #header, #content {
         padding: 15px;
@@ -5631,7 +5588,7 @@ input[type="submit"], button {
         padding: 10px 15px;
     }
 
-    /* Dashboard */
+    
 
     .colMS, .colSM {
         margin: 0;
@@ -5651,7 +5608,7 @@ input[type="submit"], button {
         font-size: 1rem;
     }
 
-    /* Changelist */
+    
 
     #changelist {
         align-items: stretch;
@@ -5701,7 +5658,7 @@ input[type="submit"], button {
         margin-left: 15px;
     }
 
-    /* Forms */
+    
 
     .form-row {
         padding: 15px 0;
@@ -5811,7 +5768,7 @@ input[type="submit"], button {
         margin-top: 5px;
     }
 
-    /* Related widget */
+    
 
     .related-widget-wrapper {
         width: 100%;
@@ -5836,7 +5793,7 @@ input[type="submit"], button {
         align-self: center;
     }
 
-    /* Selector */
+    
 
     .selector {
         flex-direction: column;
@@ -5879,7 +5836,7 @@ input[type="submit"], button {
         background-position: 0 -72px;
     }
 
-    /* Inlines */
+    
 
     .inline-group[data-inline-type="stacked"] .inline-related {
         border: 1px solid var(--hairline-color);
@@ -5950,7 +5907,7 @@ input[type="submit"], button {
         background-position: 8px 9px;
     }
 
-    /* Submit row */
+    
 
     .submit-row {
         padding: 10px;
@@ -5972,7 +5929,7 @@ input[type="submit"], button {
         margin: 0;
     }
 
-    /* Messages */
+    
 
     ul.messagelist li {
         padding-left: 40px;
@@ -5987,13 +5944,13 @@ input[type="submit"], button {
         background-position: 15px 14px;
     }
 
-    /* Paginator */
+    
 
     .paginator .this-page, .paginator a:link, .paginator a:visited {
         padding: 4px 10px;
     }
 
-    /* Login */
+    
 
     body.login {
         padding: 0 15px;
@@ -6046,7 +6003,7 @@ input[type="submit"], button {
         font-size: 0.8125rem;
     }
 
-    /* Calendar and clock */
+    
 
     .calendarbox, .clockbox {
         position: fixed !important;
@@ -6120,7 +6077,7 @@ input[type="submit"], button {
         top: 10px;
     }
 
-    /* History */
+    
 
     table#change-history tbody th, table#change-history tbody td {
         font-size: 0.8125rem;
@@ -6131,7 +6088,7 @@ input[type="submit"], button {
         width: auto;
     }
 
-    /* Docs */
+    
 
     table.model tbody th, table.model tbody td {
         font-size: 0.8125rem;
@@ -6144,7 +6101,7 @@ input[type="submit"], button {
 FILE: .\staticfiles\admin\css\responsive_rtl.css
 ==================================================
 
-/* TABLETS */
+
 
 @media (max-width: 1024px) {
     [dir="rtl"] .colMS {
@@ -6195,7 +6152,7 @@ FILE: .\staticfiles\admin\css\responsive_rtl.css
     }
 }
 
-/* MOBILE */
+
 
 @media (max-width: 767px) {
     [dir="rtl"] .aligned .related-lookup,
@@ -6239,7 +6196,7 @@ FILE: .\staticfiles\admin\css\responsive_rtl.css
 FILE: .\staticfiles\admin\css\rtl.css
 ==================================================
 
-/* GLOBAL */
+
 
 th {
     text-align: right;
@@ -6275,7 +6232,7 @@ tfoot td:first-child {
     border-left: none;
 }
 
-/* LAYOUT */
+
 
 #user-tools {
     right: auto;
@@ -6302,7 +6259,7 @@ div.breadcrumbs {
     margin-right: 0;
 }
 
-/* SORTABLE TABLES */
+
 
 table thead th.sorted .sortoptions {
    float: left;
@@ -6313,14 +6270,14 @@ thead th.sorted .text {
     padding-left: 42px;
 }
 
-/* dashboard styles */
+
 
 .dashboard .module table td a {
     padding-left: .6em;
     padding-right: 16px;
 }
 
-/* changelists styles */
+
 
 .change-list .filtered table {
     border-left: none;
@@ -6358,7 +6315,7 @@ thead th.sorted .text {
     margin-right: auto;
 }
 
-/* FORMS */
+
 
 .aligned label {
     padding: 0 0 3px 1em;
@@ -6432,7 +6389,7 @@ fieldset .fieldBox {
     padding: 10px 12px;
 }
 
-/* WIDGETS */
+
 
 .calendarnav-previous {
     top: 0;
@@ -6506,7 +6463,7 @@ form .form-row p.datetime {
     float: right;
 }
 
-/* MISC */
+
 
 .inline-related h2, .inline-group h2 {
     text-align: right
@@ -6538,18 +6495,18 @@ form .form-row p.datetime {
 FILE: .\staticfiles\admin\css\unusable_password_field.css
 ==================================================
 
-/* Hide warnings fields if usable password is selected */
+
 form:has(#id_usable_password input[value="true"]:checked) .messagelist {
     display: none;
 }
 
-/* Hide password fields if unusable password is selected */
+
 form:has(#id_usable_password input[value="false"]:checked) .field-password1,
 form:has(#id_usable_password input[value="false"]:checked) .field-password2 {
     display: none;
 }
 
-/* Select appropriate submit button */
+
 form:has(#id_usable_password input[value="true"]:checked) input[type="submit"].unset-password {
     display: none;
 }
@@ -6563,7 +6520,7 @@ form:has(#id_usable_password input[value="false"]:checked) input[type="submit"].
 FILE: .\staticfiles\admin\css\widgets.css
 ==================================================
 
-/* SELECTOR (FILTER INTERFACE) */
+
 
 .selector {
     display: flex;
@@ -6772,7 +6729,7 @@ FILE: .\staticfiles\admin\css\widgets.css
     background-position: 0 -144px;
 }
 
-/* STACKED SELECTORS */
+
 
 .stacked {
     float: left;
@@ -6868,7 +6825,7 @@ FILE: .\staticfiles\admin\css\widgets.css
     width: 1.125rem;
 }
 
-/* DATE AND TIME */
+
 
 p.datetime {
     line-height: 20px;
@@ -6931,7 +6888,7 @@ table p.datetime {
     color: var(--body-quiet-color);
 }
 
-/* URL */
+
 
 p.url {
     line-height: 20px;
@@ -6946,7 +6903,7 @@ p.url {
     font-weight: normal;
 }
 
-/* FILE UPLOADS */
+
 
 p.file-upload {
     line-height: 20px;
@@ -6972,7 +6929,7 @@ span.clearable-file-input label {
     float: none;
 }
 
-/* CALENDARS & CLOCKS */
+
 
 .calendarbox, .clockbox {
     margin: 5px auto;
@@ -7136,7 +7093,7 @@ ul.timelist, .timelist li {
     padding: 2px;
 }
 
-/* EDIT INLINE */
+
 
 .inline-deletelink {
     float: right;
@@ -7152,7 +7109,7 @@ ul.timelist, .timelist li {
     cursor: pointer;
 }
 
-/* RELATED WIDGET WRAPPER */
+
 .related-widget-wrapper {
     display: flex;
     gap: 0 10px;
@@ -7171,7 +7128,7 @@ ul.timelist, .timelist li {
     filter: grayscale(0);
 }
 
-/* GIS MAPS */
+
 .dj_map {
     width: 600px;
     height: 400px;
@@ -7681,20 +7638,21 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Profile
 
-# Создаем "инлайн" для профиля
+
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
-    verbose_name_plural = 'Дополнительная информация'
+    verbose_name_plural = "Дополнительная информация"
 
-# Определяем новый класс для UserAdmin
+
 class UserAdmin(BaseUserAdmin):
     inlines = (ProfileInline,)
 
-# Перерегистрируем модель User
+
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(Profile)
+
 
 ==================================================
 FILE: .\website\apps.py
@@ -7720,125 +7678,156 @@ from django import forms
 from django.contrib.auth.models import User
 from .models import Document, ModelSubmission, Profile
 
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['gender', 'city', 'language', 'birth_date', 'phone', 'address', 'avatar']
+        fields = [
+            "gender",
+            "city",
+            "language",
+            "birth_date",
+            "phone",
+            "address",
+            "avatar",
+        ]
         widgets = {
-            # Добавляем класс 'form-control' или любой другой для CSS
-            'gender': forms.Select(attrs={'class': 'custom-select'}),
-            'city': forms.TextInput(attrs={'placeholder': 'Город'}),
-            'birth_date': forms.DateInput(attrs={'type': 'date'}),
-            'phone': forms.TextInput(attrs={'placeholder': '+7 (___) ___ __ __'}),
-            'address': forms.TextInput(attrs={'placeholder': 'Адрес'}),
+            "gender": forms.Select(attrs={"class": "custom-select"}),
+            "city": forms.TextInput(attrs={"placeholder": "Город"}),
+            "birth_date": forms.DateInput(attrs={"type": "date"}),
+            "phone": forms.TextInput(attrs={"placeholder": "+7 (___) ___ __ __"}),
+            "address": forms.TextInput(attrs={"placeholder": "Адрес"}),
         }
+
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name']
+        fields = ["first_name", "last_name"]
         widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'Имя'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Фамилия'}),
+            "first_name": forms.TextInput(attrs={"placeholder": "Имя"}),
+            "last_name": forms.TextInput(attrs={"placeholder": "Фамилия"}),
         }
+
+
 class SignUpForm(forms.ModelForm):
     full_name = forms.CharField(
-        label='Имя и Фамилия',
-        widget=forms.TextInput(attrs={'placeholder': 'Введите имя и фамилию', 'class': 'form-input'})
+        label="Имя и Фамилия",
+        widget=forms.TextInput(
+            attrs={"placeholder": "Введите имя и фамилию", "class": "form-input"}
+        ),
     )
     email = forms.EmailField(
-        label='Email',
-        widget=forms.EmailInput(attrs={'placeholder': 'example@mail.com', 'class': 'form-input'})
+        label="Email",
+        widget=forms.EmailInput(
+            attrs={"placeholder": "example@mail.com", "class": "form-input"}
+        ),
     )
     password = forms.CharField(
-        label='Пароль',
-        widget=forms.PasswordInput(attrs={'placeholder': 'Минимум 8 символов', 'class': 'form-input'})
+        label="Пароль",
+        widget=forms.PasswordInput(
+            attrs={"placeholder": "Минимум 8 символов", "class": "form-input"}
+        ),
     )
 
     class Meta:
         model = User
-        fields = ['full_name', 'email', 'password']
+        fields = ["full_name", "email", "password"]
 
     def save(self, commit=True):
         user = super().save(commit=False)
         # Разделяем имя и фамилию
-        names = self.cleaned_data['full_name'].split()
+        names = self.cleaned_data["full_name"].split()
         if len(names) > 0:
             user.first_name = names[0]
         if len(names) > 1:
             user.last_name = " ".join(names[1:])
-        
-        user.username = self.cleaned_data['email'] # Используем email как username
-        user.set_password(self.cleaned_data['password'])
+
+        user.username = self.cleaned_data["email"]
+        user.set_password(self.cleaned_data["password"])
         if commit:
             user.save()
         return user
-    
+
 
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ['standard_number', 'name', 'file'] # Добавили file
+        fields = ["standard_number", "name", "file"]
         widgets = {
-            'standard_number': forms.TextInput(attrs={'class': 'st-input', 'placeholder': 'ГОСТ 7798-70'}),
-            'name': forms.TextInput(attrs={'class': 'st-input', 'placeholder': 'Болты с шестигранной головкой'}),
-            'file': forms.FileInput(attrs={'class': 'st-input', 'accept': '.pdf'}), # Ограничение на PDF
+            "standard_number": forms.TextInput(
+                attrs={"class": "st-input", "placeholder": "ГОСТ 7798-70"}
+            ),
+            "name": forms.TextInput(
+                attrs={
+                    "class": "st-input",
+                    "placeholder": "Болты с шестигранной головкой",
+                }
+            ),
+            "file": forms.FileInput(attrs={"class": "st-input", "accept": ".pdf"}),
         }
-
 
 
 class ModelSubmissionForm(forms.ModelForm):
     class Meta:
         model = ModelSubmission
         fields = [
-            'title', 
-            'category', 
-            'standard',
-            'description', 
-            'file_stp', 
-            'file_igs', 
-            'file_stl',
-            'thumbnail',
+            "title",
+            "category",
+            "standard",
+            "description",
+            "file_stp",
+            "file_igs",
+            "file_stl",
+            "thumbnail",
         ]
-        
+
         widgets = {
-            'title': forms.TextInput(attrs={
-                'placeholder': 'Название модели', 
-                'style': 'width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;'
-            }),
-            'category': forms.TextInput(attrs={
-                'placeholder': 'Например: Крепежные изделия', 
-                'style': 'width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;'
-            }),
-            'standard': forms.TextInput(attrs={
-                'placeholder': 'Например: ГОСТ', 
-                'style': 'width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;'
-            }),
+            "title": forms.TextInput(
+                attrs={
+                    "placeholder": "Название модели",
+                    "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+                }
+            ),
+            "category": forms.TextInput(
+                attrs={
+                    "placeholder": "Например: Крепежные изделия",
+                    "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+                }
+            ),
+            "standard": forms.TextInput(
+                attrs={
+                    "placeholder": "Например: ГОСТ",
+                    "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+                }
+            ),
         }
 
     def clean_file_stp(self):
-        return self.validate_extension('file_stp', ['.stp', '.step'])
+        return self.validate_extension("file_stp", [".stp", ".step"])
 
     def clean_file_igs(self):
-        return self.validate_extension('file_igs', ['.igs', '.iges'])
+        return self.validate_extension("file_igs", [".igs", ".iges"])
 
     def clean_file_stl(self):
-        return self.validate_extension('file_stl', ['.stl'])
+        return self.validate_extension("file_stl", [".stl"])
 
     def validate_extension(self, field_name, allowed_extensions):
         file = self.cleaned_data.get(field_name)
         if file:
             import os
+
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in allowed_extensions:
-                raise forms.ValidationError(f"Ошибка: ожидался формат {allowed_extensions}")
+                raise forms.ValidationError(
+                    f"Ошибка: ожидался формат {allowed_extensions}"
+                )
         return file
+
 
 ==================================================
 FILE: .\website\models.py
 ==================================================
-
-# website/models.py
 
 import os
 from django.db import models
@@ -7850,36 +7839,38 @@ from django.utils import timezone
 
 class Profile(models.Model):
     GENDER_CHOICES = [
-        ('M', 'мужской'),
-        ('F', 'женский'),
+        ("M", "мужской"),
+        ("F", "женский"),
     ]
 
-    # Связь с базовым пользователем
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    
-    # Данные профиля
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, verbose_name="Аватар")
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, verbose_name="Пол")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+
+    avatar = models.ImageField(
+        upload_to="avatars/", null=True, blank=True, verbose_name="Аватар"
+    )
+    gender = models.CharField(
+        max_length=1, choices=GENDER_CHOICES, blank=True, verbose_name="Пол"
+    )
     city = models.CharField(max_length=100, blank=True, verbose_name="Город")
-    language = models.CharField(max_length=50, default='русский', verbose_name="Язык")
+    language = models.CharField(max_length=50, default="русский", verbose_name="Язык")
     birth_date = models.DateField(null=True, blank=True, verbose_name="Дата рождения")
     phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
     address = models.TextField(blank=True, verbose_name="Адрес")
-    
-    # Безопасность
-    password_changed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата смены пароля")
 
-    # --- ИЗБРАННОЕ (Связь с твоими моделями деталей) ---
+    password_changed_at = models.DateTimeField(
+        null=True, blank=True, verbose_name="Дата смены пароля"
+    )
+
     favorite_models = models.ManyToManyField(
-        'ModelSubmission', 
-        blank=True, 
-        related_name='liked_by_profiles',
-        verbose_name="Избранные изделия"
+        "ModelSubmission",
+        blank=True,
+        related_name="liked_by_profiles",
+        verbose_name="Избранные изделия",
     )
 
     def __str__(self):
-        return f'Профиль для {self.user.username}'
-    
+        return f"Профиль для {self.user.username}"
+
     def get_last_security_event(self):
         """Возвращает строку с последним важным событием безопасности"""
         if self.password_changed_at:
@@ -7898,12 +7889,12 @@ class Profile(models.Model):
 
     def get_avatar_url(self):
         """Возвращает путь к аватарке или стандартную картинку"""
-        if self.avatar and hasattr(self.avatar, 'url'):
+        if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar.url
-        return '/static/img/default-avatar.png' # Укажите свой путь к дефолтной картинке
+        return "/static/img/default-avatar.png"
 
     def __str__(self):
-        return f'Профиль: {self.get_display_name()}'
+        return f"Профиль: {self.get_display_name()}"
 
 
 @receiver(post_save, sender=User)
@@ -7911,119 +7902,51 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     else:
-        if hasattr(instance, 'profile'):
+        if hasattr(instance, "profile"):
             instance.profile.save()
 
 
-# class ModelSubmission(models.Model):
-#     # Константы статусов
-#     STATUS_PENDING  = 'pending'
-#     STATUS_APPROVED = 'approved'
-#     STATUS_REJECTED = 'rejected'
-
-#     STATUS_CHOICES = [
-#         (STATUS_PENDING,  '⏳ На рассмотрении'),
-#         (STATUS_APPROVED, '✅ Принята'),
-#         (STATUS_REJECTED, '❌ Отклонена'),
-#     ]
-
-#     # Основная информация
-#     user = models.ForeignKey(
-#         User, on_delete=models.CASCADE, 
-#         related_name='submissions', verbose_name='Пользователь'
-#     )
-#     title = models.CharField(max_length=200, verbose_name='Название модели')
-#     category = models.CharField(max_length=255, blank=True, null=True, verbose_name='Тип изделия')
-#     standard = models.CharField(max_length=255, blank=True, null=True, verbose_name='Стандарт')
-#     description = models.TextField(blank=True, verbose_name='Описание')
-
-#     # ТРИ ПОЛЯ ДЛЯ ФАЙЛОВ (вместо одного model_file)
-#     file_stp = models.FileField(upload_to='submissions/models/stp/', blank=True, null=True, verbose_name='Файл STP/STEP')
-#     file_igs = models.FileField(upload_to='submissions/models/igs/', blank=True, null=True, verbose_name='Файл IGS/IGES')
-#     file_stl = models.FileField(upload_to='submissions/models/stl/', blank=True, null=True, verbose_name='Файл STL')
-
-#     thumbnail = models.ImageField(upload_to='submissions/thumbnails/', null=True, blank=True, verbose_name='Превью')
-    
-#     # Администрирование
-#     status = models.CharField(
-#         max_length=20, choices=STATUS_CHOICES, 
-#         default=STATUS_PENDING, db_index=True, verbose_name='Статус'
-#     )
-#     admin_comment = models.TextField(blank=True, verbose_name='Комментарий администратора')
-    
-#     created_at = models.DateTimeField(default=timezone.now, verbose_name='Создана')
-#     reviewed_at = models.DateTimeField(null=True, blank=True, verbose_name='Рассмотрена')
-#     reviewed_by = models.ForeignKey(
-#         User, on_delete=models.SET_NULL, null=True, blank=True,
-#         related_name='reviewed_submissions', verbose_name='Проверил'
-#     )
-
-#     class Meta:
-#         verbose_name = 'Заявка на модель'
-#         verbose_name_plural = 'Заявки на модели'
-#         ordering = ['-created_at']
-
-#     def __str__(self):
-#         return f'{self.title} ({self.get_status_display()})'
-
-#     # Свойства для проверки статуса
-#     @property
-#     def is_pending(self):
-#         return self.status == self.STATUS_PENDING
-
-#     @property
-#     def is_approved(self):
-#         return self.status == self.STATUS_APPROVED
-
-#     @property
-#     def is_rejected(self):
-#         return self.status == self.STATUS_REJECTED
-
-#     # Метод для получения списка загруженных форматов
-#     def get_available_formats(self):
-#         formats = []
-#         if self.file_stp: formats.append('STP')
-#         if self.file_igs: formats.append('IGS')
-#         if self.file_stl: formats.append('STL')
-#         return ", ".join(formats) if formats else "Нет файлов"
-    
-#     @property
-#     def model_extension(self):
-#         """Отображает доступные форматы в карточке."""
-#         exts = []
-#         if self.file_stp: exts.append('STP')
-#         if self.file_igs: exts.append('IGS')
-#         if self.file_stl: exts.append('STL')
-#         return " / ".join(exts) if exts else "—"
-    
 from django.db import models
 from django.utils import timezone
 
 
 class ModelSubmission(models.Model):
     """Модель для хранения 3D-изделий в каталоге"""
-    # Основная информация
-    title = models.CharField(max_length=200, verbose_name='Название изделия')
-    category = models.CharField(max_length=255, blank=True, null=True, verbose_name='Тип изделия')
-    standard = models.CharField(max_length=255, blank=True, null=True, verbose_name='Стандарт (ГОСТ/ISO)')
-    description = models.TextField(blank=True, verbose_name='Описание')
 
-    # Файлы (три основных формата)
-    file_stp = models.FileField(upload_to='models/stp/', blank=True, null=True, verbose_name='Файл STP')
-    file_igs = models.FileField(upload_to='models/igs/', blank=True, null=True, verbose_name='Файл IGS')
-    file_stl = models.FileField(upload_to='models/stl/', blank=True, null=True, verbose_name='Файл STL')
+    title = models.CharField(max_length=200, verbose_name="Название изделия")
+    category = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Тип изделия"
+    )
+    standard = models.CharField(
+        max_length=255, blank=True, null=True, verbose_name="Стандарт (ГОСТ/ISO)"
+    )
+    description = models.TextField(blank=True, verbose_name="Описание")
 
-    # Визуализация
-    thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True, verbose_name='Превью (фото)')
-    
-    # Статистика
-    download_count = models.PositiveIntegerField(default=0, verbose_name='Количество скачиваний')
-    created_at = models.DateTimeField(default=timezone.now, verbose_name='Дата добавления')
+    file_stp = models.FileField(
+        upload_to="models/stp/", blank=True, null=True, verbose_name="Файл STP"
+    )
+    file_igs = models.FileField(
+        upload_to="models/igs/", blank=True, null=True, verbose_name="Файл IGS"
+    )
+    file_stl = models.FileField(
+        upload_to="models/stl/", blank=True, null=True, verbose_name="Файл STL"
+    )
+
+    thumbnail = models.ImageField(
+        upload_to="thumbnails/", null=True, blank=True, verbose_name="Превью (фото)"
+    )
+
+    download_count = models.PositiveIntegerField(
+        default=0, verbose_name="Количество скачиваний"
+    )
+    created_at = models.DateTimeField(
+        default=timezone.now, verbose_name="Дата добавления"
+    )
 
     class Meta:
-        verbose_name = 'Модель'
-        verbose_name_plural = 'Модели'
-        ordering = ['-created_at']
+        verbose_name = "Модель"
+        verbose_name_plural = "Модели"
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
@@ -8032,47 +7955,61 @@ class ModelSubmission(models.Model):
     def model_extension(self):
         """Возвращает строку доступных форматов для плашки на карточке"""
         exts = []
-        if self.file_stp: exts.append('STP')
-        if self.file_igs: exts.append('IGS')
-        if self.file_stl: exts.append('STL')
+        if self.file_stp:
+            exts.append("STP")
+        if self.file_igs:
+            exts.append("IGS")
+        if self.file_stl:
+            exts.append("STL")
         return " / ".join(exts) if exts else "—"
 
 
 class ChatRoom(models.Model):
-    # Делаем submission необязательным (null=True), раз он больше не нужен для чата
+
     submission = models.OneToOneField(
-        'ModelSubmission', on_delete=models.CASCADE, 
-        related_name='chat_room', null=True, blank=True
+        "ModelSubmission",
+        on_delete=models.CASCADE,
+        related_name="chat_room",
+        null=True,
+        blank=True,
     )
-    # Добавляем прямую связь с пользователем
+
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, 
-        related_name='support_chat', null=True
+        User, on_delete=models.CASCADE, related_name="support_chat", null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def get_client(self):
-        # Теперь клиент — это просто владелец чата
+
         return self.user
 
     class Meta:
-        verbose_name = 'Чат-комната'
-        verbose_name_plural = 'Чат-комнаты'
+        verbose_name = "Чат-комната"
+        verbose_name_plural = "Чат-комнаты"
 
 
 class ChatMessage(models.Model):
-    room      = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
-    sender    = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_messages', verbose_name='Отправитель')
-    body      = models.TextField(blank=True, verbose_name='Текст')
+    room = models.ForeignKey(
+        ChatRoom, on_delete=models.CASCADE, related_name="messages"
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="chat_messages",
+        verbose_name="Отправитель",
+    )
+    body = models.TextField(blank=True, verbose_name="Текст")
     is_system = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now, db_index=True)
-    is_read   = models.BooleanField(default=False)
-    file      = models.FileField(upload_to='chat_files/', blank=True, null=True, verbose_name='Файл')
+    is_read = models.BooleanField(default=False)
+    file = models.FileField(
+        upload_to="chat_files/", blank=True, null=True, verbose_name="Файл"
+    )
 
     class Meta:
-        verbose_name        = 'Сообщение'
-        verbose_name_plural = 'Сообщения'
-        ordering            = ['created_at']
+        verbose_name = "Сообщение"
+        verbose_name_plural = "Сообщения"
+        ordering = ["created_at"]
 
     @property
     def sender_is_admin(self):
@@ -8080,75 +8017,86 @@ class ChatMessage(models.Model):
         return self.sender.is_staff or self.sender.is_superuser
 
     def __str__(self):
-        return f'{self.sender.username}: {self.body[:40]}'
+        return f"{self.sender.username}: {self.body[:40]}"
 
 
 class NewsItem(models.Model):
     title = models.CharField(max_length=255, verbose_name="Заголовок новости")
-    image = models.ImageField(upload_to='news_previews/', verbose_name="Превью (картинка)")
+    image = models.ImageField(
+        upload_to="news_previews/", verbose_name="Превью (картинка)"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата публикации")
     content = models.TextField(verbose_name="Текст новости", blank=True)
 
-    # --- НОВОЕ ПОЛЕ ДЛЯ ПРОСМОТРОВ ---
-    views_count = models.PositiveIntegerField(default=0, verbose_name="Количество просмотров")
+    views_count = models.PositiveIntegerField(
+        default=0, verbose_name="Количество просмотров"
+    )
 
     class Meta:
         verbose_name = "Новость"
-        verbose_name_plural = "Новости" # Исправил опечатку в твоем коде (было дважды verbose_name)
-        ordering = ['-created_at']
+        verbose_name_plural = "Новости"
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.title
-    
+
 
 class Document(models.Model):
     standard_number = models.CharField(max_length=100, verbose_name="Номер / Стандарт")
     name = models.CharField(max_length=255, verbose_name="Название документа")
-    file = models.FileField(upload_to='documents/pdfs/', null=True, blank=True)
+    file = models.FileField(upload_to="documents/pdfs/", null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата загрузки")
-    
-    # Поле для счетчика скачиваний (использовали в шаблоне)
-    downloads_count = models.PositiveIntegerField(default=0, verbose_name="Кол-во скачиваний")
+
+    downloads_count = models.PositiveIntegerField(
+        default=0, verbose_name="Кол-во скачиваний"
+    )
 
     class Meta:
         verbose_name = "Документ"
         verbose_name_plural = "Документация"
-        ordering = ['-uploaded_at']
+        ordering = ["-uploaded_at"]
 
     def __str__(self):
         return f"{self.standard_number} - {self.name}"
 
-
     def get_extension(self):
         if not self.file:
             return ""
-        # Достаем расширение из пути файла и переводим в верхний регистр (без точки)
+
         extension = os.path.splitext(self.file.name)[1][1:].upper()
-        return extension # Вернет 'PDF', 'DOCX', 'XLSX' и т.д.
+        return extension
 
 
 class DownloadLog(models.Model):
-    # Связь с моделью (если модель удалят, логи останутся с пометкой SET_NULL)
-    model_item = models.ForeignKey(ModelSubmission, on_delete=models.SET_NULL, null=True, verbose_name="Изделие")
-    
-    # Кто скачал (null=True для неавторизованных)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Пользователь")
-    
-    # Какой именно формат выбрали
+
+    model_item = models.ForeignKey(
+        ModelSubmission, on_delete=models.SET_NULL, null=True, verbose_name="Изделие"
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Пользователь",
+    )
+
     file_format = models.CharField(max_length=10, verbose_name="Формат (STP/STL/IGS)")
-    
-    # Технические данные для админки
-    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP адрес")
+
+    ip_address = models.GenericIPAddressField(
+        null=True, blank=True, verbose_name="IP адрес"
+    )
     timestamp = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время")
 
     class Meta:
         verbose_name = "Лог скачивания"
         verbose_name_plural = "Логи скачиваний"
-        ordering = ['-timestamp']
+        ordering = ["-timestamp"]
 
     def __str__(self):
         user_display = self.user.username if self.user else f"Гость ({self.ip_address})"
         return f"{user_display} скачал {self.model_item} ({self.file_format})"
+
 
 ==================================================
 FILE: .\website\tests.py
@@ -8163,83 +8111,90 @@ from django.test import TestCase
 FILE: .\website\urls.py
 ==================================================
 
-# website/urls.py
-
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    # ── Обычные страницы ──────────────────────────────────────
-    path('',                 views.home,           name='home'),
-    path('contacts/',        views.contacts,       name='contacts'),
-    path('news/',            views.news_list_view, name='news'),
-    path('news/<int:pk>/', views.news_detail_view, name='news_detail'),
-    path('catalog/',         views.catalog,        name='catalog'),
-    path('catalog/<int:pk>/', views.model_detail,  name='model_detail'),   # ← НОВЫЙ
-    path('documentation/',   views.documentation,  name='documentation'),
-    path('about_platform/',  views.about_platform, name='about_platform'),
-    path('questions/',       views.questions,      name='questions'),
-
-    # ── Авторизация ───────────────────────────────────────────
-    path('login/',    views.login_view,   name='login'),
-    path('logout/',   views.logout_user,  name='logout'),
-    path('signup/',   views.signup_view,  name='signup'),
-
-    # ── Сброс пароля ─────────────────────────────────────────
-    path('password_reset/', auth_views.PasswordResetView.as_view(
-        template_name='password_reset.html',
-        html_email_template_name='password_reset_email.html',
-    ), name='password_reset'),
-    path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
-        template_name='password_reset_done.html',
-    ), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
-        template_name='password_reset_confirm.html',
-    ), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
-        template_name='password_reset_complete.html',
-    ), name='password_reset_complete'),
-
-    # ── Чат ──────────────────────────────────────────────────
-
-
-    # ── Профиль ─────────────────────────────────────────────
-    path('settings/',  views.settings_view, name='settings'),
-    path('anews/', views.anews_view, name='anews'),
-    path('anews/create/', views.create_news_view, name='create_news'),
-    path('anews/edit/<int:pk>/', views.edit_news_view, name='edit_news'),
-    path('anews/delete/<int:pk>/', views.delete_news_view, name='delete_news'),
-
-
-    path('adocumentation/', views.adocumentation_view, name='adocumentation'),
-    path('adocumentation/add/', views.document_edit_view, name='add_document'),
-    path('adocumentation/edit/<int:pk>/', views.document_edit_view, name='edit_document'),
-    path('adocumentation/delete/<int:pk>/', views.delete_document_view, name='delete_document'),
-
-    path('acatalog/', views.acatalog_view, name='acatalog'),
-    path('acatalog/add/', views.model_edit_view, name='add_model'),
-    path('acatalog/edit/<int:pk>/', views.model_edit_view, name='edit_model'),
-    path('acatalog/delete/<int:pk>/', views.model_delete_view, name='delete_model'),
-
-    # Страница "Безопасность"
-    path('security/', views.security_view, name='security'),
-    path('security/change-password/', views.password_change_view, name='password_change'),
-
-    path('profile/', views.profile_view, name='profile'),
-    path('download/<int:pk>/<str:file_format>/', views.download_file, name='download_file'),
-
-    path('chat/', views.chat_list, name='chat'),
-    path('chat/<int:room_id>/', views.chat_room_view, name='chat_room'),
-    
-    path('favorite/toggle/<int:pk>/', views.toggle_favorite, name='toggle_favorite'),
+    path("", views.home, name="home"),
+    path("contacts/", views.contacts, name="contacts"),
+    path("news/", views.news_list_view, name="news"),
+    path("news/<int:pk>/", views.news_detail_view, name="news_detail"),
+    path("catalog/", views.catalog, name="catalog"),
+    path("catalog/<int:pk>/", views.model_detail, name="model_detail"),
+    path("documentation/", views.documentation, name="documentation"),
+    path("about_platform/", views.about_platform, name="about_platform"),
+    path("questions/", views.questions, name="questions"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_user, name="logout"),
+    path("signup/", views.signup_view, name="signup"),
+    path(
+        "password_reset/",
+        auth_views.PasswordResetView.as_view(
+            template_name="password_reset.html",
+            html_email_template_name="password_reset_email.html",
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password_reset/done/",
+        auth_views.PasswordResetDoneView.as_view(
+            template_name="password_reset_done.html",
+        ),
+        name="password_reset_done",
+    ),
+    path(
+        "reset/<uidb64>/<token>/",
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name="password_reset_confirm.html",
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "reset/done/",
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name="password_reset_complete.html",
+        ),
+        name="password_reset_complete",
+    ),
+    path("settings/", views.settings_view, name="settings"),
+    path("anews/", views.anews_view, name="anews"),
+    path("anews/create/", views.create_news_view, name="create_news"),
+    path("anews/edit/<int:pk>/", views.edit_news_view, name="edit_news"),
+    path("anews/delete/<int:pk>/", views.delete_news_view, name="delete_news"),
+    path("adocumentation/", views.adocumentation_view, name="adocumentation"),
+    path("adocumentation/add/", views.document_edit_view, name="add_document"),
+    path(
+        "adocumentation/edit/<int:pk>/", views.document_edit_view, name="edit_document"
+    ),
+    path(
+        "adocumentation/delete/<int:pk>/",
+        views.delete_document_view,
+        name="delete_document",
+    ),
+    path("acatalog/", views.acatalog_view, name="acatalog"),
+    path("acatalog/add/", views.model_edit_view, name="add_model"),
+    path("acatalog/edit/<int:pk>/", views.model_edit_view, name="edit_model"),
+    path("acatalog/delete/<int:pk>/", views.model_delete_view, name="delete_model"),
+    path("security/", views.security_view, name="security"),
+    path(
+        "security/change-password/", views.password_change_view, name="password_change"
+    ),
+    path("profile/", views.profile_view, name="profile"),
+    path(
+        "download/<int:pk>/<str:file_format>/",
+        views.download_file,
+        name="download_file",
+    ),
+    path("chat/", views.chat_list, name="chat"),
+    path("chat/<int:room_id>/", views.chat_room_view, name="chat_room"),
+    path("favorite/toggle/<int:pk>/", views.toggle_favorite, name="toggle_favorite"),
 ]
+
 
 ==================================================
 FILE: .\website\views.py
 ==================================================
-
-# website/views.py
 
 import os
 from django.utils import timezone
@@ -8272,241 +8227,228 @@ from django.shortcuts import render
 from django.db.models import Q
 from .models import ChatRoom, DownloadLog, ModelSubmission, ChatMessage
 
-# Декоратор для проверки прав суперпользователя (можно использовать для админки и т.п.)
+
 def superuser_required(user):
     return user.is_superuser
 
-# ══════════════════════════════════════════════════════════════
-# Обычные страницы сайта
-# ══════════════════════════════════════════════════════════════
 
 def home(request):
-    return render(request, 'index.html')
+    return render(request, "index.html")
+
 
 def contacts(request):
-    return render(request, 'contacts.html')
+    return render(request, "contacts.html")
+
 
 def news_list_view(request):
     news = NewsItem.objects.all()
-    return render(request, 'news.html', {'news_list': news})
+    return render(request, "news.html", {"news_list": news})
+
 
 def news_detail_view(request, pk):
     news_item = get_object_or_404(NewsItem, pk=pk)
 
     news_item.views_count += 1
     news_item.save()
-    
-    return render(request, 'news_detail.html', {'item': news_item})
+
+    return render(request, "news_detail.html", {"item": news_item})
+
 
 def documentation(request):
-    documents = Document.objects.all().order_by('standard_number')
-    return render(request, 'documentation.html', {'documents': documents})
+    documents = Document.objects.all().order_by("standard_number")
+    return render(request, "documentation.html", {"documents": documents})
+
 
 def adocumentation_view(request):
-    # Получаем поисковый запрос из GET-параметра 'q'
-    query = request.GET.get('q')
-    
+
+    query = request.GET.get("q")
+
     if query:
-        # Ищем по названию или номеру стандарта (зависит от твоих полей в модели)
-        documents = Document.objects.filter(name__icontains=query) | \
-                    Document.objects.filter(standard_number__icontains=query)
+
+        documents = Document.objects.filter(
+            name__icontains=query
+        ) | Document.objects.filter(standard_number__icontains=query)
     else:
         documents = Document.objects.all()
-    
-    return render(request, 'adocumentation.html', {
-        'documents': documents
 
-    })
+    return render(request, "adocumentation.html", {"documents": documents})
 
 
 def document_edit_view(request, pk=None):
-    # Если pk есть — редактируем, если нет — создаем новый
+
     instance = get_object_or_404(Document, pk=pk) if pk else None
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         form = DocumentForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
-            return redirect('adocumentation')
+            return redirect("adocumentation")
     else:
         form = DocumentForm(instance=instance)
-    
-    return render(request, 'document_form.html', {
-        'form': form,
-        'edit_mode': pk is not None
-    })
+
+    return render(
+        request, "document_form.html", {"form": form, "edit_mode": pk is not None}
+    )
 
 
-    
 def about_platform(request):
-    return render(request, 'about_platform.html')
+    return render(request, "about_platform.html")
+
 
 def questions(request):
-    return render(request, 'questions.html')
-
-
-# ══════════════════════════════════════════════════════════════
-# Каталог одобренных моделей
-# ══════════════════════════════════════════════════════════════
-
-
+    return render(request, "questions.html")
 
 
 def catalog(request):
-    # Берем все модели, так как теперь их добавляет только админ
+
     models_queryset = ModelSubmission.objects.all()
 
-    # 1. Поиск по названию или стандарту
-    query = request.GET.get('q')
+    query = request.GET.get("q")
     if query:
         models_queryset = models_queryset.filter(
             Q(title__icontains=query) | Q(standard__icontains=query)
         )
 
-    # 2. Фильтр по форматам (проверяем, что поле с файлом не пустое)
-    selected_formats = request.GET.getlist('formats')
+    selected_formats = request.GET.getlist("formats")
     if selected_formats:
         format_queries = Q()
-        if 'STEP' in selected_formats:
-            # Проверяем, что поле file_stp не пустое и не None
-            format_queries |= Q(file_stp__isnull=False) & ~Q(file_stp='')
-        if 'STL' in selected_formats:
-            format_queries |= Q(file_stl__isnull=False) & ~Q(file_stl='')
-        if 'IGES' in selected_formats:
-            format_queries |= Q(file_igs__isnull=False) & ~Q(file_igs='')
-        
+        if "STEP" in selected_formats:
+
+            format_queries |= Q(file_stp__isnull=False) & ~Q(file_stp="")
+        if "STL" in selected_formats:
+            format_queries |= Q(file_stl__isnull=False) & ~Q(file_stl="")
+        if "IGES" in selected_formats:
+            format_queries |= Q(file_igs__isnull=False) & ~Q(file_igs="")
+
         models_queryset = models_queryset.filter(format_queries)
 
     context = {
-        'models': models_queryset, # В шаблоне используй {% for item in models %}
-        'query': query,
-        'selected_formats': selected_formats,
+        "models": models_queryset,
+        "query": query,
+        "selected_formats": selected_formats,
     }
-    return render(request, 'catalog.html', context)
+    return render(request, "catalog.html", context)
 
 
 def model_detail(request, pk):
-    # БЫЛО (с ошибкой):
-    # submission = get_object_or_404(ModelSubmission, pk=pk, status=ModelSubmission.STATUS_APPROVED)
-    
-    # СТАЛО (правильно):
+
     submission = get_object_or_404(ModelSubmission, pk=pk)
-    
-    # Логика для "Похожих моделей" (если используешь категорию)
-    related = ModelSubmission.objects.filter(category=submission.category).exclude(pk=pk)[:4]
 
-    return render(request, 'model_detail.html', {
-        'submission': submission,
-        'related': related
-    })
+    related = ModelSubmission.objects.filter(category=submission.category).exclude(
+        pk=pk
+    )[:4]
 
+    return render(
+        request, "model_detail.html", {"submission": submission, "related": related}
+    )
 
-# ══════════════════════════════════════════════════════════════
-# Авторизация / регистрация
-# ══════════════════════════════════════════════════════════════
 
 def signup_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Регистрация прошла успешно! Теперь войдите.")
-            return redirect('login')
+            return redirect("login")
         else:
             for error in form.errors.values():
                 messages.error(request, error)
     else:
         form = SignUpForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, "signup.html", {"form": form})
 
 
 def login_view(request):
-    if request.method == 'POST':
-        u = request.POST.get('username')
-        p = request.POST.get('password')
+    if request.method == "POST":
+        u = request.POST.get("username")
+        p = request.POST.get("password")
         user = authenticate(request, username=u, password=p)
         if user is not None:
             login(request, user)
-            return redirect('settings')
+            return redirect("settings")
         else:
-            # Передаем ошибку напрямую в контекст шаблона
-            return render(request, 'login.html', {'error': "Неверный Email или пароль"})
-    return render(request, 'login.html')
+
+            return render(request, "login.html", {"error": "Неверный Email или пароль"})
+    return render(request, "login.html")
+
 
 def logout_user(request):
     logout(request)
-    return redirect('/')
+    return redirect("/")
 
 
 @login_required
 def settings_view(request):
-    is_edit = request.GET.get('edit') == '1'
-    
-    if request.method == 'POST':
+    is_edit = request.GET.get("edit") == "1"
+
+    if request.method == "POST":
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        p_form = ProfileUpdateForm(
+            request.POST, request.FILES, instance=request.user.profile
+        )
         if u_form.is_valid() and p_form.is_valid():
             u_form.save()
             p_form.save()
-            return redirect('settings') # Возврат в режим просмотра
+            return redirect("settings")
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.profile)
 
-    # Если не режим редактирования — отключаем поля
     if not is_edit:
         for field in u_form.fields.values():
-            field.widget.attrs['disabled'] = 'disabled'
+            field.widget.attrs["disabled"] = "disabled"
         for field in p_form.fields.values():
-            field.widget.attrs['disabled'] = 'disabled'
+            field.widget.attrs["disabled"] = "disabled"
 
-    return render(request, 'settings.html', {
-        'u_form': u_form, 
-        'p_form': p_form, 
-        'is_edit': is_edit
-    })
+    return render(
+        request,
+        "settings.html",
+        {"u_form": u_form, "p_form": p_form, "is_edit": is_edit},
+    )
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def anews_view(request):
-    query = request.GET.get('q')
+    query = request.GET.get("q")
     if query:
-        # Фильтруем по заголовку (title) или тексту (content)
+
         news_items = NewsItem.objects.filter(title__icontains=query)
     else:
         news_items = NewsItem.objects.all()
-        
-    return render(request, 'anews.html', {'news_items': news_items})
+
+    return render(request, "anews.html", {"news_items": news_items})
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def create_news_view(request):
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        content = request.POST.get('content')
-        image = request.FILES.get('image')
-        
-        if title: 
-            NewsItem.objects.create(title=title, content=content, image=image)
-            return redirect('anews')
+    if request.method == "POST":
+        title = request.POST.get("title")
+        content = request.POST.get("content")
+        image = request.FILES.get("image")
 
-    # Передаем is_edit=False
-    return render(request, 'create_news.html', {'is_edit': False})
+        if title:
+            NewsItem.objects.create(title=title, content=content, image=image)
+            return redirect("anews")
+
+    return render(request, "create_news.html", {"is_edit": False})
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def edit_news_view(request, pk):
     news = get_object_or_404(NewsItem, pk=pk)
-    if request.method == 'POST':
-        news.title = request.POST.get('title')
-        news.content = request.POST.get('content')
-        if request.FILES.get('image'):
-            news.image = request.FILES.get('image')
+    if request.method == "POST":
+        news.title = request.POST.get("title")
+        news.content = request.POST.get("content")
+        if request.FILES.get("image"):
+            news.image = request.FILES.get("image")
         news.save()
-        return redirect('anews')
-    
-    return render(request, 'create_news.html', {'news': news, 'is_edit': True})
+        return redirect("anews")
+
+    return render(request, "create_news.html", {"news": news, "is_edit": True})
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -8514,170 +8456,167 @@ def edit_news_view(request, pk):
 def delete_news_view(request, pk):
     news = get_object_or_404(NewsItem, pk=pk)
     news.delete()
-    return redirect('anews')
-
-
+    return redirect("anews")
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def model_edit_view(request, pk=None):
     instance = get_object_or_404(ModelSubmission, pk=pk) if pk else None
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         form = ModelSubmissionForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
             form.save()
-            return redirect('acatalog')
+            return redirect("acatalog")
     else:
         form = ModelSubmissionForm(instance=instance)
 
-    # ПОДГОТОВКА ФАЙЛОВ ДЛЯ ЦИКЛА (добавлено извлечение имени файла)
     file_fields = []
-    fields_info = [('file_stp', 'STP'), ('file_igs', 'IGS'), ('file_stl', 'STL')]
-    
+    fields_info = [("file_stp", "STP"), ("file_igs", "IGS"), ("file_stl", "STL")]
+
     for field_name, ext in fields_info:
         file_obj = getattr(instance, field_name) if instance else None
-        if file_obj and hasattr(file_obj, 'url'):
-            # Файл существует
+        if file_obj and hasattr(file_obj, "url"):
+
             file_url = file_obj.url
             file_basename = os.path.basename(file_obj.name)
         else:
-            # Файла нет
+
             file_url = None
             file_basename = None
-            
+
         file_fields.append((field_name, ext, file_url, file_basename))
 
-    return render(request, 'amanage_model.html', {
-        'form': form,
-        'edit_mode': pk is not None,
-        'instance': instance,
-        'file_fields': file_fields
-    })
+    return render(
+        request,
+        "amanage_model.html",
+        {
+            "form": form,
+            "edit_mode": pk is not None,
+            "instance": instance,
+            "file_fields": file_fields,
+        },
+    )
+
 
 def acatalog_view(request):
-    # Просто получаем все модели, так как статусов больше нет
-    query = request.GET.get('q', '')
+
+    query = request.GET.get("q", "")
     if query:
         submissions = ModelSubmission.objects.filter(title__icontains=query)
     else:
         submissions = ModelSubmission.objects.all()
 
     context = {
-        'submissions': submissions,
-        'total_count': submissions.count(),
+        "submissions": submissions,
+        "total_count": submissions.count(),
     }
-    return render(request, 'acatalog.html', context)
+    return render(request, "acatalog.html", context)
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 @require_POST
 def model_delete_view(request, pk):
-    # Находим модель или выдаем 404
+
     submission = get_object_or_404(ModelSubmission, pk=pk)
-    # Удаляем ее
+
     submission.delete()
-    # Возвращаемся обратно в каталог
-    return redirect('acatalog')
+
+    return redirect("acatalog")
 
 
 @login_required
 def security_view(request):
-    # Просто отдаем твою страницу с щитом
-    return render(request, 'security.html')
+
+    return render(request, "security.html")
+
 
 @login_required
 def password_change_view(request):
-    if request.method == 'POST':
-        # Передаем request.user первым аргументом, данные из POST — вторым
+    if request.method == "POST":
+
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
-            # Важно: обновляем сессию, чтобы юзера не выкинуло
+
             update_session_auth_hash(request, user)
-            
-            # Обновляем дату изменения в профиле (если поле создано)
-            if hasattr(request.user, 'profile'):
+
+            if hasattr(request.user, "profile"):
                 request.user.profile.password_changed_at = timezone.now()
                 request.user.profile.save()
-                
+
             messages.success(request, "Пароль успешно изменен!")
-            return redirect('security')
+            return redirect("security")
     else:
-        # Теперь форма будет видна и при GET запросе
+
         form = PasswordChangeForm(request.user)
-        
-    return render(request, 'password_change_form.html', {'form': form})
+
+    return render(request, "password_change_form.html", {"form": form})
+
 
 @login_required
 def profile_view(request):
     if request.user.is_superuser:
-        # --- ЛОГИКА ДЛЯ АДМИНА ---
-        # Собираем статистику для карточек
+
         users_count = User.objects.count()
         models_count = ModelSubmission.objects.count()
         docs_count = Document.objects.count()
         news_count = NewsItem.objects.count()
-        
-        # Топ-5 изделий по скачиванию (поле download_count добавлено в миграции 0009)
-        top_models = ModelSubmission.objects.order_by('-download_count')[:5]
-        
-        # Последние действия (скачивания)
-        recent_actions = DownloadLog.objects.select_related('user', 'model_item').order_by('-timestamp')[:5]
-        
+
+        top_models = ModelSubmission.objects.order_by("-download_count")[:5]
+
+        recent_actions = DownloadLog.objects.select_related(
+            "user", "model_item"
+        ).order_by("-timestamp")[:5]
+
         context = {
-            'users_count': users_count,
-            'models_count': models_count,
-            'docs_count': docs_count,
-            'news_count': news_count,
-            'top_models': top_models,
-            'recent_actions': recent_actions,
+            "users_count": users_count,
+            "models_count": models_count,
+            "docs_count": docs_count,
+            "news_count": news_count,
+            "top_models": top_models,
+            "recent_actions": recent_actions,
         }
-        return render(request, 'profile_admin.html', context)
+        return render(request, "profile_admin.html", context)
     else:
-        # --- ЛОГИКА ДЛЯ ОБЫЧНОГО ПОЛЬЗОВАТЕЛЯ ---
+
         favorite_models = request.user.profile.favorite_models.all()
-        
-        # Считаем количество скачиваний текущего пользователя
+
         downloaded_count = DownloadLog.objects.filter(user=request.user).count()
-        
+
         context = {
-            'favorite_models': favorite_models,
-            'fav_count': favorite_models.count(),
-            'downloaded_count': downloaded_count,
+            "favorite_models": favorite_models,
+            "fav_count": favorite_models.count(),
+            "downloaded_count": downloaded_count,
         }
-        return render(request, 'profile_user.html', context)
+        return render(request, "profile_user.html", context)
 
 
 def download_file(request, pk, file_format):
     model_item = get_object_or_404(ModelSubmission, pk=pk)
-    
-    # 1. Получаем IP адрес (для истории)
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
 
-    # 2. Создаем запись в логах
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+
     DownloadLog.objects.create(
         model_item=model_item,
         user=request.user if request.user.is_authenticated else None,
         file_format=file_format.upper(),
-        ip_address=ip
+        ip_address=ip,
     )
 
-    # 3. Увеличиваем общий счетчик в основной модели
-    ModelSubmission.objects.filter(pk=pk).update(download_count=F('download_count') + 1)
+    ModelSubmission.objects.filter(pk=pk).update(download_count=F("download_count") + 1)
 
-    # 4. Редирект на сам файл
-    file_field = getattr(model_item, f'file_{file_format.lower()}', None)
+    file_field = getattr(model_item, f"file_{file_format.lower()}", None)
     if file_field:
         return redirect(file_field.url)
-    
-    return redirect('model_detail', pk=pk)
+
+    return redirect("model_detail", pk=pk)
 
 
 @login_required
@@ -8685,141 +8624,135 @@ def download_file(request, pk, file_format):
 def toggle_favorite(request, model_id):
     model_item = get_object_or_404(ModelSubmission, id=model_id)
     profile = request.user.profile
-    
+
     if model_item in profile.favorite_models.all():
         profile.favorite_models.remove(model_item)
-        action = 'removed'
+        action = "removed"
     else:
         profile.favorite_models.add(model_item)
-        action = 'added'
-        
-    return JsonResponse({'status': 'ok', 'action': action})
+        action = "added"
+
+    return JsonResponse({"status": "ok", "action": action})
 
 
 @user_passes_test(lambda u: u.is_superuser)
 def admin_profile_view(request):
-    # Собираем реальные цифры из базы
+
     context = {
-        'users_count': User.objects.count(),
-        'models_count': ModelSubmission.objects.count(),
-        'news_count': NewsItem.objects.count(),
-        'docs_count': 6,  # Если будет модель документов, замени на .count()
-        
-        # Топ изделий по скачиванию
-        'top_models': ModelSubmission.objects.order_by('-download_count')[:5],
-        
-        # Последние действия (скачивания)
-        'recent_actions': DownloadLog.objects.select_related('user', 'model_item').order_by('-timestamp')[:5]
+        "users_count": User.objects.count(),
+        "models_count": ModelSubmission.objects.count(),
+        "news_count": NewsItem.objects.count(),
+        "docs_count": 6,
+        "top_models": ModelSubmission.objects.order_by("-download_count")[:5],
+        "recent_actions": DownloadLog.objects.select_related(
+            "user", "model_item"
+        ).order_by("-timestamp")[:5],
     }
-    return render(request, 'profile_admin.html', context)
-
-
+    return render(request, "profile_admin.html", context)
 
 
 @login_required
 def chat_stub_view(request):
-    # Если это админ, можно передать другой заголовок
+
     is_admin = request.user.is_superuser
-    return render(request, 'chat_stub.html', {'is_admin': is_admin})
+    return render(request, "chat_stub.html", {"is_admin": is_admin})
 
 
 @login_required
 def chat_list(request):
     if request.user.is_staff:
-        # 1. Проверяем, есть ли непрочитанные сообщения от клиентов для индикатора в меню
-        has_unread = ChatMessage.objects.filter(is_read=False).exclude(sender__is_staff=True).exists()
 
-        # 2. Получаем список всех комнат с последним временем сообщения
-        rooms = ChatRoom.objects.select_related('user', 'user__profile').annotate(
-            last_msg_time=Max('messages__created_at')
-        ).order_by('-last_msg_time')
+        has_unread = (
+            ChatMessage.objects.filter(is_read=False)
+            .exclude(sender__is_staff=True)
+            .exists()
+        )
 
-        return render(request, 'chat/chat_list.html', {
-            'rooms': rooms,
-            'has_unread': has_unread  # Передаем статус непрочитанных
-        })
+        rooms = (
+            ChatRoom.objects.select_related("user", "user__profile")
+            .annotate(last_msg_time=Max("messages__created_at"))
+            .order_by("-last_msg_time")
+        )
 
-    # ДЛЯ КЛИЕНТА: Перенаправляем в его единственный чат
+        return render(
+            request, "chat/chat_list.html", {"rooms": rooms, "has_unread": has_unread}
+        )
+
     room, created = ChatRoom.objects.get_or_create(user=request.user)
-    return redirect('chat_room', room_id=room.id)
+    return redirect("chat_room", room_id=room.id)
 
 
 @login_required
 def chat_room_view(request, room_id):
     room = get_object_or_404(ChatRoom, id=room_id)
-    
-    # Защита: клиент может зайти только в СВОЙ чат. Админ может в любой.
+
     if not request.user.is_staff and room.user != request.user:
-        return redirect('home')
+        return redirect("home")
 
-    # ПОМЕТКА ПРОЧИТАННЫМ:
-    # Когда кто-то открывает чат, все сообщения в этой комнате, 
-    # отправленные НЕ этим пользователем, становятся прочитанными.
-    room.messages.exclude(sender=request.user).filter(is_read=False).update(is_read=True)
+    room.messages.exclude(sender=request.user).filter(is_read=False).update(
+        is_read=True
+    )
 
-    if request.method == 'POST':
-        body = request.POST.get('message', '').strip()
-        file = request.FILES.get('file') # Получаем файл из запроса
+    if request.method == "POST":
+        body = request.POST.get("message", "").strip()
+        file = request.FILES.get("file")
 
-        # Создаем сообщение, если есть текст ИЛИ файл
         if body or file:
             ChatMessage.objects.create(
-                room=room,
-                sender=request.user,
-                body=body,
-                file=file
+                room=room, sender=request.user, body=body, file=file
             )
-            
-            # Если это AJAX запрос (от Drag-and-Drop или JS), возвращаем пустой ответ или статус
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return redirect('chat_room', room_id=room.id)
-            
-            return redirect('chat_room', room_id=room.id)
 
-    # Оптимизированная загрузка сообщений
-    chat_messages = room.messages.select_related('sender', 'sender__profile').all().order_by('created_at')
-    
-    return render(request, 'chat/chat_room.html', {
-        'room': room,
-        'chat_messages': chat_messages
-    })
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return redirect("chat_room", room_id=room.id)
+
+            return redirect("chat_room", room_id=room.id)
+
+    chat_messages = (
+        room.messages.select_related("sender", "sender__profile")
+        .all()
+        .order_by("created_at")
+    )
+
+    return render(
+        request, "chat/chat_room.html", {"room": room, "chat_messages": chat_messages}
+    )
+
 
 @login_required
 def toggle_favorite(request, pk):
     model_obj = get_object_or_404(ModelSubmission, pk=pk)
     profile = request.user.profile
-    
+
     if model_obj in profile.favorite_models.all():
         profile.favorite_models.remove(model_obj)
         is_favorite = False
     else:
         profile.favorite_models.add(model_obj)
         is_favorite = True
-        
-    return JsonResponse({
-        'status': 'ok',
-        'is_favorite': is_favorite,
-        'count': profile.favorite_models.count()
-    })
+
+    return JsonResponse(
+        {
+            "status": "ok",
+            "is_favorite": is_favorite,
+            "count": profile.favorite_models.count(),
+        }
+    )
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 @require_POST
 def delete_document_view(request, pk):
-    # Находим документ по ID или выдаем 404 ошибку
+
     document = get_object_or_404(Document, pk=pk)
-    
-    # Необязательно, но полезно: удаляем физический файл с сервера
+
     if document.file:
         if os.path.isfile(document.file.path):
             os.remove(document.file.path)
-            
-    # Удаляем запись из базы данных
-    document.delete()
-    
-    # Возвращаемся на страницу со списком документов
-    return redirect('adocumentation')
 
+    document.delete()
+
+    return redirect("adocumentation")
 
 
 ==================================================
@@ -9368,18 +9301,18 @@ FILE: .\website\static\header_login.css
 }
 
 
-/* --- 1. ОБЩИЕ ПАРАМЕТРЫ КОНТЕЙНЕРА (Нужны для выравнивания шапки) --- */
+
 .container {
     width: 95%;           
     max-width: 1700px;    
     margin: 0 auto;
 }
 
-/* --- 2. ОСНОВНОЙ БЛОК ШАПКИ --- */
+
 .site-header {
     width: 100%;
     min-height: 180px;
-    /* Градиент + фоновая картинка куба */
+   
     background: linear-gradient(rgba(20, 30, 48, 0.85), rgba(36, 59, 85, 0.85)), 
                 url('img/background.png'); 
     background-size: cover;
@@ -9391,7 +9324,7 @@ FILE: .\website\static\header_login.css
     align-items: center;
 }
 
-/* --- 3. ВЕРХНЯЯ ЧАСТЬ (Логотип, Телефон, Кнопка Входа) --- */
+
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -9399,7 +9332,7 @@ FILE: .\website\static\header_login.css
     padding-bottom: 20px;
 }
 
-/* Логотип */
+
 .logo {
     display: flex;
     align-items: center;
@@ -9416,10 +9349,10 @@ FILE: .\website\static\header_login.css
     font-family: "Playfair Display", serif;
 }
 .logo-text span {
-    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+    color: #6a5acd;
 }
 
-/* Правая часть (Телефон и Вход) */
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -9453,7 +9386,7 @@ FILE: .\website\static\header_login.css
     border-color: white;
 }
 
-/* --- 4. РАЗДЕЛИТЕЛЬНАЯ ЛИНИЯ И МЕНЮ --- */
+
 .header-divider {
     border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.3);
@@ -9463,7 +9396,7 @@ FILE: .\website\static\header_login.css
 .main-nav ul {
     list-style: none;
     display: flex;
-    justify-content: space-between; /* Ссылки растягиваются по ширине */
+    justify-content: space-between;
 }
 .main-nav a {
     text-decoration: none;
@@ -9479,7 +9412,7 @@ FILE: .\website\static\header_login.css
     font-weight: 800;
 }
 
-/* --- 5. СПЕЦИАЛЬНЫЙ СТИЛЬ ДЛЯ ГЛАВНОЙ СТРАНИЦЫ (Прозрачность) --- */
+
 .site-header.header-home {
     background: transparent; 
     position: absolute;      
@@ -9493,7 +9426,7 @@ FILE: .\website\static\header_login.css
     border-color: rgba(255, 255, 255, 0.1); 
 }
 
-/* --- 6. МОБИЛЬНАЯ АДАПТАЦИЯ ШАПКИ --- */
+
 @media (max-width: 992px) {
     .header-top {
         flex-direction: column;
@@ -9530,7 +9463,7 @@ body, html {
     background-color: #f8faff;
 }
 
-/* Форма слева */
+
 .form-container {
     flex: 1.2;
     display: flex;
@@ -9553,7 +9486,7 @@ body, html {
     text-align: center;
 }
 
-/* Элементы ввода */
+
 .input-group {
     margin-bottom: 25px;
 }
@@ -9583,12 +9516,12 @@ body, html {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 18px; /* Увеличили размер иконки */
+    font-size: 18px; 
     color: #888;
     user-select: none;
 }
 
-/* Чекбокс "Запомни меня" */
+
 .options-row {
     margin-bottom: 25px;
 }
@@ -9610,7 +9543,7 @@ body, html {
     cursor: pointer;
 }
 
-/* Текст и кнопка */
+
 .policy-text {
     font-size: 13px;
     color: #1a1a1a;
@@ -9655,7 +9588,7 @@ body, html {
     font-weight: 700;
 }
 
-/* Сайдбар справа */
+
 .sidebar {
     position: relative;
     flex: 1;
@@ -9665,18 +9598,18 @@ body, html {
     background-size: cover;
     background-position: center;
     
-    /* Наклон. 35% - это точка начала. Все, что левее 35% по X — прозрачно */
+    
     clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
     
-    /* ВАЖНО: используем Flex для центрирования текста в ОСТАВШЕЙСЯ части */
+    
     display: flex;
-    align-items: center;      /* Вертикальное центрирование */
-    justify-content: flex-end; /* Прижимаем к правой части */
-    padding-right: 5%;        /* Отступ от правого края */
+    align-items: center;      
+    justify-content: flex-end; 
+    padding-right: 5%;        
 }
 
 .sidebar-text {
-    /* Ограничиваем ширину текста, чтобы он не заходил на наклонную область */
+    
     width: 60%; 
 }
 
@@ -9685,35 +9618,35 @@ body, html {
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     text-align: center;
-    font-size: 2.5vw; /* Размер адаптируется под ширину */
-    white-space: nowrap; /* В одну строку */
+    font-size: 2.5vw; 
+    white-space: nowrap; 
     margin: 0;
 }
 
-/* На случай, если экран совсем узкий */
+
 @media (max-width: 900px) {
     .sidebar { display: none; }
 }
 
 
-/* Стандартное состояние кнопки (серая) */
+
 .submit-btn {
     width: 100%;
     padding: 18px;
-    background-color: #E0E0E0; /* Светло-серый */
+    background-color: #E0E0E0; 
     color: #FFFFFF;
     border: none;
     border-radius: 40px;
     font-size: 18px;
     font-weight: 600;
-    cursor: not-allowed; /* Курсор запрета */
+    cursor: not-allowed; 
     transition: all 0.3s ease;
     margin-top: 20px;
 }
 
-/* Состояние, когда поля заполнены (черная или темно-синяя) */
+
 .submit-btn.active {
-    background-color: #1A1C41; /* Темный цвет как на макете */
+    background-color: #1A1C41; 
     cursor: pointer;
 }
 
@@ -9725,7 +9658,7 @@ body, html {
 FILE: .\website\static\profile.css
 ==================================================
 
-/* 1. Глобальные сбросы */
+
 * {
     margin: 0;
     padding: 0;
@@ -9764,7 +9697,7 @@ FILE: .\website\static\profile.css
 
 .logo-text span {
     font-family: "Playfair Display", serif;
-    color: #6a5acd; /* Фиолетовый цвет для "Base" */
+    color: #6a5acd; 
 }
 
 .header-top {
@@ -9788,18 +9721,18 @@ FILE: .\website\static\profile.css
 }
 
 .user-name {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
 .user-role {
-    color: inherit;            /* Берет цвет у родительского текста */
-    text-decoration: none;     /* Убирает подчеркивание */
-    font: inherit;             /* Наследует шрифт, размер и жирность */
-    cursor: pointer;           /* Оставляет "палец" при наведении */
+    color: inherit;            
+    text-decoration: none;     
+    font: inherit;             
+    cursor: pointer;           
     outline: none;
 }
 
@@ -9837,10 +9770,10 @@ body {
     color: #333;
 }
 
-/* Header */
+
 .top-header {
     height: 70px;
-    background: #23236e; /* Цвет из макета */
+    background: #23236e; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -9876,13 +9809,13 @@ body {
 .user-role { font-size: 10px; opacity: 0.7; }
 .header-avatar img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
 
-/* Main Layout */
+
 .wrapper { display: flex; min-height: calc(100vh - 70px); }
 
 .sidebar {
     width: 250px;
     background: var(--sidebar-grad);
-    /* Здесь можно добавить background-image: url('img/background.png') */
+    
     padding-top: 30px;
 }
 
@@ -9906,7 +9839,7 @@ body {
 
 h1 { font-size: 28px; margin-bottom: 50px; }
 
-/* Cards */
+
 .card {
     background: white;
     border-radius: 12px;
@@ -9935,11 +9868,11 @@ h1 { font-size: 28px; margin-bottom: 50px; }
     padding: 5px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Fields */
+
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 40px; }
 .field-group label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; }
 
-/* Стили для полей Django */
+
 input[type="text"], input[type="tel"], input[type="email"], select {
     width: 100%;
     background: var(--input-bg);
@@ -9956,7 +9889,7 @@ input[type="text"], input[type="tel"], input[type="email"], select {
 
 .section-title { font-size: 18px; margin-bottom: 25px; }
 
-/* Button */
+
 .actions { display: flex; justify-content: flex-end; }
 .btn-submit {
     background: #43458b; color: white; border: none; padding: 12px 30px;
@@ -9986,16 +9919,16 @@ body, html {
     background-color: #fff;
 }
 
-/* Фигура треугольника */
+
 .triangle-bg {
     position: absolute;
     right: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    /* Глубокий фиолетовый градиент */
+    
     background: linear-gradient(135deg, #1A1C41 0%, #4B00B4 100%);
-    /* Рисуем треугольник: точка слева по центру, углы справа сверху и снизу */
+    
     clip-path: polygon(0 50%, 100% 0, 100% 100%);
     z-index: 1;
 }
@@ -10005,7 +9938,7 @@ body, html {
     z-index: 2;
     width: 100%;
     max-width: 450px;
-    margin-left: 30%; /* Смещаем вправо в широкую часть треугольника */
+    margin-left: 30%; 
     text-align: center;
     color: white;
 }
@@ -10046,7 +9979,7 @@ input {
 FILE: .\website\static\signup_style.css
 ==================================================
 
-/* 1. Сброс стилей и базовые настройки */
+
 * {
     margin: 0;
     padding: 0;
@@ -10061,13 +9994,13 @@ body, html {
     background-color: #f8faff;
 }
 
-/* 2. Контейнер страницы */
+
 .registration-page {
     display: flex;
     min-height: 100vh;
 }
 
-/* 3. Сайдбар и его фон */
+
 .sidebar {
     position: relative;
     flex: 1.3;
@@ -10078,7 +10011,7 @@ body, html {
     z-index: 2;
 }
 
-/* Фон с наклоном (отдельный слой, чтобы не резал текст) */
+
 .sidebar-bg {
     position: absolute;
     top: 0; 
@@ -10107,7 +10040,7 @@ body, html {
     letter-spacing: 2px;
 }
 
-/* 4. Правая панель (Форма) */
+
 .form-container {
     flex: 1;
     display: flex;
@@ -10141,7 +10074,7 @@ body, html {
     text-decoration: underline;
 }
 
-/* 5. Поля ввода */
+
 .input-group {
     margin-bottom: 20px;
 }
@@ -10191,7 +10124,7 @@ body, html {
     line-height: 1.4;
 }
 
-/* 6. Текст условий */
+
 .policy-text {
     font-size: 13px;
     color: #718096;
@@ -10205,7 +10138,7 @@ body, html {
     font-weight: 700;
 }
 
-/* 7. Кнопка */
+
 .submit-btn {
     width: 100%;
     padding: 18px;
@@ -10229,7 +10162,7 @@ body, html {
     background-color: #2a2d61;
 }
 
-/* 8. Адаптивность */
+
 @media (max-width: 1100px) {
     .sidebar-bg {
         clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
@@ -12348,6 +12281,23 @@ FILE: .\website\templates\catalog.html
 {% load static %}
 
 {% block content %}
+<style>
+    /* Добавляем эффект при наведении на саму карточку (чтобы было понятно, что она кликабельная) */
+    .card-main-info {
+        transition: background-color 0.2s ease;
+    }
+    .card-main-info:hover {
+        background-color: #f4f6f9;
+    }
+    /* Делаем так, чтобы кнопки переносились на новую строку, если их много */
+    .card-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
 <section class="catalog-section">
     <div class="container">
         <nav class="breadcrumbs">
@@ -12386,7 +12336,9 @@ FILE: .\website\templates\catalog.html
                 <div class="catalog-grid">
                     {% for model in models %}
                     <div class="catalog-card">
-                        <div class="card-main-info">
+                        
+                        <!-- ВЕСЬ ВЕРХНИЙ БЛОК ТЕПЕРЬ ССЫЛКА -->
+                        <a href="{% url 'model_detail' model.pk %}" class="card-main-info" style="text-decoration: none; color: inherit;">
                             <div class="card-image">
                                 {% if model.thumbnail %}
                                     <img src="{{ model.thumbnail.url }}" alt="">
@@ -12396,21 +12348,30 @@ FILE: .\website\templates\catalog.html
                                 <span class="badge-ext">{{ model.model_extension }}</span>
                             </div>
                             <div class="card-content">
-                                <a href="{% url 'model_detail' model.pk %}" style="text-decoration:none; color:inherit;">
-                                    <h4 class="model-name">{{ model.title }}</h4>
-                                    <p style="color:#666">{{ model.standard|default:"" }}</p>
-                                </a>
+                                <h4 class="model-name">{{ model.title }}</h4>
+                                <p style="color:#666; margin-top: 8px; font-size: 13px;">{{ model.standard|default:"" }}</p>
                             </div>
-                        </div>
+                        </a>
+                        
+                        <!-- КНОПКИ СКАЧИВАНИЯ (Каждая проверяется отдельно) -->
                         <div class="card-footer">
                             {% if model.file_stp %}
-                                <a href="{{ model.file_stp.url }}" class="download-link" download>Скачать STP</a>
-                            {% elif model.file_stl %}
-                                <a href="{{ model.file_stl.url }}" class="download-link" download>Скачать STL</a>
-                            {% else %}
+                                <a href="{% url 'download_file' model.pk 'stp' %}" class="download-link" download>Скачать STP</a>
+                            {% endif %}
+                            
+                            {% if model.file_stl %}
+                                <a href="{% url 'download_file' model.pk 'stl' %}" class="download-link" download>Скачать STL</a>
+                            {% endif %}
+                            
+                            {% if model.file_igs %}
+                                <a href="{% url 'download_file' model.pk 'igs' %}" class="download-link" download>Скачать IGS</a>
+                            {% endif %}
+
+                            {% if not model.file_stp and not model.file_stl and not model.file_igs %}
                                 <span style="font-size: 12px; color: #999;">Файлы недоступны</span>
                             {% endif %}
                         </div>
+                        
                     </div>
                     {% empty %}
                     <div style="padding: 40px; grid-column: span 2; text-align: center;">
@@ -12418,7 +12379,7 @@ FILE: .\website\templates\catalog.html
                     </div>
                     {% endfor %}
                 </div>
-                </main>
+            </main>
         </div>
     </div>
 </section>
@@ -12445,11 +12406,11 @@ FILE: .\website\templates\contacts.html
             </div>
             <div class="contact-item">
                 <i class='bx bx-globe'></i>
-                <div><span>Веб-сайт</span><br>www.cadbase.ru</div>
+                <div><span>Веб-сайт</span><br>cadbase.pro</div>
             </div>
             <div class="contact-item">
                 <i class='bx bx-time-five'></i>
-                <div><span>Время работы</span><br>Пн-Пт 10:00 - 18:00</div>
+                <div><span>Время работы техподдержки</span><br>Пн-Пт 10:00 - 18:00</div>
             </div>
         </div>
         <div class="contacts-image">
@@ -13171,9 +13132,31 @@ FILE: .\website\templates\model_detail.html
 
 {% block content %}
 <style>
-    /* Добавляем стили состояний для кнопки, чтобы не ломать кавычки в инлайне */
+    /* Стили для активной кнопки избранного */
     .fav-active { background: #3e5281 !important; color: white !important; }
     .fav-active svg { fill: white !important; }
+    
+    /* Контейнер для фото/3D (чтобы сохранять пропорции 16/10) */
+    .viewer-container {
+        width: 100%; 
+        aspect-ratio: 16/10; 
+        background: #f0f2f5; 
+        border-radius: 12px; 
+        border: 1px solid #e0e0e0; 
+        position: relative; 
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Изображение внутри контейнера (если нет 3D) */
+    .viewer-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Картинка помещается целиком без обрезки */
+        background: #fff;    /* Белый фон под картинкой смотрится лучше */
+    }
 </style>
 
 <div class="catalog-section">
@@ -13191,48 +13174,78 @@ FILE: .\website\templates\model_detail.html
 
             <div style="display: grid; grid-template-columns: 1fr 350px; gap: 40px;">
                 
+                <!-- ЛЕВАЯ ЧАСТЬ (Просмотр и Описание) -->
                 <div>
-                    <div id="viewerWrap" style="width: 100%; aspect-ratio: 16/10; background: #f0f2f5; border-radius: 12px; border: 1px solid #e0e0e0; position: relative; overflow: hidden;">
-                        <canvas id="threeCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                    <div id="viewerWrap" class="viewer-container">
                         
-                        <div id="viewerOverlay" style="position: absolute; inset: 0; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-                            <div id="ovIcon" style="font-size: 40px; margin-bottom: 15px;">📦</div>
-                            <div id="ovText" style="font-size: 14px; color: #666; margin-bottom: 15px;">Подготовка визуализации...</div>
-                            <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
-                                <div id="progressBar" style="width: 0%; height: 100%; background: #3e5281; transition: width 0.3s;"></div>
+                        {% if submission.file_stl %}
+                            <!-- ЕСЛИ ЕСТЬ STL ФАЙЛ: Включаем 3D Viewer -->
+                            <canvas id="threeCanvas" style="display: block; width: 100%; height: 100%;"></canvas>
+                            
+                            <div id="viewerOverlay" style="position: absolute; inset: 0; background: #f8f9fb; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                                <div id="ovIcon" style="font-size: 40px; margin-bottom: 15px;">📦</div>
+                                <div id="ovText" style="font-size: 14px; color: #666; margin-bottom: 15px;">Подготовка визуализации...</div>
+                                <div style="width: 200px; height: 4px; background: #eee; border-radius: 2px; overflow: hidden;">
+                                    <div id="progressBar" style="width: 0%; height: 100%; background: #3e5281; transition: width 0.3s;"></div>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="viewerHint" style="position: absolute; top: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; display: none;">
-                            ЛКМ — вращение · Колесо — масштаб
-                        </div>
+                            <div id="viewerHint" style="position: absolute; top: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px; display: none;">
+                                ЛКМ — вращение · Колесо — масштаб
+                            </div>
+
+                        {% elif submission.thumbnail %}
+                            <!-- ЕСЛИ НЕТ STL, НО ЕСТЬ ФОТО: Показываем фото в том же блоке -->
+                            <img src="{{ submission.thumbnail.url }}" alt="{{ submission.title }}" class="viewer-image">
+                            
+                            <div style="position: absolute; bottom: 15px; right: 15px; font-size: 11px; color: #999; background: rgba(255,255,255,0.8); padding: 5px 10px; border-radius: 5px;">
+                                3D-просмотр недоступен (отсутствует файл STL)
+                            </div>
+
+                        {% else %}
+                            <!-- ЕСЛИ НЕТ НИ STL, НИ ФОТО: Показываем заглушку -->
+                            <div style="text-align: center; color: #999;">
+                                <div style="font-size: 40px; margin-bottom: 10px;">📷</div>
+                                <div style="font-size: 14px;">Нет изображения и 3D-модели</div>
+                            </div>
+                        {% endif %}
+
                     </div>
 
                     <div style="margin-top: 30px;">
                         <h3 style="font-size: 18px; color: #2d5a9e; margin-bottom: 15px;">Описание</h3>
                         <div class="news-detail-content" style="font-size: 16px;">
-                            {{ submission.description|linebreaks|default:"Описание для данной модели не предоставлено." }}
+                            {{ submission.description|linebreaks|default:"Описание для данного изделия не предоставлено." }}
                         </div>
                     </div>
                 </div>
 
+                <!-- ПРАВАЯ ЧАСТЬ (Кнопки действий и Информация) -->
                 <aside>
                     <div style="background: #f4f6f9; padding: 25px; border-radius: 12px; border: 1px solid #e0e0e0;">
                         <h3 style="font-size: 16px; margin-bottom: 20px; color: #333;">Действия</h3>
                         
                         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px;">
-                        {% if submission.file_stp %}
-                            <a href="{% url 'download_file' submission.pk 'stp' %}" class="download-link" style="justify-content: center;">Скачать STEP</a>
-                        {% endif %}
+                            {% if submission.file_stp %}
+                                <a href="{% url 'download_file' submission.pk 'stp' %}" class="download-link" style="justify-content: center;">Скачать STEP</a>
+                            {% endif %}
 
-                        {% if submission.file_stl %}
-                            <a href="{% url 'download_file' submission.pk 'stl' %}" class="download-link" style="justify-content: center; background: #5a6b94;">Скачать STL</a>
-                        {% endif %}
+                            {% if submission.file_stl %}
+                                <a href="{% url 'download_file' submission.pk 'stl' %}" class="download-link" style="justify-content: center;">Скачать STL</a>
+                            {% endif %}
 
-                        {% if submission.file_igs %}
-                            <a href="{% url 'download_file' submission.pk 'igs' %}" class="download-link" style="justify-content: center; background: #7a8bb3;">Скачать IGES</a>
-                        {% endif %}
+                            {% if submission.file_igs %}
+                                <a href="{% url 'download_file' submission.pk 'igs' %}" class="download-link" style="justify-content: center;">Скачать IGES</a>
+                            {% endif %}
                             
+                            {% if not submission.file_stp and not submission.file_stl and not submission.file_igs %}
+                                <div style="text-align: center; padding: 10px; color: #999; font-size: 13px; background: white; border-radius: 6px; border: 1px dashed #ccc;">
+                                    Файлы для скачивания отсутствуют
+                                </div>
+                            {% endif %}
+
+                            <!-- Кнопка Избранное -->
+                            {% if user.is_authenticated %}
                             <button type="button" id="fav-btn" data-id="{{ submission.pk }}" style="
                                 display: flex;
                                 align-items: center;
@@ -13258,6 +13271,7 @@ FILE: .\website\templates\model_detail.html
                                     {% if submission in user.profile.favorite_models.all %}В избранном{% else %}Сохранить в избранное{% endif %}
                                 </span>
                             </button>
+                            {% endif %}
                         </div>
 
                         <hr style="border: none; border-top: 1px solid #ddd; margin-bottom: 20px;">
@@ -13268,97 +13282,100 @@ FILE: .\website\templates\model_detail.html
                                 <span style="font-weight: 600;">{{ submission.standard|default:"—" }}</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 14px;">
+                                <span style="color: #888;">Категория:</span>
+                                <span style="font-weight: 600; text-align: right; max-width: 60%;">{{ submission.category|default:"—" }}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 14px;">
                                 <span style="color: #888;">Добавлено:</span>
                                 <span style="font-weight: 600;">{{ submission.created_at|date:"d.m.Y" }}</span>
                             </div>
                         </div>
                     </div>
                 </aside>
+
             </div>
         </div>
     </div>
 </div>
 
+<!-- СКРИПТ 3D-Viewer'а (загружается только если есть STL) -->
+{% if submission.file_stl %}
 <script type="module">
 import * as THREE from 'https://esm.sh/three@0.158.0';
 import { OrbitControls } from 'https://esm.sh/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'https://esm.sh/three@0.158.0/examples/jsm/loaders/STLLoader.js';
 
-const MODEL_URL = '{% if submission.file_stl %}{{ submission.file_stl.url }}{% endif %}';
+const MODEL_URL = '{{ submission.file_stl.url }}';
+const canvas = document.getElementById('threeCanvas');
+const wrap = document.getElementById('viewerWrap');
 
-if (!MODEL_URL) {
-    document.getElementById('ovText').innerHTML = "Предпросмотр недоступен<br><small>Требуется STL файл</small>";
-    document.getElementById('ovIcon').textContent = "⚠️";
-} else {
-    const canvas = document.getElementById('threeCanvas');
-    const wrap = document.getElementById('viewerWrap');
-    
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
-    
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(wrap.clientWidth, wrap.clientHeight);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / wrap.clientHeight, 0.1, 1000);
 
-    const loader = new STLLoader();
-    loader.load(MODEL_URL, (geometry) => {
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x3e5281, 
-            metalness: 0.5, 
-            roughness: 0.4 
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        
-        geometry.computeBoundingBox();
-        const center = new THREE.Vector3();
-        geometry.boundingBox.getCenter(center);
-        mesh.position.sub(center);
-        scene.add(mesh);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
 
-        const size = geometry.boundingBox.getSize(new THREE.Vector3());
-        const maxDim = Math.max(size.x, size.y, size.z);
-        camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
-        camera.lookAt(0, 0, 0);
-        
-        document.getElementById('viewerOverlay').style.display = 'none';
-        document.getElementById('viewerHint').style.display = 'block';
-    }, (xhr) => {
-        if (xhr.lengthComputable) {
-            const pct = Math.round(xhr.loaded / xhr.total * 100);
-            document.getElementById('progressBar').style.width = pct + '%';
-        }
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 10, 7);
+scene.add(dirLight);
+
+const loader = new STLLoader();
+loader.load(MODEL_URL, (geometry) => {
+    const material = new THREE.MeshStandardMaterial({ 
+        color: 0x3e5281, 
+        metalness: 0.5, 
+        roughness: 0.4 
     });
+    const mesh = new THREE.Mesh(geometry, material);
+    
+    geometry.computeBoundingBox();
+    const center = new THREE.Vector3();
+    geometry.boundingBox.getCenter(center);
+    mesh.position.sub(center);
+    scene.add(mesh);
 
-    function animate() {
-        requestAnimationFrame(animate);
-        controls.update();
-        renderer.render(scene, camera);
+    const size = geometry.boundingBox.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    camera.position.set(maxDim * 1.5, maxDim * 1.5, maxDim * 1.5);
+    camera.lookAt(0, 0, 0);
+    
+    document.getElementById('viewerOverlay').style.display = 'none';
+    document.getElementById('viewerHint').style.display = 'block';
+}, (xhr) => {
+    if (xhr.lengthComputable) {
+        const pct = Math.round(xhr.loaded / xhr.total * 100);
+        document.getElementById('progressBar').style.width = pct + '%';
     }
-    animate();
+});
 
-    window.addEventListener('resize', () => {
-        camera.aspect = wrap.clientWidth / wrap.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(wrap.clientWidth, wrap.clientHeight);
-    });
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
 }
-</script>
+animate();
 
+window.addEventListener('resize', () => {
+    camera.aspect = wrap.clientWidth / wrap.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+});
+</script>
+{% endif %}
+
+<!-- СКРИПТ КНОПКИ ИЗБРАННОЕ -->
+{% if user.is_authenticated %}
 <script>
 document.getElementById('fav-btn').addEventListener('click', function() {
     const btn = this;
     const modelId = btn.getAttribute('data-id');
     const textSpan = document.getElementById('fav-text');
 
-    // Используем Django-тег для генерации URL, заменяя заглушку "0" на реальный ID
     const url = "{% url 'toggle_favorite' 0 %}".replace('0', modelId);
 
     fetch(url, {
@@ -13369,9 +13386,7 @@ document.getElementById('fav-btn').addEventListener('click', function() {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Сервер ответил ошибкой 404 или 500');
-        }
+        if (!response.ok) throw new Error('Сервер ответил ошибкой');
         return response.json();
     })
     .then(data => {
@@ -13388,10 +13403,10 @@ document.getElementById('fav-btn').addEventListener('click', function() {
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        alert('Не удалось обновить избранное. Проверьте, зарегистрирован ли путь в urls.py');
     });
 });
 </script>
+{% endif %}
 {% endblock %}
 
 ==================================================
@@ -13428,25 +13443,108 @@ FILE: .\website\templates\news_detail.html
 {% extends "base.html" %}
 
 {% block content %}
-<div class="news-detail-page-bg">
-    <div class="container">
-        <nav class="news-detail-breadcrumbs">
-            <a href="/">Главная</a> | <a href="{% url 'news' %}">Новости</a> | <span>Новость</span>
-        </nav>
+<style>
+    /* Фон страницы */
+    .news-bg-area {
+        background-color: #f8f9fb;
+        padding: 40px 0 100px;
+        min-height: 100vh;
+    }
+    
+    /* Хлебные крошки (навигация) - выровнены по ширине новой карточки */
+    .nd-breadcrumbs {
+        max-width: 1300px;
+        margin: 0 auto 20px auto;
+        font-size: 14px;
+        color: #666;
+    }
+    .nd-breadcrumbs a {
+        color: #666;
+        text-decoration: none;
+    }
+    .nd-breadcrumbs a:hover {
+        color: #3e5281;
+    }
+    
+    /* Сама карточка из макета (расширили до 1300px) */
+    .nd-card {
+        max-width: 1300px;
+        margin: 0 auto;
+        background: #ffffff;
+        border: 1px solid #eaedf1;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05); /* Мягкая тень */
+        padding: 50px 60px; /* Оптимальные отступы по краям */
+    }
+    
+    /* Заголовок (крупный, жирный, по центру) */
+    .nd-title {
+        text-align: center;
+        font-size: 34px;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 40px;
+    }
+    
+    /* Текст новости */
+    .nd-text {
+        font-size: 20px; 
+        line-height: 1.6;
+        color: #1a1a1a;
+        margin-bottom: 50px;
+        
+        /* ЭТИ ТРИ СТРОЧКИ НЕ ДАЮТ ТЕКСТУ ВЫЛЕЗТИ ЗА КРАЯ */
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+    
+    /* Блок с картинкой */
+    .nd-img-wrapper {
+        text-align: center;
+        width: 100%;
+    }
+    .nd-img-wrapper img {
+        max-width: 100%; /* Картинка не вылезет по ширине */
+        max-height: 500px; /* Картинка не вылезет по высоте (будет адекватного размера) */
+        object-fit: contain; /* Сохраняет пропорции без обрезки */
+        border-radius: 8px;
+    }
+    
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .nd-breadcrumbs { padding: 0 15px; }
+        .nd-card { 
+            padding: 30px 20px; 
+            border-radius: 12px; 
+            margin: 0 10px;
+        }
+        .nd-title { font-size: 26px; }
+        .nd-text { font-size: 18px; }
+        .nd-img-wrapper img { max-height: 350px; }
+    }
+</style>
 
-        <div class="news-detail-card">
-            <h1 class="news-detail-title">{{ item.title }}</h1>
-            
-            <div class="news-detail-content">
-                <p>{{ item.content }}</p>
-                
-                {% if item.image %}
-                <div class="news-detail-main-image">
-                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
-                </div>
-                {% endif %}
-            </div>
+<div class="news-bg-area">
+    <nav class="nd-breadcrumbs">
+        <a href="/">Главная</a> | <a href="{% url 'news' %}">Новости</a> | <span>Новость</span>
+    </nav>
+
+    <div class="nd-card">
+        <!-- Заголовок -->
+        <h1 class="nd-title">{{ item.title }}</h1>
+        
+        <!-- Текст с сохранением переносов строк -->
+        <div class="nd-text">
+            {{ item.content|linebreaksbr }}
         </div>
+        
+        <!-- Фотография (ужатая до нормальных размеров) -->
+        {% if item.image %}
+        <div class="nd-img-wrapper">
+            <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -14431,46 +14529,40 @@ FILE: .\website\templates\settings.html
 {% extends "base.html" %}
 {% block content %}
 <div class="st-main-wrapper">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">
+                ПРОФИЛЬ
             </a>
 
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
+            {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}"
+                class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+                КАТАЛОГ ИЗДЕЛИЙ
             </a>
 
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
+            <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">
+                ДОКУМЕНТАЦИЯ
             </a>
-        {% endif %}
 
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
+            <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">
+                НОВОСТИ
+            </a>
+            {% endif %}
 
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
+            <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">
+                НАСТРОЙКИ
+            </a>
 
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">
+                БЕЗОПАСНОСТЬ
+            </a>
+
+            <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">
+                ЧАТ С ВОПРОСАМИ
+            </a>
+        </nav>
+    </aside>
 
 
     <main class="st-content-area">
@@ -14480,33 +14572,33 @@ FILE: .\website\templates\settings.html
 
         <form method="post" enctype="multipart/form-data" class="st-form">
             {% csrf_token %}
-            
+
             <div class="st-white-card">
                 <div class="st-avatar-container">
                     {% if is_edit %}
-                        <label class="st-avatar-label" style="cursor: pointer;">
-                            <input type="file" name="avatar" accept="image/*" id="id_avatar" style="display: none;">
-                            
-                            <div class="st-avatar-circle st-clickable">
-                                <div class="st-upload-overlay">
-                                    <i>✎</i>
-                                    <span>Поменять фото</span>
-                                </div>
-                                {% if user.profile.avatar %}
-                                    <img src="{{ user.profile.avatar.url }}" id="avatar-preview">
-                                {% else %}
-                                    <div class="no-avatar" style="color: #ccc;">N/A</div>
-                                {% endif %}
+                    <label class="st-avatar-label" style="cursor: pointer;">
+                        <input type="file" name="avatar" accept="image/*" id="id_avatar" style="display: none;">
+
+                        <div class="st-avatar-circle st-clickable">
+                            <div class="st-upload-overlay">
+                                <i>✎</i>
+                                <span>Поменять фото</span>
                             </div>
-                        </label>
-                    {% else %}
-                        <div class="st-avatar-circle">
                             {% if user.profile.avatar %}
-                                <img src="{{ user.profile.avatar.url }}">
+                            <img src="{{ user.profile.avatar.url }}" id="avatar-preview">
                             {% else %}
-                                <div class="no-avatar" style="color: #ccc;">N/A</div>
+                            <div class="no-avatar" style="color: #ccc;">N/A</div>
                             {% endif %}
                         </div>
+                    </label>
+                    {% else %}
+                    <div class="st-avatar-circle">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}">
+                        {% else %}
+                        <div class="no-avatar" style="color: #ccc;">N/A</div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
 
@@ -14530,10 +14622,10 @@ FILE: .\website\templates\settings.html
 
             <div class="st-form-footer">
                 {% if is_edit %}
-                    <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
-                    <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
+                <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
+                <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
                 {% else %}
-                    <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
+                <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
                 {% endif %}
             </div>
         </form>
@@ -14658,94 +14750,93 @@ FILE: .\website\templates\chat\chat_list.html
 
 {% block content %}
 <div class="st-main-wrapper" style="display: flex; min-height: 100vh; background: #e9eef3;">
-<aside class="st-sidebar-bg">
-    <nav class="st-left-menu">
-        <a href="{% url 'profile' %}" 
-           class="{% if 'profile' in request.path %}st-active{% endif %}">
-           ПРОФИЛЬ
-        </a>
-
-        {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}" 
-               class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-               КАТАЛОГ ИЗДЕЛИЙ
+    <aside class="st-sidebar-bg">
+        <nav class="st-left-menu">
+            <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">
+                ПРОФИЛЬ
             </a>
 
-            <a href="{% url 'adocumentation' %}" 
-               class="{% if 'documentation' in request.path %}st-active{% endif %}">
-               ДОКУМЕНТАЦИЯ
+            {% if user.is_superuser %}
+            <a href="{% url 'acatalog' %}"
+                class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
+                КАТАЛОГ ИЗДЕЛИЙ
             </a>
 
-            <a href="{% url 'anews' %}" 
-               class="{% if 'news' in request.path %}st-active{% endif %}">
-               НОВОСТИ
+            <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">
+                ДОКУМЕНТАЦИЯ
             </a>
-        {% endif %}
 
-        <a href="{% url 'settings' %}" 
-           class="{% if 'settings' in request.path %}st-active{% endif %}">
-           НАСТРОЙКИ
-        </a>
+            <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">
+                НОВОСТИ
+            </a>
+            {% endif %}
 
-        <a href="{% url 'security' %}" 
-           class="{% if 'security' in request.path %}st-active{% endif %}">
-           БЕЗОПАСНОСТЬ
-        </a>
+            <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">
+                НАСТРОЙКИ
+            </a>
 
-        <a href="{% url 'chat' %}" 
-           class="{% if 'chat' in request.path %}st-active{% endif %}">
-           ЧАТ С ВОПРОСАМИ
-        </a>
-    </nav>
-</aside>
+            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">
+                БЕЗОПАСНОСТЬ
+            </a>
+
+            <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">
+                ЧАТ С ВОПРОСАМИ
+            </a>
+        </nav>
+    </aside>
 
     <div style="flex-grow: 1; padding: 40px; overflow-y: auto;">
         <div style="max-width: 900px; margin: 0 auto;">
             <h2 style="font-weight: 700; color: #1e293b; margin-bottom: 30px;">Все диалоги</h2>
-            
+
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 {% for room in rooms %}
-                    <a href="{% url 'chat_room' room.id %}" style="text-decoration: none; color: inherit;">
-                        <div style="background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.2s;"
-                             onmouseover="this.style.background='#fafafa'; this.style.transform='translateY(-2px)'" 
-                             onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
-                            
-                            <div style="flex-shrink: 0;">
-                                {% if room.user.profile.avatar %}
-                                    <img src="{{ room.user.profile.avatar.url }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f1f5f9;">
-                                {% else %}
-                                    <img src="{% static 'img/default.png' %}" style="width: 60px; height: 60px; border-radius: 50%; background: #e2e8f0;">
-                                {% endif %}
-                            </div>
+                <a href="{% url 'chat_room' room.id %}" style="text-decoration: none; color: inherit;">
+                    <div style="background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.2s;"
+                        onmouseover="this.style.background='#fafafa'; this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
 
-                            <div style="flex-grow: 1; min-width: 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                    <h4 style="margin: 0; font-weight: 700; color: #1e293b;">
-                                        {{ room.user.get_full_name|default:room.user.username }}
-                                    </h4>
-                                    {% with last_msg=room.messages.last %}
-                                        {% if last_msg %}
-                                            <span style="font-size: 12px; color: #94a3b8;">{{ last_msg.created_at|date:"d.m H:i" }}</span>
-                                        {% endif %}
-                                    {% endwith %}
-                                </div>
+                        <div style="flex-shrink: 0;">
+                            {% if room.user.profile.avatar %}
+                            <img src="{{ room.user.profile.avatar.url }}"
+                                style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #f1f5f9;">
+                            {% else %}
+                            <img src="{% static 'img/default.png' %}"
+                                style="width: 60px; height: 60px; border-radius: 50%; background: #e2e8f0;">
+                            {% endif %}
+                        </div>
 
+                        <div style="flex-grow: 1; min-width: 0;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <h4 style="margin: 0; font-weight: 700; color: #1e293b;">
+                                    {{ room.user.get_full_name|default:room.user.username }}
+                                </h4>
                                 {% with last_msg=room.messages.last %}
-                                    <p style="margin: 0; color: #64748b; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        {% if last_msg %}
-                                            {% if last_msg.sender == request.user %}<b>Вы:</b> {% endif %}
-                                            {{ last_msg.body|truncatechars:80 }}
-                                            {% if last_msg.file %} [Файл] {% endif %}
-                                        {% else %}
-                                            <i>Сообщений пока нет</i>
-                                        {% endif %}
-                                    </p>
+                                {% if last_msg %}
+                                <span style="font-size: 12px; color: #94a3b8;">{{ last_msg.created_at|date:"d.m H:i"
+                                    }}</span>
+                                {% endif %}
                                 {% endwith %}
                             </div>
+
+                            {% with last_msg=room.messages.last %}
+                            <p
+                                style="margin: 0; color: #64748b; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {% if last_msg %}
+                                {% if last_msg.sender == request.user %}<b>Вы:</b> {% endif %}
+                                {{ last_msg.body|truncatechars:80 }}
+                                {% if last_msg.file %} [Файл] {% endif %}
+                                {% else %}
+                                <i>Сообщений пока нет</i>
+                                {% endif %}
+                            </p>
+                            {% endwith %}
                         </div>
-                    </a>
+                    </div>
+                </a>
                 {% empty %}
-                    <p style="text-align: center; color: #94a3b8; padding: 50px;">Диалогов пока нет.</p>
+                <p style="text-align: center; color: #94a3b8; padding: 50px;">Диалогов пока нет.</p>
                 {% endfor %}
             </div>
         </div>
@@ -14762,20 +14853,22 @@ FILE: .\website\templates\chat\chat_room.html
 
 {% block content %}
 <style>
-/* 1. Блокируем скролл абсолютно для всей страницы (html и body) */
-    html, body {
+    /* 1. Блокируем скролл абсолютно для всей страницы (html и body) */
+    html,
+    body {
         height: 100vh;
         margin: 0;
         padding: 0;
-        overflow: hidden !important; 
+        overflow: hidden !important;
     }
 
     /* 2. Основной контейнер. Вычитаем шапку и ТОЖЕ блокируем скролл */
     .st-main-wrapper {
         display: flex;
-        height: calc(100vh - 185px); 
-        background: #f8f9fc; 
-        overflow: hidden !important; /* Ключевой момент */
+        height: calc(100vh - 185px);
+        background: #f8f9fc;
+        overflow: hidden !important;
+        /* Ключевой момент */
     }
 
     /* 3. Правая область. Запрещаем ей растягиваться вниз */
@@ -14784,22 +14877,27 @@ FILE: .\website\templates\chat\chat_room.html
         padding: 25px 40px;
         display: flex;
         flex-direction: column;
-        height: 100%; /* Строго 100% от доступного места */
-        overflow: hidden !important; /* Ключевой момент №2 */
+        height: 100%;
+        /* Строго 100% от доступного места */
+        overflow: hidden !important;
+        /* Ключевой момент №2 */
     }
 
     /* 4. САМО "ОКНО" ЧАТА (Крутая идея) */
     .chat-window {
         flex: 1;
-        min-height: 0; /* Магия Flexbox: не дает окну распирать родителя */
+        min-height: 0;
+        /* Магия Flexbox: не дает окну распирать родителя */
         background: #f8fafc;
         border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* Красивая тень окна */
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        /* Красивая тень окна */
         border: 1px solid #e2e8f0;
         display: flex;
         flex-direction: column;
         max-height: calc(100% - 180px);
-        overflow: hidden; /* Чтобы углы оставались круглыми */
+        overflow: hidden;
+        /* Чтобы углы оставались круглыми */
     }
 
     /* 5. Шапка внутри окна */
@@ -14826,10 +14924,42 @@ FILE: .\website\templates\chat\chat_room.html
     }
 
     /* Стили пузырей сообщений */
-    .msg { max-width: 70%; padding: 12px 18px; border-radius: 16px; font-size: 15px; line-height: 1.4; position: relative; }
-    .my-msg { align-self: flex-end; background: #3e5281; color: white; border-bottom-right-radius: 4px; }
-    .other-msg { align-self: flex-start; background: white; border: 1px solid #e2e8f0; color: #1e293b; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .file-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 8px; text-decoration: none; color: inherit; margin-top: 8px; }
+    .msg {
+        max-width: 70%;
+        padding: 12px 18px;
+        border-radius: 16px;
+        font-size: 15px;
+        line-height: 1.4;
+        position: relative;
+    }
+
+    .my-msg {
+        align-self: flex-end;
+        background: #3e5281;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .other-msg {
+        align-self: flex-start;
+        background: white;
+        border: 1px solid #e2e8f0;
+        color: #1e293b;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .file-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.1);
+        padding: 8px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: inherit;
+        margin-top: 8px;
+    }
 
     /* 7. Подвал окна (с парящим инпутом) */
     .chat-footer {
@@ -14845,7 +14975,7 @@ FILE: .\website\templates\chat\chat_room.html
         align-items: center;
         background: white;
         border-radius: 30px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
         padding: 8px 10px;
         gap: 10px;
         border: 1px solid #e2e8f0;
@@ -14864,7 +14994,11 @@ FILE: .\website\templates\chat\chat_room.html
         transition: background 0.2s;
         color: #94a3b8;
     }
-    .btn-attach:hover { background: #f1f5f9; color: #3e5281; }
+
+    .btn-attach:hover {
+        background: #f1f5f9;
+        color: #3e5281;
+    }
 
     .chat-input-pill {
         flex: 1;
@@ -14887,7 +15021,10 @@ FILE: .\website\templates\chat\chat_room.html
         cursor: pointer;
         transition: background 0.2s;
     }
-    .btn-send-pill:hover { background: #2d3d63; }
+
+    .btn-send-pill:hover {
+        background: #2d3d63;
+    }
 
     /* Плашка файла над таблеткой */
     #file-indicator {
@@ -14898,7 +15035,7 @@ FILE: .\website\templates\chat\chat_room.html
         padding: 8px 16px;
         border-radius: 20px;
         font-size: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         color: #3e5281;
         font-weight: 600;
         display: none;
@@ -14907,7 +15044,11 @@ FILE: .\website\templates\chat\chat_room.html
         border: 1px solid #e2e8f0;
     }
 
-    #chat-box.drag-over { background: #e2e8f0; outline: 2px dashed #3e5281; outline-offset: -10px; }
+    #chat-box.drag-over {
+        background: #e2e8f0;
+        outline: 2px dashed #3e5281;
+        outline-offset: -10px;
+    }
 </style>
 
 <div class="st-main-wrapper">
@@ -14916,32 +15057,40 @@ FILE: .\website\templates\chat\chat_room.html
         <nav class="st-left-menu">
             <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">ПРОФИЛЬ</a>
             {% if user.is_superuser %}
-                <a href="{% url 'acatalog' %}" class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">КАТАЛОГ ИЗДЕЛИЙ</a>
-                <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
-                <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">НОВОСТИ</a>
+            <a href="{% url 'acatalog' %}"
+                class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">КАТАЛОГ
+                ИЗДЕЛИЙ</a>
+            <a href="{% url 'adocumentation' %}"
+                class="{% if 'documentation' in request.path %}st-active{% endif %}">ДОКУМЕНТАЦИЯ</a>
+            <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">НОВОСТИ</a>
             {% endif %}
             <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">НАСТРОЙКИ</a>
-            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
+            <a href="{% url 'security' %}"
+                class="{% if 'security' in request.path %}st-active{% endif %}">БЕЗОПАСНОСТЬ</a>
             <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">ЧАТ С ВОПРОСАМИ</a>
         </nav>
     </aside>
 
     <!-- Основная область с отступами -->
     <main class="st-content-area">
-        
+
         <!-- ТО САМОЕ ОКНО ЧАТА -->
         <div class="chat-window">
-            
+
             <!-- Шапка окна -->
             <header class="chat-header">
-                <a href="{% url 'chat' %}" style="text-decoration: none; color: #64748b; font-size: 22px; margin-right: 5px;">←</a>
+                <a href="{% url 'chat' %}"
+                    style="text-decoration: none; color: #64748b; font-size: 22px; margin-right: 5px;">←</a>
                 {% if room.user.profile.avatar %}
-                    <img src="{{ room.user.profile.avatar.url }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
+                <img src="{{ room.user.profile.avatar.url }}"
+                    style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover;">
                 {% else %}
-                    <img src="{% static 'img/default-avatar.png' %}" style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0;">
+                <img src="{% static 'img/default-avatar.png' %}"
+                    style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0;">
                 {% endif %}
                 <div>
-                    <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">{{ room.user.get_full_name|default:room.user.username }}</h3>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">{{
+                        room.user.get_full_name|default:room.user.username }}</h3>
                     <span style="font-size: 13px; color: #94a3b8;">Чат поддержки</span>
                 </div>
             </header>
@@ -14949,23 +15098,31 @@ FILE: .\website\templates\chat\chat_room.html
             <!-- Сообщения -->
             <div id="chat-box">
                 {% for msg in chat_messages %}
-                    <div class="msg {% if msg.sender == request.user %}my-msg{% else %}other-msg{% endif %}">
-                        {% if msg.body %}<div>{{ msg.body }}</div>{% endif %}
-                        
-                        {% if msg.file %}
-                            <a href="{{ msg.file.url }}" class="file-box" download>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                <span style="font-size: 13px;">{{ msg.file.name|cut:"chat_files/" }}</span>
-                            </a>
-                        {% endif %}
+                <div class="msg {% if msg.sender == request.user %}my-msg{% else %}other-msg{% endif %}">
+                    {% if msg.body %}<div>{{ msg.body }}</div>{% endif %}
 
-                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; margin-top: 6px;">
-                            {{ msg.created_at|date:"H:i" }}
-                            {% if msg.sender == request.user %}
-                                <span>{% if msg.is_read %}✓✓{% else %}✓{% endif %}</span>
-                            {% endif %}
-                        </div>
+                    {% if msg.file %}
+                    <a href="{{ msg.file.url }}" class="file-box" download>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span style="font-size: 13px;">{{ msg.file.name|cut:"chat_files/" }}</span>
+                    </a>
+                    {% endif %}
+
+                    <div
+                        style="display: flex; justify-content: flex-end; align-items: center; gap: 4px; font-size: 10px; opacity: 0.7; margin-top: 6px;">
+                        {{ msg.created_at|date:"H:i" }}
+                        {% if msg.sender == request.user %}
+                        <span>{% if msg.is_read %}✓✓{% else %}✓{% endif %}</span>
+                        {% endif %}
                     </div>
+                </div>
                 {% endfor %}
             </div>
 
@@ -14974,25 +15131,31 @@ FILE: .\website\templates\chat\chat_room.html
                 <form id="chat-form" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="chat-form-pill">
-                        
+
                         <!-- Индикатор прикрепленного файла -->
                         <div id="file-indicator">
                             📎 <span id="file-name-text">Файл</span>
-                            <button type="button" id="remove-file-btn" style="background:none; border:none; color:#e74c3c; cursor:pointer; font-weight:bold; margin-left:8px; padding:0;">✕</button>
+                            <button type="button" id="remove-file-btn"
+                                style="background:none; border:none; color:#e74c3c; cursor:pointer; font-weight:bold; margin-left:8px; padding:0;">✕</button>
                         </div>
 
                         <input type="file" name="file" id="file-input" style="display: none;">
-                        
+
                         <!-- Скрепка -->
-                        <button type="button" class="btn-attach" onclick="document.getElementById('file-input').click()" title="Прикрепить файл">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        <button type="button" class="btn-attach" onclick="document.getElementById('file-input').click()"
+                            title="Прикрепить файл">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path
+                                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                                </path>
                             </svg>
                         </button>
-                        
+
                         <!-- Поле ввода -->
-                        <input type="text" name="message" id="chat-input" class="chat-input-pill" placeholder="Напишите сообщение..." autocomplete="off">
-                        
+                        <input type="text" name="message" id="chat-input" class="chat-input-pill"
+                            placeholder="Напишите сообщение..." autocomplete="off">
+
                         <!-- Отправить -->
                         <button type="submit" class="btn-send-pill">Отправить</button>
                     </div>
@@ -15015,47 +15178,47 @@ FILE: .\website\templates\chat\chat_room.html
     function scrollToBottom() { chatBox.scrollTop = chatBox.scrollHeight; }
     scrollToBottom();
 
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener('change', function () {
         if (this.files && this.files.length > 0) {
             fileNameText.textContent = this.files[0].name;
             fileIndicator.style.display = 'flex';
         }
     });
 
-    removeFileBtn.addEventListener('click', function() {
+    removeFileBtn.addEventListener('click', function () {
         fileInput.value = '';
         fileIndicator.style.display = 'none';
     });
 
     function sendData() {
         const formData = new FormData(chatForm);
-        chatInput.value = ''; 
+        chatInput.value = '';
         fileInput.value = '';
-        fileIndicator.style.display = 'none'; 
-        
+        fileIndicator.style.display = 'none';
+
         fetch(window.location.href, {
             method: 'POST',
             body: formData,
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
         }).then(response => {
             if (response.ok) updateChat();
         });
     }
 
     function updateChat() {
-        fetch(window.location.href, { headers: {'X-Requested-With': 'XMLHttpRequest'} })
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newMessages = doc.getElementById('chat-box').innerHTML;
-            
-            if (chatBox.innerHTML !== newMessages) {
-                const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
-                chatBox.innerHTML = newMessages;
-                if (isAtBottom) scrollToBottom();
-            }
-        });
+        fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newMessages = doc.getElementById('chat-box').innerHTML;
+
+                if (chatBox.innerHTML !== newMessages) {
+                    const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
+                    chatBox.innerHTML = newMessages;
+                    if (isAtBottom) scrollToBottom();
+                }
+            });
     }
 
     setInterval(updateChat, 2000);

@@ -242,14 +242,19 @@
                     <div style="display: flex; flex-direction: column;">
                         {% for log in recent_actions %}
                         <div class="adm-action-item">
-                            <img src="{% if log.user.profile.avatar %}{{ log.user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
-                                 class="adm-avatar-img">
+<img src="{% if log.user and log.user.profile.avatar %}{{ log.user.profile.avatar.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" class="adm-avatar-img">
                             <div style="flex-grow: 1;">
                                 <div style="font-size: 13px; color: #1e293b;">
-                                    <strong>{{ log.user.first_name|default:log.user.username }}</strong> 
-                                    <span style="color: #64748b;">скачал файл</span> 
-                                    <span style="color: #3e5281; font-weight: 600;">{{ log.model_item.title }}</span>
-                                </div>
+    <strong>
+        {% if log.user %}
+            {{ log.user.first_name|default:log.user.username }}
+        {% else %}
+            Гость
+        {% endif %}
+    </strong> 
+    <span style="color: #64748b;">скачал файл</span> 
+    <span style="color: #3e5281; font-weight: 600;">{{ log.model_item.title|default:"неизвестный файл" }}</span>
+</div>
                                 <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">{{ log.timestamp|timesince }} назад</div>
                             </div>
                         </div>

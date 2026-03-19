@@ -239,8 +239,8 @@
                     style="width: 45px; height: 45px; border-radius: 50%; background: #e2e8f0;">
                 {% endif %}
                 <div>
-                    <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">{{
-                        room.user.get_full_name|default:room.user.username }}</h3>
+                    <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">
+                        {{ room.user.get_full_name|default:room.user.username }}</h3>
                     <span style="font-size: 13px; color: #94a3b8;">Чат поддержки</span>
                 </div>
             </header>
