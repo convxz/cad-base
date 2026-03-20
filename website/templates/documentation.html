@@ -17,6 +17,20 @@
                     <span>Всего документов: <strong>{{ documents.count }}</strong></span>
                 </div>
             </div>
+            <!-- Внутри .wide-doc-card, над таблицей (перед .documentation-table-wrapper) -->
+<div style="margin-bottom: 25px;">
+    <form method="get" action="{% url 'documentation' %}" style="display: flex; gap: 10px;">
+        <input type="text" name="q" value="{{ request.GET.q|default:'' }}" 
+               placeholder="Поиск по названию или стандарту..." 
+               style="flex: 1; padding: 12px 20px; border: 1px solid #eef0f3; border-radius: 8px; outline: none; font-size: 15px;">
+        <button type="submit" style="padding: 10px 25px; background: #3e5281; color: white; border: none; border-radius: 8px; cursor: pointer;">
+            Найти
+        </button>
+        {% if request.GET.q %}
+            <a href="{% url 'documentation' %}" style="padding: 10px 20px; background: #f1f4f8; color: #666; text-decoration: none; border-radius: 8px; display: flex; align-items: center;">Сброс</a>
+        {% endif %}
+    </form>
+</div>
             
             <div class="documentation-table-wrapper">
                 <table class="full-width-table">

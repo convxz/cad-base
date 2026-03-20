@@ -57,9 +57,17 @@ def news_detail_view(request, pk):
 
 
 def documentation(request):
+    query = request.GET.get("q")
+    # Берем все документы
     documents = Document.objects.all().order_by("standard_number")
+    
+    # Если есть поисковый запрос - фильтруем
+    if query:
+        documents = documents.filter(
+            Q(name__icontains=query) | Q(standard_number__icontains=query)
+        )
+        
     return render(request, "documentation.html", {"documents": documents})
-
 
 def adocumentation_view(request):
 
