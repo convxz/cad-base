@@ -4,6 +4,7 @@ __pycache__/
 gunicorn.ctl
 .DS_Store
 db.sqlite3
+.env
 
 staticfiles/
 media/
