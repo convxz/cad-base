@@ -5,6 +5,7 @@ gunicorn.ctl
 .DS_Store
 db.sqlite3
 .env
+result_code.txt
 
 staticfiles/
 media/

@@ -17,6 +17,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.db.models import F
 from django.contrib.auth.models import User
 
+from django.http import FileResponse, Http404
 
 from website.models import ModelSubmission, NewsItem, Profile, Document
 from .forms import DocumentForm, UserUpdateForm, ProfileUpdateForm, ModelSubmissionForm
@@ -403,10 +404,36 @@ def profile_view(request):
         }
         return render(request, "profile_user.html", context)
 
+# @login_required
+# def download_file(request, pk, file_format):
+#     model_item = get_object_or_404(ModelSubmission, pk=pk)
 
+#     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+#     if x_forwarded_for:
+#         ip = x_forwarded_for.split(",")[0]
+#     else:
+#         ip = request.META.get("REMOTE_ADDR")
+
+#     DownloadLog.objects.create(
+#         model_item=model_item,
+#         user=request.user if request.user.is_authenticated else None,
+#         file_format=file_format.upper(),
+#         ip_address=ip,
+#     )
+
+#     ModelSubmission.objects.filter(pk=pk).update(download_count=F("download_count") + 1)
+
+#     file_field = getattr(model_item, f"file_{file_format.lower()}", None)
+#     if file_field:
+#         return redirect(file_field.url)
+
+#     return redirect("model_detail", pk=pk)
+
+@login_required
 def download_file(request, pk, file_format):
     model_item = get_object_or_404(ModelSubmission, pk=pk)
 
+    # ... (ваш код логирования остается без изменений) ...
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0]
@@ -415,19 +442,24 @@ def download_file(request, pk, file_format):
 
     DownloadLog.objects.create(
         model_item=model_item,
-        user=request.user if request.user.is_authenticated else None,
+        user=request.user,
         file_format=file_format.upper(),
         ip_address=ip,
     )
-
     ModelSubmission.objects.filter(pk=pk).update(download_count=F("download_count") + 1)
+    # ... (конец кода логирования) ...
 
+    # ИЗМЕНЕННАЯ ЧАСТЬ:
     file_field = getattr(model_item, f"file_{file_format.lower()}", None)
-    if file_field:
-        return redirect(file_field.url)
-
-    return redirect("model_detail", pk=pk)
-
+    
+    if file_field and file_field.name:
+        try:
+            # Открываем файл в бинарном режиме и отдаем его через Django
+            return FileResponse(open(file_field.path, 'rb'), as_attachment=True)
+        except FileNotFoundError:
+            raise Http404("Файл не найден на сервере")
+    
+    raise Http404("Файл отсутствует")
 
 @login_required
 @require_POST

@@ -55,7 +55,7 @@
         </form>
     </div>
 </div>
-{% if request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'settings' and "acatalog" not in request.path and "adocumentation" not in request.path and "anews" not in request.path and "security" not in request.path and "profile" not in request.path and "chat" not in request.path %}
+{% if request.resolver_match.url_name != 'home' %}
 <hr class="header-divider">
     <nav class="main-nav">
         <ul>

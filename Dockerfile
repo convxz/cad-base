@@ -8,7 +8,6 @@ ENV PYTHONUNBUFFERED 1
 # Рабочая директория внутри контейнера
 WORKDIR /app
 
-# Устанавливаем зависимости системы (нужны для сборки некоторых пакетов)
 RUN apt-get update \
     && apt-get install -y gcc libpq-dev \
     && apt-get clean
