@@ -1,141 +1,187 @@
-{% extends "base.html" %}
-{% load static %}
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block content %}
 <div class="st-main-wrapper">
-    <aside class="st-sidebar-bg">
-        <nav class="st-left-menu">
-            <a href="{% url 'profile' %}" class="{% if 'profile' in request.path %}st-active{% endif %}">
-                ПРОФИЛЬ
-            </a>
+  <aside class="st-sidebar-bg">
+    <nav class="st-left-menu">
+      <a
+        href="{% url 'profile' %}"
+        class="{% if 'profile' in request.path %}st-active{% endif %}"
+      >
+        ПРОФИЛЬ
+      </a>
 
-            {% if user.is_superuser %}
-            <a href="{% url 'acatalog' %}"
-                class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}">
-                КАТАЛОГ ИЗДЕЛИЙ
-            </a>
+      {% if user.is_superuser %}
+      <a
+        href="{% url 'acatalog' %}"
+        class="{% if 'acatalog' in request.path or 'catalog' in request.path %}st-active{% endif %}"
+      >
+        КАТАЛОГ ИЗДЕЛИЙ
+      </a>
 
-            <a href="{% url 'adocumentation' %}" class="{% if 'documentation' in request.path %}st-active{% endif %}">
-                ДОКУМЕНТАЦИЯ
-            </a>
+      <a
+        href="{% url 'adocumentation' %}"
+        class="{% if 'documentation' in request.path %}st-active{% endif %}"
+      >
+        ДОКУМЕНТАЦИЯ
+      </a>
 
-            <a href="{% url 'anews' %}" class="{% if 'news' in request.path %}st-active{% endif %}">
-                НОВОСТИ
-            </a>
+      <a
+        href="{% url 'anews' %}"
+        class="{% if 'news' in request.path %}st-active{% endif %}"
+      >
+        НОВОСТИ
+      </a>
+      {% endif %}
+
+      <a
+        href="{% url 'settings' %}"
+        class="{% if 'settings' in request.path %}st-active{% endif %}"
+      >
+        НАСТРОЙКИ
+      </a>
+
+      <a
+        href="{% url 'security' %}"
+        class="{% if 'security' in request.path %}st-active{% endif %}"
+      >
+        БЕЗОПАСНОСТЬ
+      </a>
+
+      <a
+        href="{% url 'chat' %}"
+        class="{% if 'chat' in request.path %}st-active{% endif %}"
+      >
+        ЧАТ С ВОПРОСАМИ
+      </a>
+    </nav>
+  </aside>
+
+  <main class="st-content-area">
+    <div class="st-header-row">
+      <h1 class="st-page-title">
+        {% if is_edit %}Редактирование{% else %}Настройки{% endif %}
+      </h1>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="st-form">
+      {% csrf_token %}
+
+      <div class="st-white-card">
+        <div class="st-avatar-container">
+          {% if is_edit %}
+          <label class="st-avatar-label" style="cursor: pointer">
+            <input
+              type="file"
+              name="avatar"
+              accept="image/*"
+              id="id_avatar"
+              style="display: none"
+            />
+
+            <div class="st-avatar-circle st-clickable">
+              <div class="st-upload-overlay">
+                <i>✎</i>
+                <span>Поменять фото</span>
+              </div>
+              {% if user.profile.avatar %}
+              <img src="{{ user.profile.avatar.url }}" id="avatar-preview" />
+              {% else %}
+              <div class="no-avatar" style="color: #ccc">N/A</div>
+              {% endif %}
+            </div>
+          </label>
+          {% else %}
+          <div class="st-avatar-circle">
+            {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" />
+            {% else %}
+            <div class="no-avatar" style="color: #ccc">N/A</div>
             {% endif %}
-
-            <a href="{% url 'settings' %}" class="{% if 'settings' in request.path %}st-active{% endif %}">
-                НАСТРОЙКИ
-            </a>
-
-            <a href="{% url 'security' %}" class="{% if 'security' in request.path %}st-active{% endif %}">
-                БЕЗОПАСНОСТЬ
-            </a>
-
-            <a href="{% url 'chat' %}" class="{% if 'chat' in request.path %}st-active{% endif %}">
-                ЧАТ С ВОПРОСАМИ
-            </a>
-        </nav>
-    </aside>
-
-
-    <main class="st-content-area">
-        <div class="st-header-row">
-            <h1 class="st-page-title">{% if is_edit %}Редактирование{% else %}Настройки{% endif %}</h1>
+          </div>
+          {% endif %}
         </div>
+        {% if is_edit %}
+        <div
+          id="delete-avatar-box"
+          style="text-align: center; margin-top: 15px"
+        >
+          <a
+            href="#"
+            id="delete-avatar-link"
+            style="
+              color: #e74c3c;
+              font-size: 12px;
+              text-decoration: underline;
+              cursor: pointer;
+            "
+          >
+            Удалить
+          </a>
+        </div>
+        {% endif %}
+        <div class="st-form-grid">
+          <div class="st-group"><label>Имя</label>{{ u_form.first_name }}</div>
+          <div class="st-group">
+            <label>Фамилия</label>{{ u_form.last_name }}
+          </div>
+          <div class="st-group"><label>Пол</label>{{ p_form.gender }}</div>
+          <div class="st-group"><label>Город</label>{{ p_form.city }}</div>
+          <div class="st-group"><label>Язык</label>{{ p_form.language }}</div>
+          <div class="st-group">
+            <label>Дата рождения</label>{{ p_form.birth_date }}
+          </div>
+        </div>
+      </div>
 
-        <form method="post" enctype="multipart/form-data" class="st-form">
-            {% csrf_token %}
+      <h2 class="st-block-title" style="margin-bottom: 25px">
+        Контактные данные
+      </h2>
+      <div class="st-white-card">
+        <div class="st-form-grid">
+          <div class="st-group"><label>Телефон</label>{{ p_form.phone }}</div>
+          <div class="st-group"><label>Адрес</label>{{ p_form.address }}</div>
+        </div>
+      </div>
 
-            <div class="st-white-card">
-                <div class="st-avatar-container">
-                    {% if is_edit %}
-                    <label class="st-avatar-label" style="cursor: pointer;">
-                        <input type="file" name="avatar" accept="image/*" id="id_avatar" style="display: none;">
-
-                        <div class="st-avatar-circle st-clickable">
-                            <div class="st-upload-overlay">
-                                <i>✎</i>
-                                <span>Поменять фото</span>
-                            </div>
-                            {% if user.profile.avatar %}
-                            <img src="{{ user.profile.avatar.url }}" id="avatar-preview">
-                            {% else %}
-                            <div class="no-avatar" style="color: #ccc;">N/A</div>
-                            {% endif %}
-                        </div>
-                    </label>
-                    {% else %}
-                    <div class="st-avatar-circle">
-                        {% if user.profile.avatar %}
-                        <img src="{{ user.profile.avatar.url }}">
-                        {% else %}
-                        <div class="no-avatar" style="color: #ccc;">N/A</div>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
-                {% if is_edit %}
-                <div id="delete-avatar-box" style="text-align: center; margin-top: 15px;">
-                    <a href="#" id="delete-avatar-link" 
-                    style="color: #e74c3c; font-size: 12px; text-decoration: underline; cursor: pointer;">
-                    Удалить
-                    </a>
-                </div>
-                {% endif %}
-                <div class="st-form-grid">
-                    <div class="st-group"><label>Имя</label>{{ u_form.first_name }}</div>
-                    <div class="st-group"><label>Фамилия</label>{{ u_form.last_name }}</div>
-                    <div class="st-group"><label>Пол</label>{{ p_form.gender }}</div>
-                    <div class="st-group"><label>Город</label>{{ p_form.city }}</div>
-                    <div class="st-group"><label>Язык</label>{{ p_form.language }}</div>
-                    <div class="st-group"><label>Дата рождения</label>{{ p_form.birth_date }}</div>
-                </div>
-            </div>
-
-            <h2 class="st-block-title">Контактные данные</h2>
-            <div class="st-white-card">
-                <div class="st-form-grid">
-                    <div class="st-group"><label>Телефон</label>{{ p_form.phone }}</div>
-                    <div class="st-group"><label>Адрес</label>{{ p_form.address }}</div>
-                </div>
-            </div>
-
-            <div class="st-form-footer">
-                {% if is_edit %}
-                <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
-                <button type="submit" class="st-btn-blue"><span style="margin-right: 8px;">✓</span> Сохранить</button>
-                {% else %}
-                <a href="?edit=1" class="st-btn-blue"><span style="margin-right: 8px;">✎</span> Редактировать</a>
-                {% endif %}
-            </div>
-        </form>
-    </main>
+      <div class="st-form-footer">
+        {% if is_edit %}
+        <a href="{% url 'settings' %}" class="st-btn-white">Отменить</a>
+        <button type="submit" class="st-btn-blue">
+          <span style="margin-right: 8px">✓</span> Сохранить
+        </button>
+        {% else %}
+        <a href="?edit=1" class="st-btn-blue"
+          ><span style="margin-right: 8px">✎</span> Редактировать</a
+        >
+        {% endif %}
+      </div>
+    </form>
+  </main>
 </div>
 <script>
-    // Создаем переменную с путем к картинке в JS-пространстве
-    const defaultAvatarUrl = "{% static 'img/default-avatar.png' %}";
-    const deleteAvatarUrl = "{% url 'delete_avatar' %}";
-    
-    const delLink = document.getElementById('delete-avatar-link');
-    if (delLink) {
-        delLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (confirm('Удалить фотографию?')) {
-                fetch(deleteAvatarUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        // Используем созданную переменную
-                        document.getElementById('avatar-preview').src = defaultAvatarUrl;
-                        document.getElementById('delete-avatar-box').style.display = 'none';
-                    }
-                });
-            }
+  // Создаем переменную с путем к картинке в JS-пространстве
+  const defaultAvatarUrl = "{% static 'img/default-avatar.png' %}";
+  const deleteAvatarUrl = "{% url 'delete_avatar' %}";
+
+  const delLink = document.getElementById("delete-avatar-link");
+  if (delLink) {
+    delLink.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (confirm("Удалить фотографию?")) {
+        fetch(deleteAvatarUrl, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json",
+          },
+        }).then((response) => {
+          if (response.ok) {
+            // Используем созданную переменную
+            document.getElementById("avatar-preview").src = defaultAvatarUrl;
+            document.getElementById("delete-avatar-box").style.display = "none";
+          }
         });
-    }
+      }
+    });
+  }
 </script>
 {% endblock %}

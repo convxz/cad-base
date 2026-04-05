@@ -59,16 +59,29 @@ def news_detail_view(request, pk):
 
 def documentation(request):
     query = request.GET.get("q")
-    # Берем все документы
+    selected_types = request.GET.getlist("types")
+
     documents = Document.objects.all().order_by("standard_number")
     
-    # Если есть поисковый запрос - фильтруем
     if query:
         documents = documents.filter(
             Q(name__icontains=query) | Q(standard_number__icontains=query)
         )
+
+    if selected_types:
+        type_queries = Q()
+        if "drawing" in selected_types:
+            type_queries |= Q(is_drawing=True)
+        if "document" in selected_types:
+            type_queries |= Q(is_drawing=False)
+            
+        documents = documents.filter(type_queries)
         
-    return render(request, "documentation.html", {"documents": documents})
+    return render(request, "documentation.html", {
+        "documents": documents,
+        "query": query,
+        "selected_types": selected_types 
+    })
 
 def adocumentation_view(request):
 
@@ -86,13 +99,15 @@ def adocumentation_view(request):
 
 
 def document_edit_view(request, pk=None):
-
     instance = get_object_or_404(Document, pk=pk) if pk else None
 
     if request.method == "POST":
         form = DocumentForm(request.POST, request.FILES, instance=instance)
         if form.is_valid():
-            form.save()
+            document = form.save(commit=False)
+            document.is_drawing = request.POST.get('is_drawing') == 'true'
+            
+            document.save()
             return redirect("adocumentation")
     else:
         form = DocumentForm(instance=instance)
@@ -124,12 +139,18 @@ def catalog(request):
     if selected_formats:
         format_queries = Q()
         if "STEP" in selected_formats:
-
             format_queries |= Q(file_stp__isnull=False) & ~Q(file_stp="")
         if "STL" in selected_formats:
             format_queries |= Q(file_stl__isnull=False) & ~Q(file_stl="")
         if "IGES" in selected_formats:
             format_queries |= Q(file_igs__isnull=False) & ~Q(file_igs="")
+
+        if "AMF" in selected_formats:
+            format_queries |= Q(file_amf__isnull=False) & ~Q(file_amf="")
+        if "OBJ" in selected_formats:
+            format_queries |= Q(file_obj__isnull=False) & ~Q(file_obj="")
+        if "DWG" in selected_formats:
+            format_queries |= Q(file_dwg__isnull=False) & ~Q(file_dwg="")
 
         models_queryset = models_queryset.filter(format_queries)
 
@@ -284,7 +305,8 @@ def model_edit_view(request, pk=None):
         form = ModelSubmissionForm(instance=instance)
 
     file_fields = []
-    fields_info = [("file_stp", "STP"), ("file_igs", "IGS"), ("file_stl", "STL")]
+    fields_info = [("file_stp", "STP"), ("file_igs", "IGS"), ("file_stl", "STL"),
+                   ("file_amf", "AMF"), ("file_obj", "OBJ"), ("file_dwg", "DWG")]
 
     for field_name, ext in fields_info:
         file_obj = getattr(instance, field_name) if instance else None

@@ -44,6 +44,19 @@
                             <input type="checkbox" name="formats" value="IGES" {% if 'IGES' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
                             <span>IGES</span>
                         </label>
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="AMF" {% if 'AMF' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>AMF</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="OBJ" {% if 'OBJ' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>OBJ</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="formats" value="DWG" {% if 'DWG' in selected_formats %}checked{% endif %} onchange="this.form.submit()">
+                            <span>DWG</span>
+                        </label>
                     </div>
                 </form>
             </aside>
@@ -87,8 +100,20 @@
                             {% if model.file_igs %}
                                 <a href="{% url 'download_file' model.pk 'igs' %}" class="download-link" download>Скачать IGS</a>
                             {% endif %}
+                            
+                            {% if model.file_amf %}
+                                <a href="{% url 'download_file' model.pk 'amf' %}" class="download-link" download>Скачать AMF</a>
+                            {% endif %}
 
-                            {% if not model.file_stp and not model.file_stl and not model.file_igs %}
+                            {% if model.file_obj %}
+                                <a href="{% url 'download_file' model.pk 'obj' %}" class="download-link" download>Скачать OBJ</a>
+                            {% endif %}
+
+                            {% if model.file_dwg %}
+                                <a href="{% url 'download_file' model.pk 'dwg' %}" class="download-link" download>Скачать DWG</a>
+                            {% endif %}
+
+                            {% if not model.file_stp and not model.file_stl and not model.file_igs and not model.file_amf and not model.file_obj and not model.file_dwg %}
                                 <span style="font-size: 12px; color: #999;">Файлы недоступны</span>
                             {% endif %}
                         </div>

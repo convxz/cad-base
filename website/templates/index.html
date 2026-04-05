@@ -1,145 +1,161 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block main_nav %}
-    <!-- Оставляем пустым. Это "сотрет" горизонтальное меню для этой страницы -->
-{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block main_nav %}
+<!-- Оставляем пустым. Это "сотрет" горизонтальное меню для этой страницы -->
+{% endblock %} {% block content %}
 
 <!-- СЕКЦИЯ 1: HERO (ГЛАВНАЯ) -->
 <section class="hero">
-    <div class="container hero-inner">
-        <!-- Левое вертикальное меню -->
-        <nav class="side-nav" id="side-nav-index">
-            <ul>
-                <!-- <a href="{% url 'home' %}" -->
-                <li><a href="{% url 'home' %}">ГЛАВНАЯ</a></li>
-                <li><a href="{% url 'catalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a></li>
-                <li><a href="{% url 'documentation' %}">ДОКУМЕНТАЦИЯ</a></li>
-                <li><a href="{% url 'about_platform' %}">О ПЛАТФОРМЕ</a></li>
-                <li><a href="{% url 'news' %}">НОВОСТИ</a></li>
-                <li><a href="{% url 'contacts' %}">КОНТАКТЫ</a></li>
-                <li><a href="{% url 'questions' %}">ВОПРОСЫ</a></li>
-            </ul>
-        </nav>
+  <div class="container hero-inner">
+    <!-- Левое вертикальное меню -->
+    <nav class="side-nav" id="side-nav-index">
+      <ul>
+        <!-- <a href="{% url 'home' %}" -->
+        <li><a href="{% url 'home' %}">ГЛАВНАЯ</a></li>
+        <li><a href="{% url 'catalog' %}">КАТАЛОГ ИЗДЕЛИЙ</a></li>
+        <li><a href="{% url 'documentation' %}">ДОКУМЕНТАЦИЯ</a></li>
+        <li><a href="{% url 'about_platform' %}">О ПЛАТФОРМЕ</a></li>
+        <li><a href="{% url 'news' %}">НОВОСТИ</a></li>
+        <li><a href="{% url 'contacts' %}">КОНТАКТЫ</a></li>
+        <li><a href="{% url 'questions' %}">ВОПРОСЫ</a></li>
+      </ul>
+    </nav>
 
-        <!-- Центральный текст -->
-        <div class="hero-content">
-            <h1>КАТАЛОГ СТАНДАРТНЫХ ИЗДЕЛИЙ<br>И КОМПОНЕНТОВ</h1>
-            <p>CADBase — НАДЕЖНОСТЬ ПРОВЕРЕННАЯ ВРЕМЕНЕМ!</p>
-        </div>
+    <!-- Центральный текст -->
+    <div class="hero-content">
+      <h1>КАТАЛОГ СТАНДАРТНЫХ ИЗДЕЛИЙ<br />И КОМПОНЕНТОВ</h1>
+      <p>CADBase — НАДЕЖНОСТЬ ПРОВЕРЕННАЯ ВРЕМЕНЕМ!</p>
     </div>
-
-    <!-- Категории (плитки снизу) -->
-    <div class="container">
-        <div class="category-grid">
-            <a href="#" class="cat-card">КРЕПЕЖНЫЕ ИЗДЕЛИЯ</a>
-            <a href="#" class="cat-card">ПОДШИПНИКИ</a>
-            <a href="#" class="cat-card">ШЕСТЕРНИ</a>
-            <a href="#" class="cat-card">ПРОФИЛИ</a>
-            <a href="#" class="cat-card">ПРОЧИЕ ИЗДЕЛИЯ</a>
-        </div>
-    </div>
+  </div>
 </section>
 
 <!-- СЕКЦИЯ 2: О ПЛАТФОРМЕ -->
 <section class="about">
-    <div class="container about-inner">
-        <div class="about-text">
-            <p class="about-text-h"><span style="font-weight: bold;">CADBase</span> — НАДЁЖНОСТЬ ПРОВЕРЕННАЯ ВРЕМЕНЕМ!</p>
-            <p class="about-text-p">CADBase — это веб-каталог стандартных изделий и компонентов САПР, предназначенный для поиска, просмотра и скачивания 3D-моделей и технической документации. Платформа обеспечивает удобный доступ к стандартизированным элементам и повышает эффективность инженерного проектирования.</p>
-        </div>
-        <div class="about-image">
-            <img src="{% static 'img/cube-illustration.png' %}" alt="3D Cube">
-        </div>
+  <div class="container about-inner" id="main-h1-index">
+    <div class="about-text">
+      <p class="about-text-h">
+        <span style="font-weight: bold">CADBase</span> — НАДЁЖНОСТЬ ПРОВЕРЕННАЯ
+        ВРЕМЕНЕМ!
+      </p>
+      <p class="about-text-p">
+        CADBase — это веб-каталог стандартных изделий и компонентов САПР,
+        предназначенный для поиска, просмотра и скачивания 3D-моделей и
+        технической документации. Платформа обеспечивает удобный доступ к
+        стандартизированным элементам и повышает эффективность инженерного
+        проектирования.
+      </p>
     </div>
+    <div class="about-image">
+      <img src="{% static 'img/cube-illustration.png' %}" alt="3D Cube" />
+    </div>
+  </div>
 </section>
-
 
 <!-- СЕКЦИЯ 3: ПРЕИМУЩЕСТВА -->
 <section class="features">
-    <div class="container">
-        <h2 class="section-title">Преимущество платформы</h2>
-        <div class="features-grid">
-            
-            <div class="feature-item">
-                <img src="{% static 'img/material-symbols_database-outline.png' %}" alt="icon" class="feature-icon">
-                <p>Централизованный доступ к стандартным 3D-моделям и технической документации.</p>
-            </div>
+  <div class="container">
+    <h2 class="section-title">Преимущество платформы</h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <img
+          src="{% static 'img/material-symbols_database-outline.png' %}"
+          alt="icon"
+          class="feature-icon"
+        />
+        <p>
+          Централизованный доступ к стандартным 3D-моделям и технической
+          документации.
+        </p>
+      </div>
 
-            <div class="feature-item">
-                <img src="{% static 'img/mdi_cube-outline.png' %}" alt="icon" class="feature-icon">
-                <p>Поддержка распространенных форматов САПР (STEP, STL, IGES).</p>
-            </div>
+      <div class="feature-item">
+        <img
+          src="{% static 'img/mdi_cube-outline.png' %}"
+          alt="icon"
+          class="feature-icon"
+        />
+        <p>Поддержка распространенных форматов САПР (STEP, STL, IGES).</p>
+      </div>
 
-            <div class="feature-item">
-                <img src="{% static 'img/material-symbols_search-rounded.png' %}" alt="icon" class="feature-icon">
-                <p>Удобный поиск и фильтрация изделий по стандартам и характеристикам.</p>
-            </div>
+      <div class="feature-item">
+        <img
+          src="{% static 'img/material-symbols_search-rounded.png' %}"
+          alt="icon"
+          class="feature-icon"
+        />
+        <p>
+          Удобный поиск и фильтрация изделий по стандартам и характеристикам.
+        </p>
+      </div>
 
-            <div class="feature-item">
-                <img width="65px"  src="{% static 'img/tabler_rotate-3d.png' %}" alt="icon" class="feature-icon">
-                <p>Интерактивный 3D-просмотр моделей прямо в браузере.</p>
-            </div>
-
-        </div>
+      <div class="feature-item">
+        <img
+          width="65px"
+          src="{% static 'img/tabler_rotate-3d.png' %}"
+          alt="icon"
+          class="feature-icon"
+        />
+        <p>Интерактивный 3D-просмотр моделей прямо в браузере.</p>
+      </div>
     </div>
+  </div>
 </section>
 
 <!-- СЕКЦИЯ 4: КОНТАКТЫ -->
 <section class="contacts">
-    <div class="container contacts-inner">
-        <div class="contacts-info">
-            <h2>Контакты</h2>
-            <div class="contact-item">
-                <i class='bx bx-phone'></i>
-                <div><span>Номер телефона</span><br>+7 (967) 899 77 55</div>
-            </div>
-            <div class="contact-item">
-                <i class='bx bx-envelope'></i>
-                <div><span>Электронная почта</span><br>info@cad_base.ru</div>
-            </div>
-            <div class="contact-item">
-                <i class='bx bx-globe'></i>
-                <div><span>Веб-сайт</span><br>www.cadbase.ru</div>
-            </div>
-            <div class="contact-item">
-                <i class='bx bx-time-five'></i>
-                <div><span>Время работы</span><br>Пн-Пт 10:00 - 18:00</div>
-            </div>
-        </div>
-        <div class="contacts-image">
-            <img src="{% static 'img/robot.png' %}" alt="Robot Helper">
-        </div>
+  <div class="container contacts-inner">
+    <div class="contacts-info">
+      <h2>Контакты</h2>
+      <div class="contact-item">
+        <i class="bx bx-phone"></i>
+        <div><span>Номер телефона</span><br />+7 (967) 899 77 55</div>
+      </div>
+      <div class="contact-item">
+        <i class="bx bx-envelope"></i>
+        <div><span>Электронная почта</span><br />info@cad_base.ru</div>
+      </div>
+      <div class="contact-item">
+        <i class="bx bx-globe"></i>
+        <div><span>Веб-сайт</span><br />www.cadbase.ru</div>
+      </div>
+      <div class="contact-item">
+        <i class="bx bx-time-five"></i>
+        <div><span>Время работы</span><br />Пн-Пт 10:00 - 18:00</div>
+      </div>
     </div>
+    <div class="contacts-image">
+      <img src="{% static 'img/robot.png' %}" alt="Robot Helper" />
+    </div>
+  </div>
 </section>
 
 <!-- ПОДВАЛ (FOOTER) -->
 <footer class="main-footer">
-    <div class="container">
-        <nav class="footer-nav">
-            <a href="{% url 'home' %}">Главная</a>
-            <a href="{% url 'catalog' %}">Каталог</a>
-            <a href="{% url 'documentation' %}">Документация</a>
-            <a href="{% url 'about_platform' %}">О платформе</a>
-            <a href="{% url 'news' %}">Новости</a>
-            <a href="{% url 'contacts' %}">Контакты</a>
-            <a href="{% url 'questions' %}">Вопросы</a>
-        </nav>
-        <div class="footer-bottom">
-            <div class="logo">
-                <img width="70px" src="{% static 'img/cubelogo.png' %}" alt="">
-                <div class="logo-text">CAD<span>Base</span></div>
-            </div>
-            <div class="footer-actions">
-                <span class="footer-phone">+7 (967) 899 77 55</span>
-            </div>
-        </div>
-        <div class="footer-legal">
-            <p>Пользовательское соглашение на передачу и обработку персональных данных</p>
-            <p>Copyright © 2024. Официальный сайт ООО "CADBase". Все права защищены.</p>
-        </div>
+  <div class="container">
+    <nav class="footer-nav">
+      <a href="{% url 'home' %}">Главная</a>
+      <a href="{% url 'catalog' %}">Каталог</a>
+      <a href="{% url 'documentation' %}">Документация</a>
+      <a href="{% url 'about_platform' %}">О платформе</a>
+      <a href="{% url 'news' %}">Новости</a>
+      <a href="{% url 'contacts' %}">Контакты</a>
+      <a href="{% url 'questions' %}">Вопросы</a>
+    </nav>
+    <div class="footer-bottom">
+      <div class="logo">
+        <img width="70px" src="{% static 'img/cubelogo.png' %}" alt="" />
+        <div class="logo-text">CAD<span>Base</span></div>
+      </div>
+      <div class="footer-actions">
+        <span class="footer-phone">+7 (967) 899 77 55</span>
+      </div>
     </div>
+    <div class="footer-legal">
+      <p>
+        Пользовательское соглашение на передачу и обработку персональных данных
+      </p>
+      <p>
+        Copyright © 2024. Официальный сайт ООО "CADBase". Все права защищены.
+      </p>
+    </div>
+  </div>
 </footer>
 {% endblock %}

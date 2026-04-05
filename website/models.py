@@ -100,6 +100,19 @@ class ModelSubmission(models.Model):
     file_stl = models.FileField(
         upload_to="models/stl/", blank=True, null=True, verbose_name="Файл STL"
     )
+    # amf
+    file_amf = models.FileField(
+        upload_to="models/amf/", blank=True, null=True, verbose_name="Файл AMF"
+    )
+    # obj
+    file_obj = models.FileField(
+        upload_to="models/obj/", blank=True, null=True, verbose_name="Файл OBJ"
+    )
+
+    # dwg
+    file_dwg = models.FileField(
+        upload_to="models/dwg/", blank=True, null=True, verbose_name="Файл DWG"
+    )
 
     thumbnail = models.ImageField(
         upload_to="thumbnails/", null=True, blank=True, verbose_name="Превью (фото)"
@@ -130,6 +143,12 @@ class ModelSubmission(models.Model):
             exts.append("IGS")
         if self.file_stl:
             exts.append("STL")
+        if self.file_amf:
+            exts.append("AMF")
+        if self.file_obj:
+            exts.append("OBJ")
+        if self.file_dwg:
+            exts.append("DWG")
         return " / ".join(exts) if exts else "—"
 
 
@@ -215,6 +234,7 @@ class Document(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название документа")
     file = models.FileField(upload_to="documents/pdfs/", null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата загрузки")
+    is_drawing = models.BooleanField(default=False, verbose_name="Это чертеж?")
 
     downloads_count = models.PositiveIntegerField(
         default=0, verbose_name="Кол-во скачиваний"

@@ -79,7 +79,7 @@ class SignUpForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = ["standard_number", "name", "file"]
+        fields = ["standard_number", "name", "is_drawing", "file"]
         widgets = {
             "standard_number": forms.TextInput(
                 attrs={"class": "st-input", "placeholder": "ГОСТ 7798-70"}
