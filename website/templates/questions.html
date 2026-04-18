@@ -1,75 +1,109 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <main class="qa-page-wrapper">
-    <div class="container">
-        
-        <nav class="qa-page-breadcrumbs">
-            Главная | Вопрос-ответ
-        </nav>
+  <div class="container">
+    <nav class="qa-page-breadcrumbs">Главная | Вопрос-ответ</nav>
 
-        <h1 class="qa-page-main-title">Вопрос-ответ</h1>
+    <h1 class="qa-page-main-title">Вопрос-ответ</h1>
 
-        <div class="qa-page-accordion-container">
-            
-            <div class="qa-page-item">
-                <button class="qa-page-trigger" onclick="toggleQaItem(this)">
-                    <span class="qa-page-question-text">Можно ли использовать материалы сайта в учебных и коммерческих проектах?</span>
-                    <span class="qa-page-icon-plus">+</span>
-                </button>
-                <div class="qa-page-content-box">
-                    <div class="qa-page-answer-text">
-                        <p>Да, вы можете свободно использовать любые 3D-модели и документацию в своих проектах. Мы поддерживаем открытый доступ к инженерным данным. Единственное требование — сохранение ссылки на автора или платформу CADBase (указание авторства) при использовании материалов в публичном поле или коммерческих продуктах.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="qa-page-item">
-                <button class="qa-page-trigger" onclick="toggleQaItem(this)">
-                    <span class="qa-page-question-text">В каких форматах доступны 3D-модели?</span>
-                    <span class="qa-page-icon-plus">+</span>
-                </button>
-                <div class="qa-page-content-box">
-                    <div class="qa-page-answer-text">
-                        <p>Наши модели оптимизированы для профессионального инженерного софта и доступны в трех ключевых форматах:</p>
-                        <ul class="qa-page-list">
-                            <li class="qa-page-list-item"><strong>STEP</strong> — для полноценного редактирования геометрии в CAD-системах.</li>
-                            <li class="qa-page-list-item"><strong>IGES</strong> — для обеспечения совместимости со старыми версиями ПО.</li>
-                            <li class="qa-page-list-item"><strong>STL</strong> — для быстрой 3D-печати и визуализации.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="qa-page-item">
-                <button class="qa-page-trigger" onclick="toggleQaItem(this)">
-                    <span class="qa-page-question-text">Нужно ли регистрироваться для скачивания моделей?</span>
-                    <span class="qa-page-icon-plus">+</span>
-                </button>
-                <div class="qa-page-content-box">
-                    <div class="qa-page-answer-text">
-                        <p>Для скачивания файлов регистрация не требуется. Мы ценим ваше время, поэтому открытый каталог доступен анонимно. Регистрация пригодится только в том случае, если вы захотите загружать собственные работы, оставлять комментарии или подписываться на обновления конкретных инженеров.</p>
-                    </div>
-                </div>
-            </div>
-
+    <div class="qa-page-accordion-container">
+      <div class="qa-page-item">
+        <button class="qa-page-trigger" onclick="toggleQaItem(this)">
+          <span class="qa-page-question-text"
+            >Можно ли использовать материалы сайта в учебных и коммерческих
+            проектах?</span
+          >
+          <span class="qa-page-icon-plus">+</span>
+        </button>
+        <div class="qa-page-content-box">
+          <div class="qa-page-answer-text">
+            <p>
+              Да, вы можете свободно использовать любые 3D-модели и документацию
+              в своих проектах. Мы поддерживаем открытый доступ к инженерным
+              данным. Единственное требование — сохранение ссылки на автора или
+              платформу CADBase (указание авторства) при использовании
+              материалов в публичном поле или коммерческих продуктах.
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div class="qa-page-item">
+        <button class="qa-page-trigger" onclick="toggleQaItem(this)">
+          <span class="qa-page-question-text"
+            >В каких форматах доступны 3D-модели?</span
+          >
+          <span class="qa-page-icon-plus">+</span>
+        </button>
+        <div class="qa-page-content-box">
+          <div class="qa-page-answer-text">
+            <p>
+              Наши модели оптимизированы для профессионального инженерного софта
+              и доступны в трех ключевых форматах:
+            </p>
+            <ul class="qa-page-list">
+              <li class="qa-page-list-item">
+                <strong>STEP</strong> — для полноценного редактирования
+                геометрии в CAD-системах.
+              </li>
+              <li class="qa-page-list-item">
+                <strong>IGES</strong> — для обеспечения совместимости со старыми
+                версиями ПО.
+              </li>
+              <li class="qa-page-list-item">
+                <strong>STL</strong> — для быстрой 3D-печати и визуализации.
+              </li>
+              <li class="qa-page-list-item">
+                <strong>DWG</strong> — для работы с чертежами и проектами в
+                AutoCAD и других CAD-программах.
+              </li>
+              <li class="qa-page-list-item">
+                <strong>OBJ</strong> — для 3D-моделирования, рендеринга и обмена
+                между графическими приложениями.
+              </li>
+              <li class="qa-page-list-item">
+                <strong>AMF</strong> — современный формат для 3D-печати с
+                поддержкой цвета, материалов и сложных структур.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="qa-page-item">
+        <button class="qa-page-trigger" onclick="toggleQaItem(this)">
+          <span class="qa-page-question-text"
+            >Нужно ли регистрироваться для скачивания моделей?</span
+          >
+          <span class="qa-page-icon-plus">+</span>
+        </button>
+        <div class="qa-page-content-box">
+          <div class="qa-page-answer-text">
+            <p>
+              Для скачивания файлов требуется регистрация. Это позволяет
+              обеспечить безопасность платформы и удобный доступ ко всем
+              функциям сервиса. После регистрации вы сможете не только скачивать
+              модели, но и загружать собственные работы.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </main>
 
 <script>
-    function toggleQaItem(element) {
-        const parent = element.parentElement;
-        
-        // Закрываем другие открытые элементы, если нужно
-        document.querySelectorAll('.qa-page-item').forEach(item => {
-            if (item !== parent) {
-                item.classList.remove('is-opened');
-            }
-        });
+  function toggleQaItem(element) {
+    const parent = element.parentElement;
 
-        // Переключаем текущий
-        parent.classList.toggle('is-opened');
-    }
+    // Закрываем другие открытые элементы, если нужно
+    document.querySelectorAll(".qa-page-item").forEach((item) => {
+      if (item !== parent) {
+        item.classList.remove("is-opened");
+      }
+    });
+
+    // Переключаем текущий
+    parent.classList.toggle("is-opened");
+  }
 </script>
 {% endblock %}

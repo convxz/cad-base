@@ -24,6 +24,9 @@
                 <!-- Важно: action пустой, значит шлет на текущий URL -->
                 <form method="post" action="" class="login-form" id="loginForm">
                     {% csrf_token %}
+                    {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                     
                     <div class="input-group">
                         <label>Email</label>

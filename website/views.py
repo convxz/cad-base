@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Count
 from django.views.decorators.http import require_POST
 from django.contrib.auth.views import PasswordChangeView
 from django.urls import reverse_lazy
@@ -16,6 +16,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.db.models import F
 from django.contrib.auth.models import User
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from django.http import FileResponse, Http404
 
@@ -525,18 +526,19 @@ def chat_stub_view(request):
 @login_required
 def chat_list(request):
     if request.user.is_staff:
-
-        has_unread = (
-            ChatMessage.objects.filter(is_read=False)
-            .exclude(sender__is_staff=True)
-            .exists()
-        )
-
         rooms = (
             ChatRoom.objects.select_related("user", "user__profile")
-            .annotate(last_msg_time=Max("messages__created_at"))
-            .order_by("-last_msg_time")
+            .annotate(
+                last_msg_time=Max("messages__created_at"),
+                unread_count=Count(
+                    "messages",
+                    filter=Q(messages__is_read=False) & Q(messages__sender__is_staff=False),
+                ),
+            )
+            .order_by(F("last_msg_time").desc(nulls_last=True), "-created_at")
         )
+
+        has_unread = any(room.unread_count > 0 for room in rooms)
 
         return render(
             request, "chat/chat_list.html", {"rooms": rooms, "has_unread": has_unread}
@@ -628,3 +630,62 @@ def delete_avatar_view(request):
         profile.avatar = None
         profile.save()
     return JsonResponse({"status": "success"})
+
+
+def login_view(request):
+    next_url = request.POST.get("next") or request.GET.get("next")
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                return redirect(next_url)
+
+            return redirect("settings")
+
+        return render(
+            request,
+            "login.html",
+            {"error": "Неверный Email или пароль", "next": next_url},
+        )
+
+    return render(request, "login.html", {"next": next_url})
+
+
+@login_required
+def download_file(request, pk, file_format):
+    model_item = get_object_or_404(ModelSubmission, pk=pk)
+
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+
+    DownloadLog.objects.create(
+        model_item=model_item,
+        user=request.user,
+        file_format=file_format.upper(),
+        ip_address=ip,
+    )
+    ModelSubmission.objects.filter(pk=pk).update(download_count=F("download_count") + 1)
+
+    file_field = getattr(model_item, f"file_{file_format.lower()}", None)
+    if file_field and file_field.name:
+        try:
+            file_field.storage.open(file_field.name).close()
+        except FileNotFoundError:
+            raise Http404("Файл не найден на сервере")
+
+        return redirect(file_field.url)
+
+    raise Http404("Файл отсутствует")

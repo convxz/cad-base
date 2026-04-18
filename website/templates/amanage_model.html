@@ -51,6 +51,11 @@
         <div class="st-white-card" style="padding: 40px; border-radius: 8px; border: 1px solid #eef0f3; background: #fff;">
             <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div style="margin-bottom: 20px; padding: 14px 16px; border-radius: 10px; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; font-size: 14px;">
+        {{ form.non_field_errors|join:", " }}
+    </div>
+    {% endif %}
     
     <!-- ВЕРХНИЙ БЛОК: Характеристики и Фото -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
@@ -58,16 +63,25 @@
             <div class="st-group">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500;">Название</label>
                 {{ form.title }}
+                {% if form.title.errors %}
+                <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ form.title.errors|join:", " }}</div>
+                {% endif %}
             </div>
 
             <div class="st-group">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500;">Тип изделия</label>
                 {{ form.category }}
+                {% if form.category.errors %}
+                <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ form.category.errors|join:", " }}</div>
+                {% endif %}
             </div>
 
             <div class="st-group">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
                 {{ form.standard }}
+                {% if form.standard.errors %}
+                <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ form.standard.errors|join:", " }}</div>
+                {% endif %}
             </div>
         </div>
 
@@ -159,6 +173,24 @@
             <div class="download-link-container" style="text-align: center; margin-top: 8px;">
                 <a href="{{ file_url }}" download style="font-size: 13px; color: #3e5281; text-decoration: underline;">Скачать {{ ext }}</a>
             </div>
+            {% endif %}
+            {% if field_name == "file_stp" and form.file_stp.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_stp.errors|join:", " }}</div>
+            {% endif %}
+            {% if field_name == "file_igs" and form.file_igs.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_igs.errors|join:", " }}</div>
+            {% endif %}
+            {% if field_name == "file_stl" and form.file_stl.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_stl.errors|join:", " }}</div>
+            {% endif %}
+            {% if field_name == "file_amf" and form.file_amf.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_amf.errors|join:", " }}</div>
+            {% endif %}
+            {% if field_name == "file_obj" and form.file_obj.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_obj.errors|join:", " }}</div>
+            {% endif %}
+            {% if field_name == "file_dwg" and form.file_dwg.errors %}
+            <div style="margin-top: 8px; color: #dc2626; font-size: 13px; text-align: center;">{{ form.file_dwg.errors|join:", " }}</div>
             {% endif %}
         </div>
         {% endfor %}

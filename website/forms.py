@@ -5,6 +5,16 @@ from django.contrib.auth.models import User
 from .models import Document, ModelSubmission, Profile
 
 
+PRODUCT_CATEGORY_CHOICES = [
+    ("", "Выберите тип изделия"),
+    ("Крепежные изделия", "Крепежные изделия"),
+    ("Подшипники", "Подшипники"),
+    ("Шестерни", "Шестерни"),
+    ("Профили", "Профили"),
+    ("Прочие изделия", "Прочие изделия"),
+]
+
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -95,6 +105,17 @@ class DocumentForm(forms.ModelForm):
 
 
 class ModelSubmissionForm(forms.ModelForm):
+    category = forms.ChoiceField(
+        choices=PRODUCT_CATEGORY_CHOICES,
+        required=True,
+        widget=forms.Select(
+            attrs={
+                "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+            }
+        ),
+        error_messages={"required": "Выберите тип изделия."},
+    )
+
     class Meta:
         model = ModelSubmission
         fields = [
@@ -105,6 +126,9 @@ class ModelSubmissionForm(forms.ModelForm):
             "file_stp",
             "file_igs",
             "file_stl",
+            "file_amf",
+            "file_obj",
+            "file_dwg",
             "thumbnail",
         ]
 
@@ -129,6 +153,13 @@ class ModelSubmissionForm(forms.ModelForm):
             ),
         }
 
+    def clean_category(self):
+        category = self.cleaned_data.get("category")
+        valid_choices = {value for value, _ in PRODUCT_CATEGORY_CHOICES if value}
+        if category not in valid_choices:
+            raise forms.ValidationError("Выберите тип изделия.")
+        return category
+
     def clean_file_stp(self):
         return self.validate_extension("file_stp", [".stp", ".step"])
 
@@ -137,6 +168,15 @@ class ModelSubmissionForm(forms.ModelForm):
 
     def clean_file_stl(self):
         return self.validate_extension("file_stl", [".stl"])
+
+    def clean_file_amf(self):
+        return self.validate_extension("file_amf", [".amf"])
+
+    def clean_file_obj(self):
+        return self.validate_extension("file_obj", [".obj"])
+
+    def clean_file_dwg(self):
+        return self.validate_extension("file_dwg", [".dwg"])
 
     def validate_extension(self, field_name, allowed_extensions):
         file = self.cleaned_data.get(field_name)

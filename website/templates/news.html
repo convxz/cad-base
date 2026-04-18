@@ -7,7 +7,11 @@
         <a href="{% url 'news_detail' item.id %}" class="news-card-link">
             <div class="news-card-item">
                 <div class="news-image-box">
+                    {% if item.image %}
                     <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    {% else %}
+                    <div class="no-image">Нет изображения</div>
+                    {% endif %}
                 </div>
                 <div class="news-title-box">
                     <span class="news-title-text">{{ item.title }}</span>
