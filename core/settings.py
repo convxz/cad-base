@@ -97,3 +97,8 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = '/'
 LOGOUT_ON_GET = True
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = None
+# Keep regular form fields unlimited, but let Django spill uploaded files
+# to temporary storage instead of comparing content length with None.
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440

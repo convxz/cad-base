@@ -110,7 +110,7 @@ class ModelSubmissionForm(forms.ModelForm):
         required=True,
         widget=forms.Select(
             attrs={
-                "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+                "style": "width: 100%; padding: 12px 44px 12px 12px; border: 1px solid #eee; border-radius: 8px; background-color: #f8f9fb;",
             }
         ),
         error_messages={"required": "Выберите тип изделия."},

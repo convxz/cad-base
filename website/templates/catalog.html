@@ -90,27 +90,33 @@
                         <!-- КНОПКИ СКАЧИВАНИЯ (Каждая проверяется отдельно) -->
                         <div class="card-footer">
                             {% if model.file_stp %}
-                                <a href="{% url 'download_file' model.pk 'stp' %}" class="download-link" download>Скачать STP</a>
+                                {% url 'download_file' model.pk 'stp' as stp_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ stp_download_url }}{% else %}{% url 'login' %}?next={{ stp_download_url|urlencode }}{% endif %}" class="download-link">Скачать STP</a>
                             {% endif %}
                             
                             {% if model.file_stl %}
-                                <a href="{% url 'download_file' model.pk 'stl' %}" class="download-link" download>Скачать STL</a>
+                                {% url 'download_file' model.pk 'stl' as stl_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ stl_download_url }}{% else %}{% url 'login' %}?next={{ stl_download_url|urlencode }}{% endif %}" class="download-link">Скачать STL</a>
                             {% endif %}
                             
                             {% if model.file_igs %}
-                                <a href="{% url 'download_file' model.pk 'igs' %}" class="download-link" download>Скачать IGS</a>
+                                {% url 'download_file' model.pk 'igs' as igs_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ igs_download_url }}{% else %}{% url 'login' %}?next={{ igs_download_url|urlencode }}{% endif %}" class="download-link">Скачать IGS</a>
                             {% endif %}
                             
                             {% if model.file_amf %}
-                                <a href="{% url 'download_file' model.pk 'amf' %}" class="download-link" download>Скачать AMF</a>
+                                {% url 'download_file' model.pk 'amf' as amf_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ amf_download_url }}{% else %}{% url 'login' %}?next={{ amf_download_url|urlencode }}{% endif %}" class="download-link">Скачать AMF</a>
                             {% endif %}
 
                             {% if model.file_obj %}
-                                <a href="{% url 'download_file' model.pk 'obj' %}" class="download-link" download>Скачать OBJ</a>
+                                {% url 'download_file' model.pk 'obj' as obj_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ obj_download_url }}{% else %}{% url 'login' %}?next={{ obj_download_url|urlencode }}{% endif %}" class="download-link">Скачать OBJ</a>
                             {% endif %}
 
                             {% if model.file_dwg %}
-                                <a href="{% url 'download_file' model.pk 'dwg' %}" class="download-link" download>Скачать DWG</a>
+                                {% url 'download_file' model.pk 'dwg' as dwg_download_url %}
+                                <a href="{% if user.is_authenticated %}{{ dwg_download_url }}{% else %}{% url 'login' %}?next={{ dwg_download_url|urlencode }}{% endif %}" class="download-link">Скачать DWG</a>
                             {% endif %}
 
                             {% if not model.file_stp and not model.file_stl and not model.file_igs and not model.file_amf and not model.file_obj and not model.file_dwg %}
