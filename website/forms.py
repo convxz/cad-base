@@ -2,6 +2,7 @@ import os
 
 from django import forms
 from django.contrib.auth.models import User
+
 from .models import Document, ModelSubmission, Profile
 
 
@@ -13,6 +14,8 @@ PRODUCT_CATEGORY_CHOICES = [
     ("Профили", "Профили"),
     ("Прочие изделия", "Прочие изделия"),
 ]
+
+OTHER_CATEGORY_VALUE = "Прочие изделия"
 
 
 class ProfileUpdateForm(forms.ModelForm):
@@ -72,7 +75,6 @@ class SignUpForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        # Разделяем имя и фамилию
         names = self.cleaned_data["full_name"].split()
         if len(names) > 0:
             user.first_name = names[0]
@@ -115,12 +117,34 @@ class ModelSubmissionForm(forms.ModelForm):
         ),
         error_messages={"required": "Выберите тип изделия."},
     )
+    custom_category = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Напишите свой вариант",
+                "style": "width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 8px; background: #f8f9fb;",
+            }
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        valid_choices = {value for value, _ in PRODUCT_CATEGORY_CHOICES if value}
+
+        if (
+            self.instance.pk
+            and self.instance.category
+            and self.instance.category not in valid_choices
+        ):
+            self.initial["category"] = OTHER_CATEGORY_VALUE
+            self.initial["custom_category"] = self.instance.category
 
     class Meta:
         model = ModelSubmission
         fields = [
             "title",
             "category",
+            "custom_category",
             "standard",
             "description",
             "file_stp",
@@ -131,7 +155,6 @@ class ModelSubmissionForm(forms.ModelForm):
             "file_dwg",
             "thumbnail",
         ]
-
         widgets = {
             "title": forms.TextInput(
                 attrs={
@@ -155,9 +178,17 @@ class ModelSubmissionForm(forms.ModelForm):
 
     def clean_category(self):
         category = self.cleaned_data.get("category")
+        custom_category = (self.cleaned_data.get("custom_category") or "").strip()
         valid_choices = {value for value, _ in PRODUCT_CATEGORY_CHOICES if value}
+
         if category not in valid_choices:
             raise forms.ValidationError("Выберите тип изделия.")
+
+        if category == OTHER_CATEGORY_VALUE:
+            if not custom_category:
+                raise forms.ValidationError("Укажите свой вариант типа изделия.")
+            return custom_category
+
         return category
 
     def clean_file_stp(self):
@@ -181,8 +212,6 @@ class ModelSubmissionForm(forms.ModelForm):
     def validate_extension(self, field_name, allowed_extensions):
         file = self.cleaned_data.get(field_name)
         if file:
-            import os
-
             ext = os.path.splitext(file.name)[1].lower()
             if ext not in allowed_extensions:
                 raise forms.ValidationError(

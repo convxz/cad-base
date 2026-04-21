@@ -88,6 +88,14 @@
                 {% endif %}
             </div>
 
+            <div class="st-group" id="custom-category-group" style="display: none;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">Свой вариант</label>
+                {{ form.custom_category }}
+                {% if form.custom_category.errors %}
+                <div style="margin-top: 8px; color: #dc2626; font-size: 13px;">{{ form.custom_category.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
             <div class="st-group">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500;">Стандарт</label>
                 {{ form.standard }}
@@ -223,6 +231,30 @@
 </div>
 
 <script>
+    const categorySelect = document.getElementById('id_category');
+    const customCategoryGroup = document.getElementById('custom-category-group');
+    const customCategoryInput = document.getElementById('id_custom_category');
+    const otherCategoryValue = 'Прочие изделия';
+
+    function toggleCustomCategory() {
+        if (!categorySelect || !customCategoryGroup || !customCategoryInput) {
+            return;
+        }
+
+        const shouldShow = categorySelect.value === otherCategoryValue;
+        customCategoryGroup.style.display = shouldShow ? 'block' : 'none';
+        customCategoryInput.required = shouldShow;
+
+        if (!shouldShow) {
+            customCategoryInput.value = '';
+        }
+    }
+
+    if (categorySelect) {
+        categorySelect.addEventListener('change', toggleCustomCategory);
+        toggleCustomCategory();
+    }
+
     document.querySelectorAll('.drop-zone').forEach(zone => {
         const input = zone.querySelector('input[type="file"]');
 
