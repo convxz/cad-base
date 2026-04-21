@@ -176,20 +176,23 @@ class ModelSubmissionForm(forms.ModelForm):
             ),
         }
 
-    def clean_category(self):
-        category = self.cleaned_data.get("category")
-        custom_category = (self.cleaned_data.get("custom_category") or "").strip()
+    def clean(self):
+        cleaned_data = super().clean()
+        category = cleaned_data.get("category")
+        custom_category = (cleaned_data.get("custom_category") or "").strip()
         valid_choices = {value for value, _ in PRODUCT_CATEGORY_CHOICES if value}
 
-        if category not in valid_choices:
-            raise forms.ValidationError("Выберите тип изделия.")
+        if category and category not in valid_choices:
+            self.add_error("category", "Выберите тип изделия.")
+            return cleaned_data
 
         if category == OTHER_CATEGORY_VALUE:
             if not custom_category:
-                raise forms.ValidationError("Укажите свой вариант типа изделия.")
-            return custom_category
+                self.add_error("custom_category", "Укажите свой вариант типа изделия.")
+            else:
+                cleaned_data["category"] = custom_category
 
-        return category
+        return cleaned_data
 
     def clean_file_stp(self):
         return self.validate_extension("file_stp", [".stp", ".step"])
